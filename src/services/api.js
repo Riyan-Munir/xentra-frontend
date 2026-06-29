@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { FrontendPacketFactory } from '../packet_templates/frontend_factory.js';
+import { signingInterceptor } from './requestSigning.js';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -61,23 +62,26 @@ api.interceptors.request.use(async (config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Skip packet wrapping for GET requests to avoid unnecessary overhead
-  if (config.method === 'get') return config;
+  // HMAC signing for bot-specific endpoints (only when VITE_REQUEST_SIGNING_SECRET is set)
+  const signedConfig = await signingInterceptor(config);
 
-  const isJsonRequest = config.headers?.['Content-Type']
-    ? config.headers['Content-Type'].includes('application/json')
+  // Skip packet wrapping for GET requests to avoid unnecessary overhead
+  if (signedConfig.method === 'get') return signedConfig;
+
+  const isJsonRequest = signedConfig.headers?.['Content-Type']
+    ? signedConfig.headers['Content-Type'].includes('application/json')
     : true;
 
-  if (isJsonRequest && config.data && typeof config.data === 'object') {
+  if (isJsonRequest && signedConfig.data && typeof signedConfig.data === 'object') {
     const packet = FrontendPacketFactory.createPacket(
       'frontend_request',
-      config.data,
+      signedConfig.data,
       'frontend'
     );
-    config.data = packet.toDict();
+    signedConfig.data = packet.toDict();
   }
 
-  return config;
+  return signedConfig;
 });
 
 api.interceptors.response.use(
