@@ -603,7 +603,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
               )}
             </div>
 
-            <div className="portfolio-projects-grid">
+            <div className="grid-auto-fill-300">
               {portfolio?.items?.length > 0 ? (
                 portfolio.items.map(project => (
                   <div key={project.id} className={'project-card glass rounded-12 overflow-hidden flex-col' + (isPremium && !isEditing ? ' premium-glow' : '')}>
@@ -656,7 +656,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                   </div>
                 ))
               ) : (
-                <div className="portfolio-projects-placeholder">
+                <div className="grid-full glass rounded-12 dashed-border text-center py-40">
                   <Briefcase size={32} className="opacity-20 mb-12" />
                   <p className="text-dim text-sm">No projects added yet. Click edit to start building your portfolio!</p>
                 </div>
