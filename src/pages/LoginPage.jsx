@@ -1,68 +1,92 @@
-import { useState } from 'react'
-import { Briefcase, Building2, Shield, Circle } from 'lucide-react'
+import React, { useState } from 'react';
+import { Disc as Discord, Shield, Briefcase, Globe, Clock, LogOut } from 'lucide-react';
 
-const roles = [
-    { value: 'freelancer', label: 'Freelancer', desc: 'Find work and manage gigs', icon: Briefcase },
-    { value: 'client', label: 'Client', desc: 'Hire talent and post jobs', icon: Building2 },
-    { value: 'server_admin', label: 'Server Admin', desc: 'Manage servers and guilds', icon: Shield },
-]
+const LoginPage = () => {
+  const [role, setRole] = useState('freelancer');
+  const [isExpired] = useState(() => {
+    const expired = sessionStorage.getItem('session_expired') === 'true';
+    sessionStorage.removeItem('session_expired');
+    return expired;
+  });
 
-export default function LoginPage() {
-    const [selected, setSelected] = useState('freelancer')
+  const handleDiscordLogin = () => {
+    localStorage.setItem('selected_role', role);
+    const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
+    const redirectUri = encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI);
+    const scope = encodeURIComponent('identify email guilds');
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${role}`;
+  };
 
-    const handleLogin = () => {
-        localStorage.setItem('selected_role', selected)
-        const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID
-        const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/callback'
-        window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds.join`
-    }
-
+  if (isExpired) {
     return (
-        <div className="min-h-screen bg-bg flex items-center justify-center p-4">
-            <div className="glass w-full max-w-md p-8 space-y-6 animate-fade-in">
-                <div className="text-center space-y-2">
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        Xentra
-                    </h1>
-                    <p className="text-sm text-gray-400">Choose your role to continue</p>
-                </div>
-
-                <div className="space-y-3">
-                    {roles.map((r) => {
-                        const Icon = r.icon
-                        return (
-                            <button
-                                key={r.value}
-                                onClick={() => setSelected(r.value)}
-                                className={`w-full glass px-4 py-3 flex items-center gap-3 text-left cursor-pointer transition-all
-                                    ${selected === r.value
-                                        ? 'border-primary/50 ring-1 ring-primary/30'
-                                        : 'hover:border-white/20'}`}
-                            >
-                                <Icon className="h-6 w-6 text-primary" />
-                                <div>
-                                    <p className="text-sm font-medium text-gray-100">{r.label}</p>
-                                    <p className="text-xs text-gray-500">{r.desc}</p>
-                                </div>
-                                {selected === r.value && (
-                                    <Circle className="ml-auto h-4 w-4 fill-primary text-primary" />
-                                )}
-                            </button>
-                        )
-                    })}
-                </div>
-
-                <button
-                    onClick={handleLogin}
-                    className="w-full py-3 bg-primary hover:bg-primary/80 text-white rounded-xl font-medium transition-colors cursor-pointer"
-                >
-                    Continue with Discord
-                </button>
-
-                <p className="text-xs text-center text-gray-500">
-                    By continuing, you agree to the Terms of Service
-                </p>
-            </div>
+      <div className="login-page-container">
+        <div className="auth-callback-grid-lines"></div>
+        <div className="hacking-modal">
+          <div className="hacking-modal-icon">
+            <Clock size={48} />
+          </div>
+          <h2 className="hacking-modal-title">Session Expired</h2>
+          <p className="hacking-modal-text">Your session has expired. Please log in again to continue.</p>
+          <button onClick={() => window.location.reload()} className="hacking-modal-btn">
+            <LogOut size={20} />
+            Go to Login
+          </button>
         </div>
-    )
-}
+      </div>
+    );
+  }
+
+  return (
+    <div className="login-page-container">
+      {/* Decorative Grid Lines */}
+      <div className="auth-callback-grid-lines"></div>
+
+      <div className="card glass fade-in login-page-card">
+        <div className="mb-40">
+          <h1 className="login-page-title">
+            Xentra
+          </h1>
+          <p className="login-subtitle">The future of decentralized freelancing.</p>
+        </div>
+
+        <div className="login-page-select-wrapper">
+          <label className="form-label">Select Your Identity</label>
+          <div className="login-page-grid">
+            <div
+              onClick={() => setRole('client')}
+              className={`nav-item login-role-item ${role === 'client' ? 'active' : ''}`}
+            >
+              <Briefcase size={20} />
+              <span>Client</span>
+            </div>
+            <div
+              onClick={() => setRole('freelancer')}
+              className={`nav-item login-role-item ${role === 'freelancer' ? 'active' : ''}`}
+            >
+              <Globe size={20} />
+              <span>Freelancer</span>
+            </div>
+            <div
+              onClick={() => setRole('server_admin')}
+              className={`nav-item login-role-item ${role === 'server_admin' ? 'active' : ''}`}
+            >
+              <Shield size={20} />
+              <span>Server Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <button onClick={handleDiscordLogin} className="btn btn-primary login-page-btn-discord">
+          <Discord size={24} />
+          Continue with Discord
+        </button>
+
+        <p className="text-075rem text-dim mt-24">
+          By continuing, you agree to our terms and conditions.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;

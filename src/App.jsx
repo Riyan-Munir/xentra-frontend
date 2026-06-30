@@ -1,28 +1,55 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { lazy, Suspense, memo } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 
-const LoginPage = lazy(() => import('./pages/LoginPage'))
-const AuthCallback = lazy(() => import('./pages/AuthCallback'))
-const BannedPage = lazy(() => import('./pages/BannedPage'))
-const Dashboard = lazy(() => import('./pages/Dashboard'))
+// Route-level code splitting — each page is a separate chunk loaded on demand
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const BannedPage = lazy(() => import('./pages/BannedPage'));
 
-const Fallback = () => (
-    <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-    </div>
-)
+// Minimal loading state — zero layout shift, pure skeleton placeholder
+const RouteFallback = memo(() => (
+  <div className="dashboard-layout">
+    <main className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="fade-in" style={{ width: '100%', maxWidth: 480, padding: 40 }}>
+        <div className="skeleton-box pulse" style={{ height: 48, marginBottom: 24, borderRadius: 12 }} />
+        <div className="skeleton-box pulse" style={{ height: 24, marginBottom: 16, width: '60%', borderRadius: 8 }} />
+        <div className="skeleton-box pulse" style={{ height: 200, borderRadius: 12 }} />
+      </div>
+    </main>
+  </div>
+));
 
-export default function App() {
-    return (
-        <Suspense fallback={<Fallback />}>
-            <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/banned" element={<BannedPage />} />
-                <Route path="/dashboard/*" element={<Dashboard />} />
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-        </Suspense>
-    )
+function App() {
+  return (
+    <Router>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/banned" element={<BannedPage />} />
+
+          {/* Protected Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Root Redirect */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
+          {/* 404 Redirect */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Suspense>
+    </Router>
+  );
 }
+
+export default memo(App);

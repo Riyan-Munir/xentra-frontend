@@ -1,13 +1,47 @@
-import api from './api'
+import api from './api';
 
-export const jobService = {
-    getJobs: async (params) => { const { data } = await api.get('/jobs/', { params }); return data },
-    getMyJobs: async (status) => { const { data } = await api.get('/jobs/', { params: { my_jobs: true, status } }); return data },
-    createJob: async (jobData) => { const { data } = await api.post('/jobs/', jobData); return data },
-    updateJob: async (id, jobData) => { const { data } = await api.patch(`/jobs/${id}/`, jobData); return data },
-    deleteJob: async (id) => { await api.delete(`/jobs/${id}/`) },
-    getMyApplications: async (jobId) => { const { data } = await api.get('/jobs/applications/', { params: { job_id: jobId } }); return data },
-    withdrawApplication: async (id) => { await api.delete(`/jobs/applications/${id}/`) },
-    applyToJob: async (formData) => { const { data } = await api.post('/jobs/applications/', formData); return data },
-    rejectApplication: async (id) => { const { data } = await api.post(`/jobs/applications/${id}/reject/`); return data },
-}
+const jobService = {
+  getJobs: (params = {}) => {
+    return api.get('/jobs/', { params });
+  },
+
+  getMyJobs: (status = 'open') => {
+    return api.get('/jobs/', {
+      params: {
+        my_jobs: 'true',
+        status: status
+      }
+    });
+  },
+
+  createJob: (jobData) => {
+    return api.post('/jobs/', jobData);
+  },
+
+  updateJob: (jobId, jobData) => {
+    return api.patch(`/jobs/${jobId}/`, jobData);
+  },
+
+  deleteJob: (jobId) => {
+    return api.delete(`/jobs/${jobId}/`);
+  },
+
+  getMyApplications: (jobId) => {
+    const params = jobId ? { job_id: jobId } : {};
+    return api.get('/jobs/applications/', { params });
+  },
+
+  withdrawApplication: (applicationId) => {
+    return api.delete(`/jobs/applications/${applicationId}/`);
+  },
+
+  applyToJob: (applicationData) => {
+    return api.post('/jobs/applications/', applicationData);
+  },
+
+  rejectApplication: (applicationId) => {
+    return api.post(`/jobs/applications/${applicationId}/reject/`);
+  }
+};
+
+export default jobService;
