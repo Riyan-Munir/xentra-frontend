@@ -883,8 +883,16 @@ input[type="radio"]:focus {
   border-radius: 16px !important;
 }
 
+/* Portfolio container — glass card (visible inner container) */
+.portfolio-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
 /* Reconcile inner containers to prevent "double box" look in premium mode */
-.premium-card .scrollable-content-card {
+.premium-card .scrollable-content-card,
+.premium-card .portfolio-container {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
