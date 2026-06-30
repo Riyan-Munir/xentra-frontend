@@ -22,7 +22,8 @@ export default function AuthCallback() {
         const exchange = async () => {
             try {
                 setStep('Exchanging token...')
-                const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+                const backendUrl = new URL(apiUrl).origin
                 const res = await fetch(`${backendUrl}/auth/discord/callback/?code=${code}&role=${role}`)
                 const data = await res.json()
 
@@ -40,7 +41,7 @@ export default function AuthCallback() {
                 // Register for guild if needed
                 if (data.guild_registration) {
                     setStep('Joining guild...')
-                    await fetch(`${backendUrl}/api/guilds/register/`, {
+                    await fetch(`${apiUrl}/guilds/register/`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${data.access_token}` }
                     })
@@ -61,7 +62,8 @@ export default function AuthCallback() {
 
         try {
             setStep('Setting username...')
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+            const backendUrl = new URL(apiUrl).origin
             const code = searchParams.get('code')
             const role = localStorage.getItem('selected_role') || 'freelancer'
             const res = await fetch(`${backendUrl}/auth/discord/callback/?code=${code}&role=${role}`, {

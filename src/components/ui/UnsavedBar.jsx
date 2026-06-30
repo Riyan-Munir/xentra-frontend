@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom'
+import { TriangleAlert } from 'lucide-react'
 
 export default function UnsavedBar({ show, onSave, onCancel }) {
     if (!show) return null
@@ -6,7 +7,7 @@ export default function UnsavedBar({ show, onSave, onCancel }) {
     return createPortal(
         <div className="fixed bottom-0 left-0 right-0 z-50 glass rounded-none border-b-0 border-t border-white/10 animate-slide-up">
             <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-                <p className="text-sm text-amber-400">⚠ You have unsaved changes</p>
+                <p className="text-sm text-amber-400 flex items-center gap-2"><TriangleAlert className="h-4 w-4" /> You have unsaved changes</p>
                 <div className="flex gap-3">
                     <button
                         onClick={onCancel}

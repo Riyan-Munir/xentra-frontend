@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Check, X } from 'lucide-react'
 
 export default function Toast({ notifications, onRemove }) {
     if (!notifications?.length) return null
@@ -33,7 +34,7 @@ function ToastItem({ notification, onRemove }) {
         >
             <div className="flex items-center gap-2">
                 <span className={colors[notification.type]?.split(' ')[2]}>
-                    {notification.type === 'success' ? '✓' : '✕'}
+                    {notification.type === 'success' ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                 </span>
                 <span className={colors[notification.type]?.split(' ')[2]}>
                     {notification.message}

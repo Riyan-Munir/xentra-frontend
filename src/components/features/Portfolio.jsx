@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Pencil, X, Plus } from 'lucide-react'
 import Skeleton from '../ui/Skeleton'
 import Modal from '../ui/Modal'
 import UnsavedBar from '../ui/UnsavedBar'
@@ -108,7 +109,7 @@ export default function Portfolio({ profile, addNotification, fetchProfile }) {
                                 {form.skills.map((s) => (
                                     <span key={s} className="px-2.5 py-1 text-xs rounded-full bg-primary/20 text-primary flex items-center gap-1">
                                         {s}
-                                        <button onClick={() => removeSkill(s)} className="text-primary/60 hover:text-primary cursor-pointer">×</button>
+                                        <button onClick={() => removeSkill(s)} className="text-primary/60 hover:text-primary cursor-pointer"><X className="h-3 w-3" /></button>
                                     </span>
                                 ))}
                                 {form.skills.length < MAX_SKILLS && (
@@ -165,8 +166,8 @@ export default function Portfolio({ profile, addNotification, fetchProfile }) {
                             <h3 className="text-sm font-semibold text-gray-100">{p.title}</h3>
                             {editing && (
                                 <div className="flex gap-2">
-                                    <button onClick={() => { setEditProject(p); setProjectModal(true) }} className="text-xs text-gray-400 hover:text-gray-200 cursor-pointer">✎</button>
-                                    <button onClick={() => setDeleteTarget(p)} className="text-xs text-red-400 hover:text-red-300 cursor-pointer">✕</button>
+                                    <button onClick={() => { setEditProject(p); setProjectModal(true) }} className="text-gray-400 hover:text-gray-200 cursor-pointer p-1"><Pencil className="h-3.5 w-3.5" /></button>
+                                    <button onClick={() => setDeleteTarget(p)} className="text-red-400 hover:text-red-300 cursor-pointer p-1"><X className="h-3.5 w-3.5" /></button>
                                 </div>
                             )}
                         </div>
@@ -241,7 +242,7 @@ function ProjectModal({ project, isOpen, onClose, onSave, isPremium, addNotifica
                 <div className="flex flex-wrap gap-1">
                     {form.technologies.map((t) => (
                         <span key={t} className="px-2 py-0.5 text-xs rounded bg-white/10 text-gray-300 flex items-center gap-1">
-                            {t}<button onClick={() => removeTech(t)} className="text-gray-500 hover:text-gray-200 cursor-pointer">×</button>
+                            {t}<button onClick={() => removeTech(t)} className="text-gray-500 hover:text-gray-200 cursor-pointer"><X className="h-3 w-3" /></button>
                         </span>
                     ))}
                     {form.technologies.length < 6 && <button onClick={addTech} className="px-2 py-0.5 text-xs border border-dashed border-white/20 text-gray-400 rounded cursor-pointer">+ Tech</button>}

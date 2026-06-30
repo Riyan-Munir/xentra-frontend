@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 export default function Select({ options, value, onChange, placeholder = 'Select...', className = '' }) {
     const [open, setOpen] = useState(false)
@@ -21,9 +22,7 @@ export default function Select({ options, value, onChange, placeholder = 'Select
                 className="w-full glass px-4 py-2.5 text-left text-sm text-gray-300 flex items-center justify-between cursor-pointer"
             >
                 <span className={selected ? 'text-gray-100' : 'text-gray-500'}>{display}</span>
-                <svg className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
             </button>
             {open && (
                 <div className="absolute z-40 mt-1 w-full glass border border-white/10 max-h-48 overflow-y-auto animate-fade-in">

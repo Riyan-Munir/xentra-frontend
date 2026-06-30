@@ -57,8 +57,9 @@ export default function Dashboard() {
     const handleRoleSwitch = (newRole) => {
         if (newRole === currentRole) return
         localStorage.setItem('selected_role', newRole)
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
-        window.location.href = `${backendUrl}/auth/discord/login/?role=${newRole}`
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+        const baseUrl = new URL(apiUrl).origin
+        window.location.href = `${baseUrl}/auth/discord/login/?role=${newRole}`
     }
 
     if (loading) {
@@ -106,7 +107,7 @@ export default function Dashboard() {
             <Toast notifications={notifications} onRemove={removeNotification} />
 
             {hacking.active && (
-                <Modal isOpen={true} onClose={hacking.dismiss} title="⚠ Security Alert" variant="danger">
+                <Modal isOpen={true} onClose={hacking.dismiss} title="Security Alert" variant="danger">
                     <p className="text-sm text-gray-300 mb-4">{hacking.message}</p>
                     <button onClick={hacking.dismiss} className="w-full py-2 bg-red-500/20 text-red-400 rounded-lg text-sm cursor-pointer">
                         Acknowledge

@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { Briefcase, Building2, Shield, Circle } from 'lucide-react'
 
 const roles = [
-    { value: 'freelancer', label: 'Freelancer', desc: 'Find work and manage gigs', icon: '💼' },
-    { value: 'client', label: 'Client', desc: 'Hire talent and post jobs', icon: '🏢' },
-    { value: 'server_admin', label: 'Server Admin', desc: 'Manage servers and guilds', icon: '🛡️' },
+    { value: 'freelancer', label: 'Freelancer', desc: 'Find work and manage gigs', icon: Briefcase },
+    { value: 'client', label: 'Client', desc: 'Hire talent and post jobs', icon: Building2 },
+    { value: 'server_admin', label: 'Server Admin', desc: 'Manage servers and guilds', icon: Shield },
 ]
 
 export default function LoginPage() {
@@ -11,8 +12,9 @@ export default function LoginPage() {
 
     const handleLogin = () => {
         localStorage.setItem('selected_role', selected)
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
-        window.location.href = `${backendUrl}/auth/discord/login/?role=${selected}`
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+        const baseUrl = new URL(apiUrl).origin
+        window.location.href = `${baseUrl}/auth/discord/login/?role=${selected}`
     }
 
     return (
@@ -26,25 +28,28 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-3">
-                    {roles.map((r) => (
-                        <button
-                            key={r.value}
-                            onClick={() => setSelected(r.value)}
-                            className={`w-full glass px-4 py-3 flex items-center gap-3 text-left cursor-pointer transition-all
-                ${selected === r.value
-                                    ? 'border-primary/50 ring-1 ring-primary/30'
-                                    : 'hover:border-white/20'}`}
-                        >
-                            <span className="text-2xl">{r.icon}</span>
-                            <div>
-                                <p className="text-sm font-medium text-gray-100">{r.label}</p>
-                                <p className="text-xs text-gray-500">{r.desc}</p>
-                            </div>
-                            {selected === r.value && (
-                                <span className="ml-auto text-primary text-lg">●</span>
-                            )}
-                        </button>
-                    ))}
+                    {roles.map((r) => {
+                        const Icon = r.icon
+                        return (
+                            <button
+                                key={r.value}
+                                onClick={() => setSelected(r.value)}
+                                className={`w-full glass px-4 py-3 flex items-center gap-3 text-left cursor-pointer transition-all
+                                    ${selected === r.value
+                                        ? 'border-primary/50 ring-1 ring-primary/30'
+                                        : 'hover:border-white/20'}`}
+                            >
+                                <Icon className="h-6 w-6 text-primary" />
+                                <div>
+                                    <p className="text-sm font-medium text-gray-100">{r.label}</p>
+                                    <p className="text-xs text-gray-500">{r.desc}</p>
+                                </div>
+                                {selected === r.value && (
+                                    <Circle className="ml-auto h-4 w-4 fill-primary text-primary" />
+                                )}
+                            </button>
+                        )
+                    })}
                 </div>
 
                 <button

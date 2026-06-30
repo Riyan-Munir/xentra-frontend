@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Pencil, X } from 'lucide-react'
 import Skeleton from '../ui/Skeleton'
 import Modal from '../ui/Modal'
 import { jobService } from '../../services/jobService'
@@ -70,9 +71,9 @@ export default function Jobs({ profile, addNotification, fetchProfile }) {
                                     <p className="text-xs text-gray-400">${job.budget} · {job.category} · {job.status}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => { setEditJob(job); setJobModal(true) }} className="text-xs text-gray-400 hover:text-gray-200 cursor-pointer">✎</button>
+                                    <button onClick={() => { setEditJob(job); setJobModal(true) }} className="text-gray-400 hover:text-gray-200 cursor-pointer p-1"><Pencil className="h-3.5 w-3.5" /></button>
                                     <button onClick={() => { setAppModal(job); fetchApplications(job.id) }} className="text-xs text-primary hover:text-primary/80 cursor-pointer">{job.application_count || 0} apps</button>
-                                    <button onClick={() => setDeleteTarget(job)} className="text-xs text-red-400 hover:text-red-300 cursor-pointer">✕</button>
+                                    <button onClick={() => setDeleteTarget(job)} className="text-red-400 hover:text-red-300 cursor-pointer p-1"><X className="h-3.5 w-3.5" /></button>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +159,7 @@ function JobModal({ job, isOpen, onClose, onSave, isPremium, addNotification }) 
                 </select>
                 <div className="flex flex-wrap gap-1">
                     {form.skills.map((s) => (
-                        <span key={s} className="px-2 py-0.5 text-xs rounded bg-white/10 text-gray-300 flex items-center gap-1">{s}<button onClick={() => removeSkill(s)} className="text-gray-500 cursor-pointer">×</button></span>
+                        <span key={s} className="px-2 py-0.5 text-xs rounded bg-white/10 text-gray-300 flex items-center gap-1">{s}<button onClick={() => removeSkill(s)} className="text-gray-500 cursor-pointer"><X className="h-3 w-3" /></button></span>
                     ))}
                     <button onClick={addSkill} className="px-2 py-0.5 text-xs border border-dashed border-white/20 text-gray-400 rounded cursor-pointer">+ Skill</button>
                 </div>
@@ -212,7 +213,8 @@ function ApplicationModal({ job, applications, isOpen, onClose, onInterview, onR
 }
 
 function InterviewModal({ application, isOpen, onClose }) {
-    const backUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const backendUrl = new URL(apiUrl).origin
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Interview">
             <div className="space-y-3">
@@ -223,7 +225,7 @@ function InterviewModal({ application, isOpen, onClose }) {
                     The bot will create a private interview room in your Discord server.
                 </p>
                 <button
-                    onClick={() => window.open(`${backUrl}/discord/interview/${application.id}/`, '_blank')}
+                    onClick={() => window.open(`${backendUrl}/discord/interview/${application.id}/`, '_blank')}
                     className="w-full py-2.5 bg-primary hover:bg-primary/80 text-white rounded-lg text-sm cursor-pointer"
                 >
                     Open in Discord
