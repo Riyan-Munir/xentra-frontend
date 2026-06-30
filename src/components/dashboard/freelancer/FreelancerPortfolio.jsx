@@ -454,7 +454,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   return (
     <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative' + (isPremium && !isEditing ? ' premium-card' : '')}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
-        <div className={'portfolio-container p-24' + (hasChanges ? ' pb-120' : ' pb-40')}>
+        <div className={'portfolio-container p-24' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ maxWidth: '800px', margin: '0 auto', minHeight: '100%', display: 'flex', flexDirection: 'column', width: '100%' }}>
 
           {/* Header Section */}
           <div className="mb-40">
@@ -591,7 +591,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
           </div>
 
           {/* Projects Section */}
-          <div>
+          <div className={portfolio?.items?.length > 0 ? 'flex-col' : 'flex-col flex-1'}>
             <div className="flex-between mb-20">
               <h3 className="text-sm text-dim tt-uppercase ls-1 flex-row items-center gap-8">
                 <Briefcase size={16} /> Featured Projects
@@ -603,9 +603,9 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
               )}
             </div>
 
-            <div className="grid-auto-fill-300">
-              {portfolio?.items?.length > 0 ? (
-                portfolio.items.map(project => (
+            {portfolio?.items?.length > 0 ? (
+              <div className="project-hscroll-container">
+                {portfolio.items.map(project => (
                   <div key={project.id} className={'project-card glass rounded-12 overflow-hidden flex-col' + (isPremium && !isEditing ? ' premium-glow' : '')}>
                     <div className="pos-relative flex-center" style={{
                       height: '160px',
@@ -654,21 +654,15 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                       </a>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="grid-full glass rounded-12 dashed-border text-center py-40">
-                  <Briefcase size={32} className="opacity-20 mb-12" />
-                  <p className="text-dim text-sm">No projects added yet. Click edit to start building your portfolio!</p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex-1 flex-col flex-center glass rounded-12 dashed-border text-center">
+                <Briefcase size={32} className="opacity-20 mb-12" />
+                <p className="text-dim text-sm">No projects added yet. Click edit to start building your portfolio!</p>
+              </div>
+            )}
           </div>
-
-          {!isEditing && portfolio?.items?.length === 0 && (
-            <div className="flex-row justify-center mt-20">
-              <p className="text-dim text-sm">No projects added yet.</p>
-            </div>
-          )}
         </div>
 
         {hasChanges && (
