@@ -213,8 +213,6 @@ function ApplicationModal({ job, applications, isOpen, onClose, onInterview, onR
 }
 
 function InterviewModal({ application, isOpen, onClose }) {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-    const backendUrl = new URL(apiUrl).origin
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Interview">
             <div className="space-y-3">
@@ -222,13 +220,13 @@ function InterviewModal({ application, isOpen, onClose }) {
                     Initiate an interview with <strong className="text-gray-100">{application.freelancer_name || `User #${application.freelancer}`}</strong>?
                 </p>
                 <p className="text-xs text-gray-500">
-                    The bot will create a private interview room in your Discord server.
+                    The bot will create a private interview room in your Discord server via DM.
                 </p>
                 <button
-                    onClick={() => window.open(`${backendUrl}/discord/interview/${application.id}/`, '_blank')}
+                    onClick={() => window.open('https://discord.com/app', '_blank')}
                     className="w-full py-2.5 bg-primary hover:bg-primary/80 text-white rounded-lg text-sm cursor-pointer"
                 >
-                    Open in Discord
+                    Open Discord
                 </button>
             </div>
         </Modal>

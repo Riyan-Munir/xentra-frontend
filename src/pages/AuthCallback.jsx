@@ -7,6 +7,7 @@ export default function AuthCallback() {
     const [step, setStep] = useState('Authenticating...')
     const [username, setUsername] = useState('')
     const [needUsername, setNeedUsername] = useState(false)
+    const [regId, setRegId] = useState(null)
     const called = useRef(false)
 
     useEffect(() => {
@@ -18,32 +19,44 @@ export default function AuthCallback() {
         const role = localStorage.getItem('selected_role') || 'freelancer'
 
         if (error) { navigate('/login'); return }
+        if (!code) { navigate('/login'); return }
 
         const exchange = async () => {
             try {
                 setStep('Exchanging token...')
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-                const backendUrl = new URL(apiUrl).origin
-                const res = await fetch(`${backendUrl}/auth/discord/callback/?code=${code}&role=${role}`)
+                const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1/').replace(/\/+$/, '')
+                const res = await fetch(`${apiUrl}/users/auth/discord/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, role })
+                })
                 const data = await res.json()
 
-                if (!res.ok) {
-                    if (data.need_username) { setNeedUsername(true); setStep('') }
-                    else { navigate('/login') }
+                // Backend returns 200 with status: 'need_username' for new users
+                if (data.status === 'need_username') {
+                    setRegId(data.registration_id)
+                    setNeedUsername(true)
+                    setStep('')
                     return
                 }
 
-                localStorage.setItem('access_token', data.access_token)
-                localStorage.setItem('refresh_token', data.refresh_token || '')
-                localStorage.setItem('is_superuser', data.is_superuser || 'false')
-                localStorage.setItem('is_banned', data.is_banned || 'false')
+                if (!res.ok) {
+                    navigate('/login')
+                    return
+                }
 
-                // Register for guild if needed
+                // Map backend serializer fields: {access, refresh, user: {...}}
+                localStorage.setItem('access_token', data.access)
+                localStorage.setItem('refresh_token', data.refresh || '')
+                localStorage.setItem('is_superuser', data.user?.is_superuser || 'false')
+                localStorage.setItem('is_banned', data.user?.is_banned || 'false')
+
+                // Register for guild if needed (guild_registration flag on response)
                 if (data.guild_registration) {
                     setStep('Joining guild...')
                     await fetch(`${apiUrl}/guilds/register/`, {
                         method: 'POST',
-                        headers: { 'Authorization': `Bearer ${data.access_token}` }
+                        headers: { 'Authorization': `Bearer ${data.access}` }
                     })
                 }
 
@@ -62,21 +75,23 @@ export default function AuthCallback() {
 
         try {
             setStep('Setting username...')
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-            const backendUrl = new URL(apiUrl).origin
-            const code = searchParams.get('code')
+            const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1/').replace(/\/+$/, '')
             const role = localStorage.getItem('selected_role') || 'freelancer'
-            const res = await fetch(`${backendUrl}/auth/discord/callback/?code=${code}&role=${role}`, {
-                method: 'PATCH',
+            const res = await fetch(`${apiUrl}/users/auth/discord/`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username.trim() })
+                body: JSON.stringify({ registration_id: regId, role, bot_username: username.trim() })
             })
             const data = await res.json()
 
             if (res.ok) {
-                localStorage.setItem('access_token', data.access_token)
-                localStorage.setItem('refresh_token', data.refresh_token || '')
+                localStorage.setItem('access_token', data.access)
+                localStorage.setItem('refresh_token', data.refresh || '')
+                localStorage.setItem('is_superuser', data.user?.is_superuser || 'false')
+                localStorage.setItem('is_banned', data.user?.is_banned || 'false')
                 navigate('/dashboard')
+            } else {
+                navigate('/login')
             }
         } catch {
             navigate('/login')

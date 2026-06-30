@@ -57,9 +57,9 @@ export default function Dashboard() {
     const handleRoleSwitch = (newRole) => {
         if (newRole === currentRole) return
         localStorage.setItem('selected_role', newRole)
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-        const baseUrl = new URL(apiUrl).origin
-        window.location.href = `${baseUrl}/auth/discord/login/?role=${newRole}`
+        const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID
+        const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/callback'
+        window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds.join`
     }
 
     if (loading) {
