@@ -1,23 +1,15 @@
-import api from './api';
+import api, { cachedGet, invalidateCache } from './api'
 
 export const profileService = {
-  /**
-   * Fetch the current user's profile data for a specific role.
-   * Uses cached GET for instantaneous section switches.
-   */
-  getMe: async (role, skipCache = false) => {
-    const res = await api.cachedGet(`profiles/me/?role=${role}`, { skipCache });
-    return res.data;
-  },
-
-  /**
-   * Update the current user's profile data for a specific role.
-   * Invalidates the profile cache after mutation.
-   */
-  updateMe: async (role, data) => {
-    const res = await api.patch(`profiles/me/?role=${role}`, data);
-    // Invalidate all cached profile data after update
-    api.invalidateCache('profiles/me');
-    return res.data;
-  }
-};
+    getMe: async (role, skipCache) => {
+        const r = role || localStorage.getItem('selected_role') || 'freelancer'
+        if (skipCache) return (await api.get('/profiles/me/', { params: { role: r } })).data
+        return cachedGet('/profiles/me/', { role: r })
+    },
+    updateMe: async (role, data) => {
+        const r = role || localStorage.getItem('selected_role') || 'freelancer'
+        const res = await api.patch('/profiles/me/', data, { params: { role: r } })
+        invalidateCache('/profiles/me/')
+        return res.data
+    },
+}

@@ -1,40 +1,17 @@
-import api from './api';
+import api from './api'
 
 export const guildService = {
-  /**
-   * Fetch all servers for the current user.
-   * Uses cached GET to avoid redundant re-fetches.
-   */
-  getMyServers: async (forceRefresh = false) => {
-    const url = `guilds/my-servers/${forceRefresh ? '?refresh=true' : ''}`;
-    const res = await api.cachedGet(url, { skipCache: forceRefresh });
-    return res.data;
-  },
-  
-  /**
-   * Helper to format/filter data strictly for UI display logic
-   */
-  getServersWithBotInstalled: (servers) => {
-    return servers.filter(s => s.has_bot);
-  },
-
-  /**
-   * Fetch available channels for a specific guild where the bot is installed.
-   */
-  getChannels: async (guildId) => {
-    if (!guildId) return [];
-    const res = await api.get(`guilds/${guildId}/channels/`);
-    return res.data;
-  },
-
-  /**
-   * Save bot configuration for a specific guild.
-   */
-  configureGuild: async (guildId, channelId) => {
-    const res = await api.post('guilds/configure/', {
-      guild_id: guildId,
-      channel_id: channelId
-    });
-    return res.data;
-  }
-};
+    getMyServers: async (forceRefresh) => {
+        const { data } = await api.get('/guilds/my-servers/', { params: { force_refresh: forceRefresh } })
+        return data
+    },
+    getServersWithBotInstalled: (servers) => servers.filter((s) => s.has_bot),
+    getChannels: async (guildId) => {
+        const { data } = await api.get(`/guilds/${guildId}/channels/`)
+        return data
+    },
+    configureGuild: async (guildId, channelId) => {
+        const { data } = await api.post('/guilds/configure/', { guild_id: guildId, channel_id: channelId })
+        return data
+    },
+}
