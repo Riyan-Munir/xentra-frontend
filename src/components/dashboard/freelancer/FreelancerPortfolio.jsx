@@ -657,7 +657,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                 ))}
               </div>
             ) : (
-              <div className="flex-1 flex-col flex-center glass rounded-12 dashed-border text-center">
+              <div className="flex-col flex-center min-h-[320px] glass rounded-12 dashed-border text-center">
                 <Briefcase size={32} className="opacity-20 mb-12" />
                 <p className="text-dim text-sm">No projects added yet. Click edit to start building your portfolio!</p>
               </div>
