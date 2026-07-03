@@ -241,7 +241,7 @@ export async function dismissHacking(notificationIds = null) {
  * The backend clears the pending captcha flag for the caller's IP.
  */
 export async function captchaVerify(token) {
-  const resp = await api.post('/system-audits/captcha/verify/', { token });
+  const resp = await api.post('/system-audits/captcha/verify/', { cf_token: token });
   return resp.data;
 }
 
