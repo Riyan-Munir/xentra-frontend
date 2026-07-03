@@ -467,17 +467,17 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
               <div className="flex-1">
                 {isEditing ? (
                   <div className="flex-col gap-16">
-                    <div className="flex-row gap-16 items-flex-end flex-wrap">
-                      <div className="form-group flex-1 mb-0">
-                        <label className="form-label">Portfolio Title</label>
-                        <input
-                          type="text"
-                          className="form-input text-lg"
-                          value={formData.title}
-                          onChange={e => setFormData({ ...formData, title: e.target.value })}
-                        />
-                      </div>
-                      <div className="form-group flex-shrink-0 maxw-300 mb-0">
+                    <div className="form-group mb-0">
+                      <label className="form-label">Portfolio Title</label>
+                      <input
+                        type="text"
+                        className="form-input text-lg"
+                        value={formData.title}
+                        onChange={e => setFormData({ ...formData, title: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex-col gap-12">
+                      <div className="form-group w-full maxw-300 mb-0">
                         <label className="form-label">Preferred Field</label>
                         <CustomSelect
                           placeholder="Select Field..."
@@ -496,20 +496,20 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                           }}
                         />
                       </div>
-                    </div>
 
-                    {(formData.preferred_field === 'Other' || (formData.preferred_field && !JOB_CATEGORIES.includes(formData.preferred_field))) && (
-                      <div className="form-group maxw-300 m-0">
-                        <label className="form-label text-xs primary-text font-semibold">Custom Field Name</label>
-                        <input
-                          type="text"
-                          className="form-input text-sm"
-                          placeholder="e.g. Blockchain Specialist"
-                          value={formData.preferred_field === 'Other' ? '' : formData.preferred_field}
-                          onChange={e => setFormData({ ...formData, preferred_field: e.target.value })}
-                        />
-                      </div>
-                    )}
+                      {(formData.preferred_field === 'Other' || (formData.preferred_field && !JOB_CATEGORIES.includes(formData.preferred_field))) && (
+                        <div className="form-group w-full maxw-300 m-0">
+                          <label className="form-label text-xs primary-text font-semibold">Custom Field Name</label>
+                          <input
+                            type="text"
+                            className="form-input text-sm"
+                            placeholder="e.g. Blockchain Specialist"
+                            value={formData.preferred_field === 'Other' ? '' : formData.preferred_field}
+                            onChange={e => setFormData({ ...formData, preferred_field: e.target.value })}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="flex-row items-center gap-12 flex-wrap mb-20">
@@ -669,7 +669,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                 ))}
               </div>
             ) : (
-              <div className="flex-col flex-center min-h-[320px] glass rounded-12 dashed-border text-center">
+              <div className="flex-col flex-center minh-300 glass rounded-12 dashed-border text-center">
                 <Briefcase size={32} className="opacity-20 mb-12" />
                 <p className="text-dim text-sm">No projects added yet. Click edit to start building your portfolio!</p>
               </div>
