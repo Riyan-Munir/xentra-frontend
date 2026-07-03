@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Briefcase,
@@ -236,8 +236,6 @@ const ProjectModal = ({ project, isOpen, onClose, onSave, isPremium, addNotifica
 };
 
 const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, triggerTremble, fetchProfile }) => {
-  const viewModeRef = useRef(null);
-  const [editMaxWidth, setEditMaxWidth] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [portfolio, setPortfolio] = useState(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -268,14 +266,6 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   useEffect(() => {
     fetchPortfolio();
   }, []); // Fetch once on mount
-
-  // Measure view mode width and apply it to edit mode for consistent sizing
-  useEffect(() => {
-    if (!isEditing && viewModeRef.current) {
-      const width = viewModeRef.current.offsetWidth;
-      if (width > 0) setEditMaxWidth(width);
-    }
-  }, [isEditing, formData.title, formData.preferred_field]);
 
   useEffect(() => {
     if (setHasUnsavedChanges) {
@@ -467,14 +457,14 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   };
 
   return (
-    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto maxw-800' + (isPremium && !isEditing ? ' premium-card' : '')}>
+    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ width: '800px', maxWidth: '100%' }}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
         <div className={'p-24 flex-col' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%' }}>
 
           {/* Header Section */}
           <div className="mb-40">
             <div className="flex-between items-flex-start">
-              <div className="flex-1" style={isEditing && editMaxWidth ? { maxWidth: editMaxWidth } : undefined}>
+              <div className="flex-1">
                 {isEditing ? (
                   <div className="flex-col gap-16">
                     <div className="form-group mb-0">
@@ -522,7 +512,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                     </div>
                   </div>
                 ) : (
-                  <div ref={viewModeRef} className="flex-row items-center gap-12 flex-wrap mb-20">
+                  <div className="flex-row items-center gap-12 flex-wrap mb-20">
                     <h1 className="text-3xl font-800 m-0">
                       {formData.title || `${profile.username || 'Freelancer'}'s Portfolio`}
                     </h1>
