@@ -32,6 +32,7 @@ const CaptchaChallenge = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [verifying, setVerifying] = useState(false);
 
   // Load Turnstile script if not already loaded
   useEffect(() => {
@@ -68,8 +69,9 @@ const CaptchaChallenge = ({
       'retry': 'auto',
       'refresh-expired': 'auto',
       callback: (token) => {
-        // User completed the challenge — notify parent
+        // User completed the challenge — show verifying state, then notify parent
         setIsExpired(false);
+        setVerifying(true);
         onVerified(token);
       },
       'expired-callback': () => {
@@ -88,9 +90,15 @@ const CaptchaChallenge = ({
     };
   }, [isLoaded, siteKey, onVerified, retryKey]);
 
+  // Reset verifying state when parent signals an error
+  useEffect(() => {
+    if (error) setVerifying(false);
+  }, [error]);
+
   // Retry handler — re-mounts the widget by bumping retryKey
   const handleRetry = useCallback(() => {
     setIsExpired(false);
+    setVerifying(false);
     setRetryKey((k) => k + 1);
   }, []);
 
@@ -111,25 +119,35 @@ const CaptchaChallenge = ({
           </p>
         )}
 
-        {/* Turnstile widget container */}
-        <div
-          ref={containerRef}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            margin: '16px 0',
-            minHeight: 72,
-          }}
-        />
+        {/* Turnstile widget container — hidden while verifying */}
+        {!verifying && (
+          <div
+            ref={containerRef}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              margin: '16px 0',
+              minHeight: 72,
+            }}
+          />
+        )}
 
-        {!isLoaded && (
+        {/* ── Verifying / success state ──────────────────────────── */}
+        {verifying && (
+          <div className="flex-center gap-8" style={{ margin: '20px 0', color: 'var(--success, #22c55e)' }}>
+            <RefreshCw size={20} className="spin" />
+            <span style={{ fontWeight: 600 }}>Verification successful! Redirecting to login...</span>
+          </div>
+        )}
+
+        {!isLoaded && !verifying && (
           <div className="flex-center gap-8" style={{ margin: '16px 0', color: 'var(--text-dim)' }}>
             <RefreshCw size={18} className="spin" />
             <span>Loading verification...</span>
           </div>
         )}
 
-        {isExpired && (
+        {isExpired && !verifying && (
           <button
             className="hacking-modal-btn"
             onClick={handleRetry}
@@ -140,13 +158,15 @@ const CaptchaChallenge = ({
           </button>
         )}
 
-        <button
-          className="hacking-modal-btn"
-          onClick={onDismiss}
-          style={{ background: 'var(--bg-card)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}
-        >
-          Cancel
-        </button>
+        {!verifying && (
+          <button
+            className="hacking-modal-btn"
+            onClick={onDismiss}
+            style={{ background: 'var(--bg-card)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
