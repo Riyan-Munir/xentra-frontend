@@ -464,7 +464,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
           {/* Header Section */}
           <div className="mb-40">
             <div className="flex-between items-flex-start">
-              <div className="flex-1">
+              <div className={'flex-1' + (isEditing ? ' maxw-500' : '')}>
                 {isEditing ? (
                   <div className="flex-col gap-16">
                     <div className="form-group mb-0">
