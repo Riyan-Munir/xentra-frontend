@@ -313,13 +313,13 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
 
   const handleEditToggle = () => {
     if (isEditing) {
-      setFormData(originalData);
+      if (originalData) setFormData(originalData);
     }
     setIsEditing(!isEditing);
   };
 
   const handleCancel = () => {
-    setFormData(originalData);
+    if (originalData) setFormData(originalData);
     setIsEditing(false);
   };
 
