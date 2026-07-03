@@ -693,7 +693,7 @@ const Dashboard = () => {
       switch (activeSection) {
         case 'overview': return <AdminOverview {...profileProps} servers={servers} onConfigure={handleGoToConfigure} onRefreshServers={() => fetchServers(true)} isRefreshing={isRefreshing} isServersLoading={isServersLoading} />;
         case 'settings': return <AdminSettings {...commonProps} onUpdate={handleUpdateProfile} />;
-        case 'configure': return <AdminConfigure servers={servers} selectedGuildId={selectedGuildId} setHasUnsavedChanges={setHasUnsavedChanges} triggerTremble={triggerTremble} isSubmitting={isSaving} />;
+        case 'configure': return <AdminConfigure servers={servers} selectedGuildId={selectedGuildId} setHasUnsavedChanges={setHasUnsavedChanges} triggerTremble={triggerTremble} addNotification={addNotification} isSubmitting={isSaving} />;
         default: return <AdminOverview {...profileProps} servers={servers} onConfigure={handleGoToConfigure} isRefreshing={isRefreshing} isServersLoading={isServersLoading} />;
       }
     }
