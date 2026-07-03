@@ -646,7 +646,7 @@ const Dashboard = () => {
     // This prevents ANY section component from mounting and making API calls.
     if (hackingState.has_pending) {
       return (
-        <div className="flex-col flex-center gap-16" style={{ minHeight: 400, opacity: 0.35, pointerEvents: 'none', userSelect: 'none' }}>
+        <div className="flex-col flex-center gap-16" style={{ minHeight: 300, opacity: 0.35, pointerEvents: 'none', userSelect: 'none' }}>
           <ShieldAlert size={64} />
           <p style={{ fontSize: 16, textAlign: 'center', maxWidth: 340 }}>
             Dashboard locked — acknowledge the security alert to continue.

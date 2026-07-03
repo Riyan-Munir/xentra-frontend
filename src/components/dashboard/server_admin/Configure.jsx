@@ -123,7 +123,7 @@ const Configure = ({ servers, selectedGuildId, setHasUnsavedChanges, triggerTrem
       <div className="card glass flex-col flex-center text-center opacity-80">
         <MessageSquare size={48} className="primary-text mb-16 opacity-50" />
         <h4 className="mb-8 text-lg">Server Isolation</h4>
-        <p className="text-sm text-dim" style={{ maxWidth: '240px' }}>
+        <p className="text-sm text-dim" style={{ maxWidth: '300px', width: '100%' }}>
           Assigning a channel ensures your server members aren't spammed. Bot interactions are restricted to the selected channel.
         </p>
       </div>

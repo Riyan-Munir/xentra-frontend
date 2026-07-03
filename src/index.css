@@ -953,6 +953,12 @@ input[type="radio"]:focus {
   }
 }
 
+@media (max-width: 1100px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .settings-grid {
     grid-template-columns: 1fr;
@@ -967,8 +973,9 @@ input[type="radio"]:focus {
   }
 
   .dashboard-view-container {
-    overflow: hidden;
-    height: calc(100vh - 40px);
+    overflow-y: auto;
+    height: auto;
+    min-height: calc(100vh - 40px);
   }
 
   .layout-bottom {
@@ -1115,7 +1122,8 @@ input[type="radio"]:focus {
 }
 
 .auth-callback-card.username-client {
-  width: 420px;
+  max-width: 420px;
+  width: 90%;
   padding: 40px 36px;
   border: 1px solid rgba(99, 102, 241, 0.25);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(99, 102, 241, 0.05);
@@ -2607,7 +2615,7 @@ input[type="radio"]:focus {
 /* --- Server Admin Overview specific utilities --- */
 .server-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
 }
 
@@ -2792,7 +2800,7 @@ input[type="radio"]:focus {
   -webkit-backdrop-filter: blur(12px);
   animation: modalIn 0.18s ease-out;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.15) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   -ms-overflow-style: auto;
 }
 
@@ -3948,7 +3956,7 @@ input[type="radio"]:focus {
 
   /* Project cards slightly smaller */
   .project-hscroll-container>.project-card {
-    min-width: 260px;
+    min-width: 220px;
   }
 
   /* Server card grid 2-column on mobile */

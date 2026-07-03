@@ -499,7 +499,7 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                   className="btn btn-secondary"
                   onClick={() => setIsApplyModalOpen(false)}
                   disabled={isApplying}
-                  style={{ minWidth: '100px' }}
+                  style={{ minWidth: '80px' }}
                 >
                   Cancel
                 </button>
@@ -507,7 +507,7 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                   type="submit"
                   className="btn btn-primary"
                   disabled={isApplying}
-                  style={{ minWidth: '160px' }}
+                  style={{ minWidth: '120px' }}
                 >
                   {isApplying ? 'Submitting...' : (
                     <><Save size={18} /> Submit Application</>

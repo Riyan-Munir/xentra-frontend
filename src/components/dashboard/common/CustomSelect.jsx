@@ -1,8 +1,9 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 const CustomSelect = ({ options, value, onChange, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
   const getOptionValue = (opt) => (opt && typeof opt === 'object' ? opt.value : opt);
   const getOptionLabel = (opt) => (opt && typeof opt === 'object' ? opt.label : opt);
@@ -18,9 +19,11 @@ const CustomSelect = ({ options, value, onChange, placeholder }) => {
   useEffect(() => {
     if (!isOpen) return;
     const handleClose = (e) => {
-      setIsOpen(false);
+      // Only close if click is OUTSIDE the wrapper (trigger + dropdown)
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
     };
-    // Use mousedown so it fires before click and avoids race conditions
     document.addEventListener('mousedown', handleClose);
     return () => {
       document.removeEventListener('mousedown', handleClose);
@@ -28,7 +31,7 @@ const CustomSelect = ({ options, value, onChange, placeholder }) => {
   }, [isOpen]);
 
   return (
-    <div className="custom-select-wrapper pos-relative w-full">
+    <div className="custom-select-wrapper pos-relative w-full" ref={wrapperRef}>
       <div
         className={`form-input custom-select-trigger ${isOpen ? 'active' : ''}`}
         onClick={toggleOpen}
