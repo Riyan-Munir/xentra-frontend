@@ -3711,29 +3711,74 @@ input[type="radio"]:focus {
     overflow: visible;
   }
 
-  /* Profile card stacks vertically */
+  /* Sidebar nav scrollable — logo & logout stay fixed */
+  .sidebar-nav {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    min-height: 0;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  /* Profile card — compact centered layout */
   .profile-card-horizontal {
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    padding: 20px;
+    gap: 14px;
+    padding: 20px 16px;
+    text-align: center;
   }
 
   .profile-avatar-horizontal {
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
   }
 
   .profile-header-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    gap: 6px;
     width: 100%;
   }
 
-  /* Stats grid single column */
+  .profile-header-row h3 {
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  .profile-header-row p {
+    font-size: 0.8rem;
+    color: var(--text-muted, #888);
+  }
+
+  .profile-header-row .badge {
+    align-self: center;
+  }
+
+  .profile-stats-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .profile-stats-row .stat-item {
+    text-align: center;
+  }
+
+  /* Stats grid 2×2 on mobile */
   .stats-grid-right {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   /* Settings grid single column */
@@ -3868,9 +3913,9 @@ input[type="radio"]:focus {
     min-width: 260px;
   }
 
-  /* Server card grid */
+  /* Server card grid 2-column on mobile */
   .server-card-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   /* Hacking modal detail */
