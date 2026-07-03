@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/(.*\\.(js|css|map|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|webp))", "destination": "/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "buildCommand": "npm run build",
