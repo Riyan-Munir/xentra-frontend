@@ -1,6 +1,7 @@
-import React, { memo, useState } from 'react';
-import { DollarSign } from 'lucide-react';
+import React, { memo } from 'react';
 import UnsavedChangesBar from '../common/UnsavedChangesBar';
+import CustomSelect from '../common/CustomSelect';
+import DisplayNameCard from '../common/DisplayNameCard';
 import Skeleton from '../../common/Skeleton';
 import { useProfileForm } from '../../../hooks/useProfileForm';
 
@@ -10,11 +11,10 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
     usernameField: 'username',
     customIdField: 'premium_id',
     customIdFallback: 'client_id',
-    extraFields: [['minProjectBudget', 'min_project_budget']],
+    extraFields: ['availability'],
   }
   );
 
-  const [focusedField, setFocusedField] = useState(null);
   const isPremium = profile.premium_tier === 'premium';
 
   if (isProfileLoading) {
@@ -51,26 +51,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
 
   return (
     <div className={`fade-in settings-grid ${isSubmitting ? 'form-submitting' : ''}`}>
-      <div className="card">
-        <div className="form-header-row">
-          <h3 className="section-heading-h3">Display Name</h3>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Client Display Name</label>
-          <input
-            type="text"
-            className="form-input"
-            value={fields.username}
-            onChange={(e) => setField('username', e.target.value)}
-            placeholder="e.g. Acme Corp"
-            disabled={isSubmitting}
-          />
-          <p className="helper-text">
-            Max 16 chars. No dots. A-Z, 0-9, _, -, space.
-          </p>
-        </div>
-      </div>
+      <DisplayNameCard fields={fields} setField={setField} role="client" isSubmitting={isSubmitting} />
 
       <div className="card">
         <div className="form-header-row">
@@ -96,40 +77,31 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
 
       <div className="card">
         <div className="form-header-row">
-          <h3 className="section-heading-h3">Min. Project Budget</h3>
+          <h3 className="section-heading-h3">Availability</h3>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Minimum Payout ($)</label>
-          <div className="pos-relative">
-            <input
-              type="text"
-              inputMode="numeric"
-              className="form-input"
-              style={{ paddingLeft: '44px' }}
-              placeholder="0"
-              value={focusedField === 'minProjectBudget' ? String(fields.minProjectBudget).replace(/\.00$/, '') : (fields.minProjectBudget ? parseFloat(fields.minProjectBudget).toFixed(2) : '')}
-              onFocus={() => setFocusedField('minProjectBudget')}
-              onBlur={() => setFocusedField(null)}
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9]/g, '');
-                setField('minProjectBudget', val ? val : '');
-              }}
-              disabled={isSubmitting}
-            />
-            <DollarSign size={16} className="pos-absolute primary-text" style={{ left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-          </div>
+          <label className="form-label">Set Your Status</label>
+          <CustomSelect
+            options={[
+              { label: 'Available (Accepting Jobs)', value: 'available' },
+              { label: 'Busy (Currently Working)', value: 'busy' },
+              { label: 'Offline (Away)', value: 'offline' }
+            ]}
+            value={fields.availability}
+            onChange={(val) => setField('availability', val)}
+            placeholder="Select Availability"
+            disabled={isSubmitting}
+          />
           <p className="helper-text">
-            The base minimum you offer for any project.
+            Informs freelancers if you are ready to take on new projects.
           </p>
         </div>
       </div>
 
       {hasChanges && (
         <UnsavedChangesBar
-          onSave={() => handleSave({
-            min_project_budget: parseFloat(fields.minProjectBudget) || 0
-          })}
+          onSave={() => handleSave()}
           onCancel={handleCancel}
           triggerTremble={triggerTremble}
           isSubmitting={isSubmitting}

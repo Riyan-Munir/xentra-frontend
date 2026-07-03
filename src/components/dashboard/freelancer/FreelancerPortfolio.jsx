@@ -157,7 +157,12 @@ const ProjectModal = ({ project, isOpen, onClose, onSave, isPremium, addNotifica
           />
           <div className="flex-between mt-4">
             {errors.description && <span className="error-text text-xs">{errors.description}</span>}
-            <span className="text-xs text-dim">
+            <span className={'text-xs font-semibold ' + (
+              (() => {
+                const wc = formData.description.trim().split(/\s+/).filter(w => w.length > 0).length;
+                return (wc < 20 || wc > 30) ? 'error-text' : 'success-text';
+              })()
+            )}>
               {formData.description.trim().split(/\s+/).filter(w => w.length > 0).length} / 30 words
             </span>
           </div>
@@ -452,7 +457,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   };
 
   return (
-    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto maxw-800' + (isPremium && !isEditing ? ' premium-card' : '')}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
         <div className={'p-24' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
 
@@ -477,8 +482,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                         <CustomSelect
                           placeholder="Select Field..."
                           options={[
-                            ...JOB_CATEGORIES.map(c => ({ label: c, value: c })),
-                            { label: 'Other', value: 'Other' }
+                            ...JOB_CATEGORIES.map(c => ({ label: c, value: c }))
                           ]}
                           value={JOB_CATEGORIES.includes(formData.preferred_field) ? formData.preferred_field : (formData.preferred_field ? 'Other' : '')}
                           onChange={(val) => {
@@ -541,7 +545,12 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                 />
-                <span className="text-xs text-dim">
+                <span className={'text-xs font-semibold ' + (
+                  (() => {
+                    const wc = formData.description.trim().split(/\s+/).filter(w => w.length > 0).length;
+                    return (wc < 1 || wc > 50) ? 'error-text' : 'success-text';
+                  })()
+                )}>
                   {formData.description.trim().split(/\s+/).filter(w => w.length > 0).length} / 50 words
                 </span>
               </div>

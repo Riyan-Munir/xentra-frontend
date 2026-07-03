@@ -2159,6 +2159,10 @@ input[type="radio"]:focus {
   max-width: 700px;
 }
 
+.maxw-800 {
+  max-width: 800px;
+}
+
 /* --- Border Radius --- */
 .radius-4 {
   border-radius: 4px;

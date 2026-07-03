@@ -1,17 +1,18 @@
 import React, { memo } from 'react';
 import UnsavedChangesBar from '../common/UnsavedChangesBar';
 import CustomSelect from '../common/CustomSelect';
+import DisplayNameCard from '../common/DisplayNameCard';
 import Skeleton from '../../common/Skeleton';
 import { useProfileForm } from '../../../hooks/useProfileForm';
 
 const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremble, addNotification, isSubmitting, isProfileLoading }) => {
   const { fields, setField, hasChanges, handleCancel, handleSave } = useProfileForm(
     profile, onUpdate, addNotification, setHasUnsavedChanges, {
-      usernameField: 'username',
-      customIdField: 'premium_id',
-      customIdFallback: 'freelancer_id',
-      extraFields: ['availability'],
-    }
+    usernameField: 'username',
+    customIdField: 'premium_id',
+    customIdFallback: 'freelancer_id',
+    extraFields: ['availability'],
+  }
   );
 
   const isPremium = profile.premium_tier === 'premium';
@@ -50,33 +51,14 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
 
   return (
     <div className={`fade-in settings-grid ${isSubmitting ? 'form-submitting' : ''}`}>
-      <div className="card">
-        <div className="form-header-row">
-          <h3 className="section-heading-h3">Display Name</h3>
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Freelancer Display Name</label>
-          <input
-            type="text"
-            className="form-input"
-            value={fields.username}
-            onChange={(e) => setField('username', e.target.value)}
-            placeholder="e.g. Shadow Hunter"
-            disabled={isSubmitting}
-          />
-          <p className="helper-text">
-            Your public name in the marketplace.
-          </p>
-        </div>
-      </div>
+      <DisplayNameCard fields={fields} setField={setField} role="freelancer" isSubmitting={isSubmitting} />
 
       <div className="card">
         <div className="form-header-row">
           <h3 className="section-heading-h3">Freelancer ID</h3>
           <span className="premium-tag">Premium</span>
         </div>
-        
+
         <div className="form-group">
           <label className="form-label">Custom ID</label>
           <input
@@ -97,7 +79,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
         <div className="form-header-row">
           <h3 className="section-heading-h3">Availability</h3>
         </div>
-        
+
         <div className="form-group">
           <label className="form-label">Set Your Status</label>
           <CustomSelect

@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import UnsavedChangesBar from '../common/UnsavedChangesBar';
+import DisplayNameCard from '../common/DisplayNameCard';
 import Skeleton from '../../common/Skeleton';
 import { useProfileForm } from '../../../hooks/useProfileForm';
 
@@ -28,26 +29,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
 
   return (
     <div className={`fade-in settings-grid ${isSubmitting ? 'form-submitting' : ''}`}>
-      <div className="card">
-        <div className="form-header-row">
-          <h3 className="section-heading-h3">Display Name</h3>
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Admin Display Name</label>
-          <input
-            type="text"
-            className="form-input"
-            value={fields.username}
-            onChange={(e) => setField('username', e.target.value)}
-            placeholder="e.g. Server Owner"
-            disabled={isSubmitting}
-          />
-          <p className="helper-text">
-            This name will be displayed in server management logs.
-          </p>
-        </div>
-      </div>
+      <DisplayNameCard fields={fields} setField={setField} role="server_admin" isSubmitting={isSubmitting} />
 
       {/* Empty space to keep card at half width in grid */}
       <div></div>

@@ -3,8 +3,8 @@ import React from 'react';
 const ROLE_CONFIG = {
   client: {
     defaultName: 'User',
-    statusText: 'Operational',
-    roleTag: null, // uses level-based tags
+    statusText: null, // dynamically resolved from availability
+    roleTag: null,
     showExpBar: true,
     expLabel: 'Score',
   },
@@ -49,29 +49,29 @@ const RoleProfile = ({ profile, avatarUrl, role, availability }) => {
 
   return (
     <div className={`profile-card-horizontal ${profile?.premium_tier === 'premium' ? 'premium-card premium-glow' : ''}`}>
-      <img 
-        src={avatarUrl} 
-        alt="Avatar" 
-        className="profile-avatar-horizontal" 
+      <img
+        src={avatarUrl}
+        alt="Avatar"
+        className="profile-avatar-horizontal"
       />
       <div className="profile-info-horizontal">
         <div className="profile-header-row">
           <h2 className="profile-username-horizontal">{profile?.username || resolvedDefaultName}</h2>
           <div className="status-badge">
-            {role === 'freelancer' ? (
+            {role === 'server_admin' ? (
               <>
-                <span 
-                  className="status-circle-small" 
+                <span className="status-circle-small"></span>
+                {resolvedStatusText}
+              </>
+            ) : (
+              <>
+                <span
+                  className="status-circle-small"
                   style={getAvailabilityStyle(availability)}
                 ></span>
                 <span style={{ textTransform: 'capitalize' }}>
                   {resolvedStatusText}
                 </span>
-              </>
-            ) : (
-              <>
-                <span className="status-circle-small"></span>
-                {resolvedStatusText}
               </>
             )}
           </div>
