@@ -557,6 +557,16 @@ input[type="radio"]:focus {
   box-shadow: 0 0 6px var(--success);
 }
 
+.status-circle-busy {
+  background: var(--error);
+  box-shadow: 0 0 8px var(--error);
+}
+
+.status-circle-offline {
+  background: var(--text-dim);
+  box-shadow: none;
+}
+
 /* Experience Bar Row */
 .exp-row-container {
   display: flex;
@@ -1075,10 +1085,6 @@ input[type="radio"]:focus {
   background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, #030712 70%);
 }
 
-.auth-callback-container.freelancer-bg {
-  background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.08) 0%, #030712 70%);
-}
-
 .auth-callback-grid-lines {
   position: absolute;
   inset: 0;
@@ -1113,13 +1119,6 @@ input[type="radio"]:focus {
   padding: 40px 36px;
   border: 1px solid rgba(99, 102, 241, 0.25);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(99, 102, 241, 0.05);
-}
-
-.auth-callback-card.username-freelancer {
-  width: 420px;
-  padding: 40px 36px;
-  border: 1px solid rgba(236, 72, 153, 0.25);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(236, 72, 153, 0.05);
 }
 
 .auth-callback-loader-wrapper {
@@ -1179,16 +1178,6 @@ input[type="radio"]:focus {
   border-radius: 12px;
 }
 
-.role-text-gradient-freelancer {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.85rem;
-}
-
 .role-text-gradient-client {
   background: linear-gradient(135deg, #6366f1, #3b82f6);
   -webkit-background-clip: text;
@@ -1197,15 +1186,6 @@ input[type="radio"]:focus {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.85rem;
-}
-
-.auth-callback-btn-username-freelancer {
-  width: 100%;
-  padding: 14px;
-  font-size: 0.95rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
 }
 
 .auth-callback-btn-username-client {

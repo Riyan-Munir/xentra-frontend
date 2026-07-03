@@ -162,17 +162,16 @@ const AuthCallback = () => {
   );
 
   if (needUsername) {
-    const isFreelancer = role === 'freelancer';
     return (
-      <div className={`auth-callback-container ${isFreelancer ? 'freelancer-bg' : 'client-bg'}`}>
+      <div className="auth-callback-container client-bg">
         <div className="auth-callback-grid-lines"></div>
         
-        <div className={`auth-callback-card ${isFreelancer ? 'username-freelancer' : 'username-client'} fade-in`}>
+        <div className="auth-callback-card username-client fade-in">
           <div className="auth-username-section">
             <h2 className="auth-username-heading">One Last Step!</h2>
             <p className="auth-username-subtitle">
               Choose your display name for the{' '}
-              <span className={isFreelancer ? 'role-text-gradient-freelancer' : 'role-text-gradient-client'}>
+              <span className="role-text-gradient-client">
                 {role.replace('_', ' ')}
               </span>{' '}
               role.
@@ -181,12 +180,12 @@ const AuthCallback = () => {
           
           <div className="auth-username-group">
             <label className="form-label auth-username-label">Display Name</label>
-            <input 
+            <input
               type="text"
               value={botUsername}
               onChange={(e) => setBotUsername(e.target.value)}
               placeholder="e.g. Shadow Hunter"
-              className={'form-input auth-username-input' + (isFreelancer ? ' border-freelancer' : ' border-client')}
+              className="form-input auth-username-input border-client"
               autoFocus
             />
             <p className="auth-helper-text">
@@ -194,9 +193,9 @@ const AuthCallback = () => {
             </p>
           </div>
           
-          <button 
-            onClick={() => exchangeCode(botUsername)} 
-            className={`btn btn-primary ${isFreelancer ? 'auth-callback-btn-username-freelancer' : 'auth-callback-btn-username-client'}`}
+          <button
+            onClick={() => exchangeCode(botUsername)}
+            className="btn btn-primary auth-callback-btn-username-client"
           >
             Enter Dashboard
           </button>

@@ -459,7 +459,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   return (
     <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto maxw-800' + (isPremium && !isEditing ? ' premium-card' : '')}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
-        <div className={'p-24' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className={'p-24 flex-col' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%' }}>
 
           {/* Header Section */}
           <div className="mb-40">
@@ -468,7 +468,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                 {isEditing ? (
                   <div className="flex-col gap-16">
                     <div className="flex-row gap-16 items-flex-end flex-wrap">
-                      <div className="form-group flex-1 mb-0" style={{ flex: '2 1 300px' }}>
+                      <div className="form-group flex-1 mb-0">
                         <label className="form-label">Portfolio Title</label>
                         <input
                           type="text"
@@ -477,7 +477,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
                           onChange={e => setFormData({ ...formData, title: e.target.value })}
                         />
                       </div>
-                      <div className="form-group mb-0" style={{ flex: '1 1 200px' }}>
+                      <div className="form-group flex-shrink-0 maxw-300 mb-0">
                         <label className="form-label">Preferred Field</label>
                         <CustomSelect
                           placeholder="Select Field..."
@@ -616,13 +616,16 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
               <div className="project-hscroll-container">
                 {portfolio.items.map(project => (
                   <div key={project.id} className={'project-card glass rounded-12 overflow-hidden flex-col' + (isPremium && !isEditing ? ' premium-glow' : '')}>
-                    <div className="pos-relative flex-center" style={{
-                      height: '160px',
-                      background: project.image_url ? `url("${project.image_url}")` : 'rgba(0,0,0,0.3)',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat'
-                    }}>
+                    <div
+                      className={'pos-relative flex-center' + (project.image_url ? ' bg-cover bg-center bg-no-repeat' : '')}
+                      style={{
+                        height: '160px',
+                        ...(project.image_url
+                          ? { backgroundImage: `url("${project.image_url}")` }
+                          : { background: 'rgba(0,0,0,0.3)' }
+                        )
+                      }}
+                    >
                       {!project.image_url && <ImageIcon size={32} className="opacity-20" />}
                       {isEditing && (
                         <div className="pos-absolute top-8 right-8 flex-row gap-6">

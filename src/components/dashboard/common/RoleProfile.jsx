@@ -24,14 +24,14 @@ const ROLE_CONFIG = {
   },
 };
 
-const getAvailabilityStyle = (availability) => {
+const getCircleClass = (availability) => {
   switch (availability) {
-    case 'available':
-      return { background: 'var(--success)', boxShadow: '0 0 8px var(--success)' };
     case 'busy':
-      return { background: 'var(--error)', boxShadow: '0 0 8px var(--error)' };
+      return 'status-circle-busy';
+    case 'offline':
+      return 'status-circle-offline';
     default:
-      return { background: 'var(--text-dim)', boxShadow: 'none' };
+      return '';
   }
 };
 
@@ -66,10 +66,9 @@ const RoleProfile = ({ profile, avatarUrl, role, availability }) => {
             ) : (
               <>
                 <span
-                  className="status-circle-small"
-                  style={getAvailabilityStyle(availability)}
+                  className={'status-circle-small ' + getCircleClass(availability)}
                 ></span>
-                <span style={{ textTransform: 'capitalize' }}>
+                <span className="text-capitalize">
                   {resolvedStatusText}
                 </span>
               </>
