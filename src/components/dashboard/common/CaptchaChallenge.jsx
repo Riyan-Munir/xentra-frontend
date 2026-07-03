@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { ShieldAlert, ShieldCheck, RefreshCw } from 'lucide-react';
 
 /**
  * CaptchaChallenge — Cloudflare Turnstile widget overlay.
@@ -11,15 +11,27 @@ import { ShieldAlert, RefreshCw } from 'lucide-react';
  * Props
  * -----
  * - siteKey: string — Turnstile site key (from backend 403 response)
- * - onVerified: () => void — called when captcha is solved
+ * - onVerified: (token) => void — called when captcha is solved
  * - onDismiss: () => void — called if user closes without solving
  * - error: string | null — optional error message to display
+ * - title: string — modal title (default: "Security Verification")
+ * - description: string — modal description text
+ * - icon: React.ComponentType — icon component to display (default: ShieldAlert)
  */
-const CaptchaChallenge = ({ siteKey, onVerified, onDismiss, error }) => {
+const CaptchaChallenge = ({
+  siteKey,
+  onVerified,
+  onDismiss,
+  error,
+  title = 'Security Verification',
+  description = 'Our system detected unusual activity from your IP. Please complete the security check to continue.',
+  icon: IconComponent = ShieldAlert,
+}) => {
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   // Load Turnstile script if not already loaded
   useEffect(() => {
@@ -46,12 +58,15 @@ const CaptchaChallenge = ({ siteKey, onVerified, onDismiss, error }) => {
 
     // Reset any previously rendered widget
     if (widgetRef.current) {
-      window.turnstile.remove(widgetRef.current);
+      try { window.turnstile.remove(widgetRef.current); } catch (_) { /* noop */ }
+      widgetRef.current = null;
     }
 
     widgetRef.current = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       theme: 'dark',
+      'retry': 'auto',
+      'refresh-expired': 'auto',
       callback: (token) => {
         // User completed the challenge — notify parent
         setIsExpired(false);
@@ -67,22 +82,27 @@ const CaptchaChallenge = ({ siteKey, onVerified, onDismiss, error }) => {
 
     return () => {
       if (widgetRef.current && window.turnstile) {
-        window.turnstile.remove(widgetRef.current);
+        try { window.turnstile.remove(widgetRef.current); } catch (_) { /* noop */ }
         widgetRef.current = null;
       }
     };
-  }, [isLoaded, siteKey, onVerified]);
+  }, [isLoaded, siteKey, onVerified, retryKey]);
+
+  // Retry handler — re-mounts the widget by bumping retryKey
+  const handleRetry = useCallback(() => {
+    setIsExpired(false);
+    setRetryKey((k) => k + 1);
+  }, []);
 
   return (
     <div className="hacking-overlay">
       <div className="hacking-modal" style={{ maxWidth: 420 }}>
         <div className="hacking-modal-icon">
-          <ShieldAlert size={48} />
+          <IconComponent size={48} />
         </div>
-        <h2 className="hacking-modal-title">Security Verification</h2>
+        <h2 className="hacking-modal-title">{title}</h2>
         <p className="hacking-modal-text">
-          Our system detected unusual activity from your IP.
-          Please complete the security check to continue.
+          {description}
         </p>
 
         {error && (
@@ -110,9 +130,14 @@ const CaptchaChallenge = ({ siteKey, onVerified, onDismiss, error }) => {
         )}
 
         {isExpired && (
-          <p className="hacking-modal-detail" style={{ marginBottom: 12 }}>
-            Challenge expired. Please try again.
-          </p>
+          <button
+            className="hacking-modal-btn"
+            onClick={handleRetry}
+            style={{ background: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)', marginBottom: 12 }}
+          >
+            <RefreshCw size={16} />
+            Challenge expired — Tap to retry
+          </button>
         )}
 
         <button

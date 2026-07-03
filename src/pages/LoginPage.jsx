@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Disc as Discord, Shield, Briefcase, Globe, Clock, LogOut } from 'lucide-react';
+import { Disc as Discord, Shield, Briefcase, Globe, Clock, LogOut, ShieldCheck } from 'lucide-react';
 import CaptchaChallenge from '../components/dashboard/common/CaptchaChallenge';
 import { fetchCaptchaChallenge, captchaVerify } from '../services/api';
 
@@ -141,6 +141,9 @@ const LoginPage = () => {
           error={captcha.error}
           onVerified={handleCaptchaVerified}
           onDismiss={handleCaptchaDismiss}
+          title="Let's Verify It's You"
+          description="Before we proceed, please complete the quick check below to confirm you're not a robot."
+          icon={ShieldCheck}
         />
       )}
     </div>
