@@ -3630,3 +3630,265 @@ input[type="radio"]:focus {
     transform: translateY(0) scale(1);
   }
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN — Mobile & Tablet Breakpoints
+   ============================================================ */
+
+/* --- Mobile Menu Button (hidden on desktop) --- */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* --- Mobile Sidebar Overlay (hidden on desktop) --- */
+.sidebar-mobile-overlay {
+  display: none;
+}
+
+/* --- Mobile: max-width 768px --- */
+@media (max-width: 768px) {
+
+  /* Show hamburger, hide sidebar statically */
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9998;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 260px;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9997;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  /* Main content full width */
+  .main-content {
+    padding: 12px 16px;
+  }
+
+  /* View container stretches naturally */
+  .dashboard-view-container {
+    height: auto;
+    min-height: calc(100vh - 40px);
+  }
+
+  /* Profile card stacks vertically */
+  .profile-card-horizontal {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .profile-avatar-horizontal {
+    width: 60px;
+    height: 60px;
+  }
+
+  .profile-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* Stats grid single column */
+  .stats-grid-right {
+    grid-template-columns: 1fr;
+  }
+
+  /* Settings grid single column */
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Layout sections stack */
+  .layout-middle {
+    flex-direction: column;
+  }
+
+  .layout-bottom {
+    flex: none;
+    min-height: 250px;
+  }
+
+  /* Fixed-height panels become min-height */
+  .jobs-fixed-panel {
+    min-height: 280px;
+    height: auto;
+  }
+
+  .browse-fixed-panel {
+    min-height: 280px;
+    height: auto;
+  }
+
+  /* Scrollable cards reduce padding */
+  .scrollable-content-card {
+    padding: 16px;
+  }
+
+  /* Card padding reduction */
+  .card {
+    padding: 16px;
+  }
+
+  /* Guild stats grid single column */
+  .guild-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modals responsive */
+  .modal-content {
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .confirm-modal-card {
+    max-width: 100%;
+  }
+
+  .hacking-modal {
+    padding: 24px 20px;
+    width: 95%;
+  }
+
+  /* Login page */
+  .login-page-card {
+    padding: 32px 24px;
+  }
+
+  .login-page-title {
+    font-size: 2rem;
+  }
+
+  /* Banned page */
+  .banned-main-title {
+    font-size: 2rem;
+    letter-spacing: 0.1em;
+  }
+
+  .icon-badge-outer {
+    width: 80px;
+    height: 80px;
+  }
+
+  .icon-badge-inner {
+    width: 56px;
+    height: 56px;
+  }
+
+  .classic-content-wrapper {
+    padding: 24px 16px;
+  }
+
+  .banned-message-card {
+    padding: 24px 16px;
+  }
+
+  /* Unsaved changes bar stacks */
+  .unsaved-changes-bar {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 16px;
+    width: calc(100% - 24px);
+    bottom: 12px;
+  }
+
+  .unsaved-bar-actions {
+    justify-content: center;
+  }
+
+  /* Role switcher compact */
+  .role-switcher-btn {
+    min-width: 120px;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  /* Nav items remove left border on mobile */
+  .nav-item.active {
+    border-left: none;
+  }
+
+  /* Project cards slightly smaller */
+  .project-hscroll-container>.project-card {
+    min-width: 260px;
+  }
+
+  /* Server card grid */
+  .server-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hacking modal detail */
+  .hacking-modal-detail {
+    font-size: 0.75rem;
+    padding: 8px 10px;
+  }
+
+  /* Compact stat cards */
+  .compact-stat-card {
+    padding: 10px 14px;
+  }
+
+  /* Form inputs full width */
+  .form-input {
+    max-width: 100%;
+  }
+
+  /* Notification container */
+  .notification-container {
+    max-width: calc(100% - 32px);
+  }
+}
+
+/* --- Tablet: 641px – 1024px --- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .main-content {
+    padding: 16px 24px;
+  }
+
+  .stats-grid-right {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .jobs-fixed-panel {
+    min-height: 320px;
+    height: auto;
+  }
+
+  .browse-fixed-panel {
+    min-height: 320px;
+    height: auto;
+  }
+
+  .scrollable-content-card {
+    padding: 20px;
+  }
+
+  .profile-card-horizontal {
+    gap: 20px;
+    padding: 20px 24px;
+  }
+
+  .server-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}

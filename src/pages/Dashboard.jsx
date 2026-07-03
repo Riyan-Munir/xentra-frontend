@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import { AlertCircle, CheckCircle, Clock, LogOut, ShieldAlert } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, LogOut, ShieldAlert, Menu } from 'lucide-react';
 import { profileService } from '../services/profileService';
 import { guildService } from '../services/guildService';
 import { checkPendingHacking, dismissHacking, captchaVerify } from '../services/api';
@@ -322,6 +322,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState(null);
   const [servers, setServers] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // ── Session Expired State ──────────────────────────────────────
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -805,10 +806,19 @@ const Dashboard = () => {
         onSectionChange={(section) => handleNavigationAttempt(() => setActiveSection(section))}
         onLogout={() => handleNavigationAttempt(handleLogout)}
         currentRole={currentRole}
+        isMobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
       />
       <main className="main-content">
         <div className="dashboard-view-container">
           <div className="layout-header">
+            <button
+              className="btn btn-secondary mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={20} />
+            </button>
             <RoleSwitcher
               currentRole={currentRole}
               onSwitch={(role) => handleNavigationAttempt(() => switchRole(role))}
@@ -841,11 +851,20 @@ const Dashboard = () => {
         onSectionChange={(section) => handleNavigationAttempt(() => setActiveSection(section))}
         onLogout={() => handleNavigationAttempt(handleLogout)}
         currentRole={currentRole}
+        isMobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
       />
 
       <main className="main-content">
         <div className="dashboard-view-container">
           <div className="layout-header">
+            <button
+              className="btn btn-secondary mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={20} />
+            </button>
             <RoleSwitcher
               currentRole={currentRole}
               onSwitch={(role) => handleNavigationAttempt(() => switchRole(role))}

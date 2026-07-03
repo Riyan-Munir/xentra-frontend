@@ -708,7 +708,7 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
               <h3 className="text-lg text-dim flex-row items-center gap-8">
                 <User size={18} /> Freelancer Applications
               </h3>
-              <div style={{ width: '250px' }}>
+              <div style={{ width: '100%', maxWidth: '250px' }}>
                 <CustomSelect
                   options={jobs.map(job => ({ label: job.title, value: job.id }))}
                   value={selectedJobId}
@@ -726,51 +726,51 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
               <div className="scroll-area">
                 <div className="flex-col gap-12">
                   {applications.map(app => (
-                      <div
-                        key={app.id}
-                        className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (app.is_premium_freelancer ? ' premium-card premium-glow' : '')}
-                      >
-                        <div className="flex-row items-center gap-16 flex-1">
-                          <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: app.is_premium_freelancer ? '#ffd700' : 'var(--primary)' }}>
-                            <User size={20} />
+                    <div
+                      key={app.id}
+                      className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (app.is_premium_freelancer ? ' premium-card premium-glow' : '')}
+                    >
+                      <div className="flex-row items-center gap-16 flex-1">
+                        <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: app.is_premium_freelancer ? '#ffd700' : 'var(--primary)' }}>
+                          <User size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex-row items-center gap-8">
+                            <span className="text-sm font-bold">{app.freelancer_name}</span>
+                            {app.is_premium_freelancer && <span className="premium-tag"><Star size={10} fill="currentColor" /> PREMIUM</span>}
                           </div>
-                          <div className="flex-1">
-                            <div className="flex-row items-center gap-8">
-                              <span className="text-sm font-bold">{app.freelancer_name}</span>
-                              {app.is_premium_freelancer && <span className="premium-tag"><Star size={10} fill="currentColor" /> PREMIUM</span>}
-                            </div>
-                            <div className="flex-row gap-12 text-sm text-dim mt-2">
-                              <span className="flex-row items-center gap-4"><Briefcase size={12} /> {app.freelancer_field}</span>
-                              <span className="flex-row items-center gap-4"><DollarSign size={12} /> Bid: ${app.bid_amount}</span>
-                              <span className="flex-row items-center gap-4"><Star size={12} /> {app.freelancer_level}</span>
-                              <span className="primary-text font-semibold">Freelancer ID: {app.effective_freelancer_id}</span>
-                              <span className="primary-text font-semibold">App ID: {app.application_id}</span>
-                            </div>
+                          <div className="flex-row gap-12 text-sm text-dim mt-2">
+                            <span className="flex-row items-center gap-4"><Briefcase size={12} /> {app.freelancer_field}</span>
+                            <span className="flex-row items-center gap-4"><DollarSign size={12} /> Bid: ${app.bid_amount}</span>
+                            <span className="flex-row items-center gap-4"><Star size={12} /> {app.freelancer_level}</span>
+                            <span className="primary-text font-semibold">Freelancer ID: {app.effective_freelancer_id}</span>
+                            <span className="primary-text font-semibold">App ID: {app.application_id}</span>
                           </div>
                         </div>
-
-                        {selectedJob?.status === 'open' ? (
-                          <div className="flex-row gap-8">
-                            <button
-                              className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text border-error"
-                              onClick={() => handleRejectApplication(app.id)}
-                            >
-                              Reject
-                            </button>
-                            <button
-                              className="btn btn-primary px-12 py-6 text-xs radius-6"
-                              onClick={() => handleInterviewClick(app)}
-                            >
-                              <MessageSquare size={14} /> Interview
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs px-4 py-3 radius-4 font-semibold text-uppercase bg-white-5 text-dim">
-                            {app.status}
-                          </span>
-                        )}
                       </div>
-                    ))}
+
+                      {selectedJob?.status === 'open' ? (
+                        <div className="flex-row gap-8">
+                          <button
+                            className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text border-error"
+                            onClick={() => handleRejectApplication(app.id)}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            className="btn btn-primary px-12 py-6 text-xs radius-6"
+                            onClick={() => handleInterviewClick(app)}
+                          >
+                            <MessageSquare size={14} /> Interview
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs px-4 py-3 radius-4 font-semibold text-uppercase bg-white-5 text-dim">
+                          {app.status}
+                        </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (

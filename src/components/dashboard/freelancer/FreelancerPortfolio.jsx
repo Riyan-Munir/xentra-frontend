@@ -457,7 +457,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   };
 
   return (
-    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ width: '800px', maxWidth: '100%' }}>
+    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ maxWidth: '800px', width: '100%' }}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
         <div className={'p-24 flex-col' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%' }}>
 
@@ -529,7 +529,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
               </div>
 
               <button
-                className={'btn py-8 px-20 text-sm' + (isPremium ? ' btn-primary' : ' btn-secondary') + (isEditing ? ' bg-white-5 border-card text-dim' : '')}
+                className={'btn py-8 px-20 text-sm flex-shrink-0' + (isPremium ? ' btn-primary' : ' btn-secondary') + (isEditing ? ' bg-white-5 border-card text-dim' : '')}
                 onClick={handleEditToggle}
               >
                 {isEditing ? <X size={16} /> : <Edit3 size={16} />}

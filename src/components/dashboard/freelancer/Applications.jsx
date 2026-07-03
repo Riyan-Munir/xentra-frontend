@@ -259,7 +259,7 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                       onChange={(val) => setFilters(prev => ({ ...prev, category: val }))}
                     />
                   </div>
-                  <div style={{ width: '160px' }}>
+                  <div style={{ width: '100%', maxWidth: '160px' }}>
                     <CustomSelect
                       placeholder="Any Budget"
                       options={[
@@ -281,7 +281,7 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                     />
                     <Zap size={14} className={filters.is_featured ? 'primary-text' : ''} /> Featured
                   </label>
-                  <div style={{ width: '150px' }}>
+                  <div style={{ width: '100%', maxWidth: '150px' }}>
                     <CustomSelect
                       placeholder="Sort By"
                       options={[

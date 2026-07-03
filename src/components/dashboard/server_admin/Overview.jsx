@@ -16,9 +16,9 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
   return (
     <React.Fragment>
       <div className="layout-middle">
-        <AdminProfile 
-          profile={profile} 
-          avatarUrl={avatarUrl} 
+        <AdminProfile
+          profile={profile}
+          avatarUrl={avatarUrl}
         />
 
         <div className="stats-grid-right">
@@ -63,7 +63,7 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
 
           {isServersLoading && servers.length === 0 ? (
             <div className="server-card-grid">
-              {[1,2,3,4].map(i => (
+              {[1, 2, 3, 4].map(i => (
                 <div key={i} className="card server-card">
                   <div className="server-card-row">
                     <Skeleton template="circle" />
@@ -79,68 +79,68 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
               ))}
             </div>
           ) : (
-          <div className="server-card-grid">
-            {servers.map((server) => (
-              <div key={server.id} className="card server-card">
-                <div className="server-card-row">
-                  {server.icon ? (
-                    <img
-                      src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
-                      alt={server.name}
-                      className="server-icon"
-                    />
-                  ) : (
-                    <div className="server-icon-placeholder">
-                      {server.name.charAt(0)}
+            <div className="server-card-grid">
+              {servers.map((server) => (
+                <div key={server.id} className="card server-card">
+                  <div className="server-card-row">
+                    {server.icon ? (
+                      <img
+                        src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
+                        alt={server.name}
+                        className="server-icon"
+                      />
+                    ) : (
+                      <div className="server-icon-placeholder">
+                        {server.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="server-card-info">
+                      <div className="flex-row items-flex-start flex-between">
+                        <h4 className="server-card-name">{server.name}</h4>
+                        {server.has_bot && (
+                          <button
+                            onClick={() => setSelectedGuild(server)}
+                            className="bg-none border-none cursor-pointer primary-text p-4"
+                            title="Show Stats"
+                          >
+                            <BarChart2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                      <p className="server-card-role">
+                        {server.is_owner ? 'Owner' : 'Moderator'}
+                      </p>
                     </div>
-                  )}
-                  <div className="server-card-info">
-                    <div className="flex-row items-flex-start flex-between">
-                      <h4 className="server-card-name">{server.name}</h4>
-                      {server.has_bot && (
-                        <button
-                          onClick={() => setSelectedGuild(server)}
-                          className="bg-none border-none cursor-pointer primary-text p-4"
-                          title="Show Stats"
-                        >
-                          <BarChart2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                    <p className="server-card-role">
-                      {server.is_owner ? 'Owner' : 'Moderator'}
-                    </p>
+                  </div>
+
+                  <div className="server-card-actions">
+                    {server.has_bot ? (
+                      <button
+                        className="btn btn-primary server-btn-full"
+                        onClick={() => onConfigure(server.id)}
+                      >
+                        <Settings size={14} />
+                        Configure
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary server-btn-full"
+                        onClick={() => {
+                          window.open(inviteUrl(server.id), '_blank');
+                          if (onRefreshServers) setTimeout(onRefreshServers, 5000);
+                        }}
+                      >
+                        <Plus size={14} />
+                        Invite Bot
+                      </button>
+                    )}
+                    <button className="btn btn-secondary server-btn-icon" title="Server Logs">
+                      <ExternalLink size={14} />
+                    </button>
                   </div>
                 </div>
-
-                <div className="server-card-actions">
-                  {server.has_bot ? (
-                    <button
-                      className="btn btn-primary server-btn-full"
-                      onClick={() => onConfigure(server.id)}
-                    >
-                      <Settings size={14} />
-                      Configure
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-primary server-btn-full"
-                      onClick={() => {
-                        window.open(inviteUrl(server.id), '_blank');
-                        if (onRefreshServers) setTimeout(onRefreshServers, 5000);
-                      }}
-                    >
-                      <Plus size={14} />
-                      Invite Bot
-                    </button>
-                  )}
-                  <button className="btn btn-secondary server-btn-icon" title="Server Logs">
-                    <ExternalLink size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -148,11 +148,11 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
       {/* Guild Stats Modal */}
       {selectedGuild && (
         <div className="modal-overlay z-9999 pos-fixed" style={{ backgroundColor: 'rgba(0,0,0,0.85)' }} onClick={() => setSelectedGuild(null)}>
-          <div className="card modal-content pos-relative" style={{ width: '450px' }} onClick={e => e.stopPropagation()}>
+          <div className="card modal-content pos-relative" style={{ maxWidth: '450px', width: '100%' }} onClick={e => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={() => setSelectedGuild(null)}>
               <X size={20} />
             </button>
-            
+
             <div className="modal-title">
               <BarChart2 size={24} className="primary-text" />
               <span>{selectedGuild.name} Stats</span>

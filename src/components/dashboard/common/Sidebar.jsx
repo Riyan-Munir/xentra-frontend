@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { LayoutDashboard, User, LogOut, Settings, Briefcase, FileText } from 'lucide-react';
 
-const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole }) => {
+const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobileOpen, onMobileClose }) => {
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'settings', label: 'Profile Settings', icon: User },
@@ -13,37 +13,45 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole }) => {
     ...(currentRole === 'server_admin' ? [{ id: 'configure', label: 'Configure Bot', icon: Settings }] : []),
   ];
 
+  const handleNavClick = (sectionId) => {
+    onSectionChange(sectionId);
+    if (onMobileClose) onMobileClose();
+  };
+
   return (
-    <aside className="sidebar glass">
-      <div className="sidebar-logo-wrapper">
-        <h2 className="sidebar-logo gradient-text-primary">
-          Xentra
-        </h2>
-      </div>
-
-      <nav className="sidebar-nav">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
-            >
-              <Icon size={20} />
-              {item.label}
-            </div>
-          );
-        })}
-      </nav>
-
-      <div className="sidebar-footer">
-        <div className="nav-item sidebar-logout" onClick={onLogout}>
-          <LogOut size={20} />
-          Logout
+    <>
+      {isMobileOpen && <div className="sidebar-mobile-overlay" onClick={onMobileClose} />}
+      <aside className={`sidebar glass${isMobileOpen ? ' mobile-open' : ''}`}>
+        <div className="sidebar-logo-wrapper">
+          <h2 className="sidebar-logo gradient-text-primary">
+            Xentra
+          </h2>
         </div>
-      </div>
-    </aside>
+
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.id}
+                className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => handleNavClick(item.id)}
+              >
+                <Icon size={20} />
+                {item.label}
+              </div>
+            );
+          })}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="nav-item sidebar-logout" onClick={() => { onLogout(); if (onMobileClose) onMobileClose(); }}>
+            <LogOut size={20} />
+            Logout
+          </div>
+        </div>
+      </aside>
+    </>
   );
 };
 
