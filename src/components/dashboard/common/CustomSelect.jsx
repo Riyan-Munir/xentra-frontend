@@ -16,12 +16,14 @@ const CustomSelect = ({ options, value, onChange, placeholder }) => {
   };
 
   useEffect(() => {
-    const handleClose = () => setIsOpen(false);
-    if (isOpen) {
-      document.addEventListener('click', handleClose);
-    }
+    if (!isOpen) return;
+    const handleClose = (e) => {
+      setIsOpen(false);
+    };
+    // Use mousedown so it fires before click and avoids race conditions
+    document.addEventListener('mousedown', handleClose);
     return () => {
-      document.removeEventListener('click', handleClose);
+      document.removeEventListener('mousedown', handleClose);
     };
   }, [isOpen]);
 

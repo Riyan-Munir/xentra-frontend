@@ -6,14 +6,21 @@ const RoleSwitcher = ({ currentRole, onSwitch }) => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    // Delay to avoid closing on the same click that opened the dropdown
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const roles = [
     { id: 'client', label: 'Client', icon: Briefcase },
