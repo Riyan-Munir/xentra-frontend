@@ -245,4 +245,13 @@ export async function captchaVerify(token) {
   return resp.data;
 }
 
+/**
+ * Fetch the public Cloudflare Turnstile site key so the frontend can render
+ * the captcha widget before the user authenticates (login page).
+ */
+export async function fetchCaptchaChallenge() {
+  const resp = await api.get('/system-audits/captcha/challenge/');
+  return resp.data; // { site_key: string }
+}
+
 export default api;
