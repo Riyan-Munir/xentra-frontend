@@ -447,7 +447,7 @@ const configureSkeleton = () => (
 const chatroomsSkeleton = () => (
   <div className="fade-in card" style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
     {/* Header */}
-    <div className="flex-row items-center gap-12" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+    <div className="flex-row items-center gap-12" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
       <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
       <div className="flex-1">
         <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 6 }} />
@@ -455,9 +455,9 @@ const chatroomsSkeleton = () => (
       </div>
       <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
     </div>
-    <div className="flex-row" style={{ flex: 1, overflow: 'hidden' }}>
+    <div className="flex-row" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
       {/* Side menu */}
-      <div style={{ width: 280, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: 280, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         <div className="flex-row items-center justify-between" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
           <div className="skeleton-line" style={{ width: 60, height: 14, borderRadius: 4 }} />
           <div className="skeleton-line" style={{ width: 24, height: 24, borderRadius: 6 }} />
@@ -466,7 +466,7 @@ const chatroomsSkeleton = () => (
           <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
           <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
         </div>
-        <div style={{ flex: 1, padding: '8px 0' }}>
+        <div style={{ flex: 1, padding: '8px 0', overflow: 'hidden' }}>
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-row items-center gap-12" style={{ padding: '12px 16px' }}>
               <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
@@ -480,7 +480,7 @@ const chatroomsSkeleton = () => (
         </div>
       </div>
       {/* Chat area — fills remaining height, bubbles pushed to bottom */}
-      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', paddingBottom: 32, overflow: 'hidden' }}>
+      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', paddingBottom: 32, overflow: 'hidden', minHeight: 0 }}>
         {[
           { w: '55%', right: false },
           { w: '70%', right: true },
@@ -493,9 +493,9 @@ const chatroomsSkeleton = () => (
           { w: '50%', right: false },
           { w: '45%', right: true },
         ].map((r, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '85%', ...(r.right ? { marginLeft: 'auto', flexDirection: 'row-reverse' } : {}) }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '85%', marginLeft: r.right ? 'auto' : undefined, flexShrink: 0 }}>
             {!r.right && <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />}
-            <div className="skeleton-line" style={{ width: r.w, height: 56, borderRadius: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px' }}>
+            <div className="skeleton-line" style={{ width: r.w, height: 56, borderRadius: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px', flexShrink: 1, minWidth: 0 }}>
               <div className="skeleton-line" style={{ height: 10, width: '90%', borderRadius: 4 }} />
               <div className="skeleton-line" style={{ height: 10, width: '60%', borderRadius: 4 }} />
             </div>
