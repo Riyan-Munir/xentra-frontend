@@ -445,36 +445,36 @@ const configureSkeleton = () => (
 );
 
 const chatroomsSkeleton = () => (
-  <div className="fade-in card" style={{ height: 'calc(100vh - 120px)' }}>
+  <div className="fade-in card" style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
     {/* Header */}
     <div className="flex-row items-center gap-12" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
-      <div className="skeleton-line skel-w-36 skel-h-36 skel-r-8" />
+      <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
       <div className="flex-1">
-        <div className="skeleton-line skel-w-120 skel-h-14 skel-r-4 mb-6" />
-        <div className="skeleton-line skel-w-80 skel-h-10 skel-r-4" />
+        <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 6 }} />
+        <div className="skeleton-line" style={{ width: 80, height: 10, borderRadius: 4 }} />
       </div>
-      <div className="skeleton-line skel-w-36 skel-h-36 skel-r-8" />
+      <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
     </div>
     <div className="flex-row" style={{ flex: 1, overflow: 'hidden' }}>
       {/* Side menu */}
       <div style={{ width: 280, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
         <div className="flex-row items-center justify-between" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
-          <div className="skeleton-line skel-w-60 skel-h-14 skel-r-4" />
-          <div className="skeleton-line skel-w-24 skel-h-24 skel-r-6" />
+          <div className="skeleton-line" style={{ width: 60, height: 14, borderRadius: 4 }} />
+          <div className="skeleton-line" style={{ width: 24, height: 24, borderRadius: 6 }} />
         </div>
         <div className="flex-row gap-8" style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
-          <div className="skeleton-line skel-h-32 skel-r-6" style={{ flex: 1 }} />
-          <div className="skeleton-line skel-h-32 skel-r-6" style={{ flex: 1 }} />
+          <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
+          <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
         </div>
         <div style={{ flex: 1, padding: '8px 0' }}>
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-row items-center gap-12" style={{ padding: '12px 16px' }}>
-              <div className="skeleton-line skel-w-32 skel-h-32 skel-r-8" />
+              <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
               <div className="flex-1">
-                <div className="skeleton-line skel-h-12 skel-r-4 mb-6" style={{ width: `${55 + (i % 3) * 12}%` }} />
-                <div className="skeleton-line skel-h-9 skel-r-4" style={{ width: `${35 + (i % 2) * 15}%` }} />
+                <div className="skeleton-line" style={{ height: 12, borderRadius: 4, marginBottom: 6, width: `${55 + (i % 3) * 12}%` }} />
+                <div className="skeleton-line" style={{ height: 10, borderRadius: 4, width: `${35 + (i % 2) * 15}%` }} />
               </div>
-              <div className="skeleton-line skel-w-8 skel-h-8" style={{ borderRadius: '50%' }} />
+              <div className="skeleton-line" style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0 }} />
             </div>
           ))}
         </div>
@@ -482,24 +482,24 @@ const chatroomsSkeleton = () => (
       {/* Chat area — fills remaining height, bubbles pushed to bottom */}
       <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', paddingBottom: 32, overflow: 'hidden' }}>
         {[
-          { w: '55%', align: 'left' },
-          { w: '70%', align: 'right' },
-          { w: '40%', align: 'left' },
-          { w: '60%', align: 'right' },
-          { w: '45%', align: 'left' },
-          { w: '55%', align: 'right' },
-          { w: '35%', align: 'left' },
-          { w: '65%', align: 'right' },
-          { w: '50%', align: 'left' },
-          { w: '45%', align: 'right' },
+          { w: '55%', right: false },
+          { w: '70%', right: true },
+          { w: '40%', right: false },
+          { w: '60%', right: true },
+          { w: '45%', right: false },
+          { w: '55%', right: true },
+          { w: '35%', right: false },
+          { w: '65%', right: true },
+          { w: '50%', right: false },
+          { w: '45%', right: true },
         ].map((r, i) => (
-          <div key={i} className="flex-row items-end gap-8" style={{ maxWidth: '85%', marginLeft: r.align === 'right' ? 'auto' : undefined, flexDirection: r.align === 'right' ? 'row-reverse' : undefined }}>
-            {r.align === 'left' && <div className="skeleton-line skel-w-32 skel-h-32" style={{ borderRadius: '50%' }} />}
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '85%', ...(r.right ? { marginLeft: 'auto', flexDirection: 'row-reverse' } : {}) }}>
+            {!r.right && <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />}
             <div className="skeleton-line" style={{ width: r.w, height: 56, borderRadius: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px' }}>
               <div className="skeleton-line" style={{ height: 10, width: '90%', borderRadius: 4 }} />
               <div className="skeleton-line" style={{ height: 10, width: '60%', borderRadius: 4 }} />
             </div>
-            {r.align === 'right' && <div className="skeleton-line skel-w-32 skel-h-32" style={{ borderRadius: '50%' }} />}
+            {r.right && <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />}
           </div>
         ))}
       </div>

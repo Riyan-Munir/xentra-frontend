@@ -570,18 +570,16 @@ const ChatRoom = ({ profile, currentRole }) => {
         return (
             <div className={`${styles.chatContainer} ${styles.chatContainerPremium}`}>
                 <GoldDust />
-                <div className={styles.chatBody} style={{ zIndex: 2, position: 'relative' }}>
-                    <div className={styles.lockedOverlay}>
-                        <div className={styles.lockedIconBlue}>
-                            <Lock size={28} />
-                        </div>
-                        <h3 className={styles.lockedTitle}>Premium Feature</h3>
-                        <p className={styles.lockedText}>
-                            Chat Rooms is an exclusive feature for premium members.
-                            Upgrade your plan to access live interview transcripts,
-                            room management, and more.
-                        </p>
+                <div className={styles.lockedOverlay}>
+                    <div className={styles.lockedIconBlue}>
+                        <Lock size={28} />
                     </div>
+                    <h3 className={styles.lockedTitle}>Premium Feature</h3>
+                    <p className={styles.lockedText}>
+                        Chat Rooms is an exclusive feature for premium members.
+                        Upgrade your plan to access live interview transcripts,
+                        room management, and more.
+                    </p>
                 </div>
             </div>
         );
