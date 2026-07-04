@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import Skeleton from '../../common/Skeleton';
 import { Shield, Plus, Settings, ExternalLink, RefreshCw, BarChart2, X, Users, Award, Briefcase, Globe } from 'lucide-react';
-import AdminProfile from './AdminProfile';
+import RoleProfile from '../common/RoleProfile';
 
 const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, isRefreshing, isServersLoading }) => {
   const [selectedGuild, setSelectedGuild] = useState(null);
@@ -16,9 +16,10 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
   return (
     <React.Fragment>
       <div className="layout-middle">
-        <AdminProfile
+        <RoleProfile
           profile={profile}
           avatarUrl={avatarUrl}
+          role="server_admin"
         />
 
         <div className="stats-grid-right">

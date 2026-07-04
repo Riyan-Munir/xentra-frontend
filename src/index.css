@@ -58,6 +58,8 @@ body::-webkit-scrollbar {
   border-radius: 16px;
   padding: 24px;
   transition: transform 0.2s ease, border-color 0.2s ease;
+  min-height: 160px;
+  max-height: 600px;
 }
 
 .card:hover {
@@ -469,16 +471,19 @@ input[type="radio"]:focus {
   display: flex;
   gap: 20px;
   align-items: stretch;
+  min-height: 140px;
+  max-height: 220px;
 }
 
 .layout-bottom {
   flex: 8;
-  min-height: 0;
+  min-height: 350px;
   overflow: hidden;
 }
 
 .scrollable-content-card {
   height: 100%;
+  min-height: 200px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -505,6 +510,9 @@ input[type="radio"]:focus {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
+  min-height: 120px;
+  max-height: 160px;
+  min-width: 280px;
 }
 
 .profile-avatar-horizontal {
@@ -631,6 +639,8 @@ input[type="radio"]:focus {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: 12px;
+  min-height: 148px;
+  max-height: 192px;
 }
 
 .compact-stat-card {
@@ -641,6 +651,9 @@ input[type="radio"]:focus {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
+  min-height: 68px;
+  max-height: 90px;
+  min-width: 100px;
 }
 
 .compact-stat-label {
@@ -748,6 +761,7 @@ input[type="radio"]:focus {
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: flex-start;
+  min-height: 380px;
 }
 
 .form-header-row {
@@ -1003,6 +1017,7 @@ input[type="radio"]:focus {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--border);
   background: var(--bg-card);
+  min-height: 320px;
 }
 
 .project-card:hover {
@@ -1045,6 +1060,8 @@ input[type="radio"]:focus {
 .project-hscroll-container>.project-card {
   min-width: 320px;
   max-width: 380px;
+  min-height: 320px;
+  max-height: 420px;
   flex-shrink: 0;
   scroll-snap-align: start;
 }
@@ -2618,6 +2635,7 @@ input[type="radio"]:focus {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
+  min-height: 240px;
 }
 
 .server-card {
@@ -2625,6 +2643,9 @@ input[type="radio"]:focus {
   flex-direction: column;
   gap: 16px;
   background: var(--glass);
+  min-height: 110px;
+  max-height: 160px;
+  min-width: 250px;
 }
 
 .server-card-row {
@@ -3135,6 +3156,162 @@ input[type="radio"]:focus {
   margin-bottom: 20px;
 }
 
+/* --- Skeleton Profile Card (matches RoleProfile DOM structure) --- */
+.skeleton-profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.skeleton-profile-username {
+  width: 120px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.skeleton-profile-status {
+  width: 70px;
+  height: 22px;
+  border-radius: 20px;
+}
+
+.skeleton-profile-level-tag {
+  width: 60px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-profile-tier-tag {
+  width: 50px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-profile-exp-fill {
+  height: 100%;
+  width: 30%;
+  border-radius: 3px;
+}
+
+.skeleton-profile-exp-text {
+  width: 80px;
+  height: 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* --- Skeleton Line Size Utilities (replace inline styles) --- */
+.skel-h-32 {
+  height: 32px;
+}
+
+.skel-h-28 {
+  height: 28px;
+}
+
+.skel-h-24 {
+  height: 24px;
+}
+
+.skel-h-18 {
+  height: 18px;
+}
+
+.skel-h-16 {
+  height: 16px;
+}
+
+.skel-h-14 {
+  height: 14px;
+}
+
+.skel-h-12 {
+  height: 12px;
+}
+
+.skel-h-8 {
+  height: 8px;
+}
+
+.skel-w-60pct {
+  width: 60%;
+}
+
+.skel-w-70pct {
+  width: 70%;
+}
+
+.skel-w-45pct {
+  width: 45%;
+}
+
+.skel-w-90pct {
+  width: 90%;
+}
+
+.skel-w-40pct {
+  width: 40%;
+}
+
+.skel-w-35pct {
+  width: 35%;
+}
+
+.skel-w-full {
+  width: 100%;
+}
+
+.skel-w-160 {
+  width: 160px;
+}
+
+.skel-w-140 {
+  width: 140px;
+}
+
+.skel-w-120 {
+  width: 120px;
+}
+
+.skel-w-80 {
+  width: 80px;
+}
+
+.skel-w-70 {
+  width: 70px;
+}
+
+.skel-w-60 {
+  width: 60px;
+}
+
+.skel-w-55 {
+  width: 55px;
+}
+
+.skel-w-50 {
+  width: 50px;
+}
+
+.skel-w-40 {
+  width: 40px;
+}
+
+.skel-r-8 {
+  border-radius: 8px;
+}
+
+.skel-r-6 {
+  border-radius: 6px;
+}
+
+.skel-r-4 {
+  border-radius: 4px;
+}
+
 /* --- Skeleton Limit Track — progress bar track background --- */
 .skeleton-limit-bar-track {
   background: var(--glass);
@@ -3546,6 +3723,8 @@ input[type="radio"]:focus {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   flex-shrink: 0;
+  min-height: 56px;
+  max-height: 64px;
 }
 
 @keyframes bannedFadeIn {
@@ -3942,16 +4121,21 @@ input[type="radio"]:focus {
   /* Stats grid 2×2 on mobile */
   .stats-grid-right {
     grid-template-columns: repeat(2, 1fr);
+    min-height: 124px;
+    max-height: none;
   }
 
   /* Settings grid single column */
   .settings-grid {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   /* Layout sections stack */
   .layout-middle {
     flex-direction: column;
+    min-height: auto;
+    max-height: none;
   }
 
   .layout-bottom {
@@ -4079,6 +4263,7 @@ input[type="radio"]:focus {
   /* Server card grid 2-column on mobile */
   .server-card-grid {
     grid-template-columns: repeat(2, 1fr);
+    min-height: 200px;
   }
 
   /* Hacking modal detail */
@@ -4090,6 +4275,48 @@ input[type="radio"]:focus {
   /* Compact stat cards */
   .compact-stat-card {
     padding: 10px 14px;
+    min-height: 56px;
+    max-height: none;
+  }
+
+  /* Card min-height mobile */
+  .card {
+    min-height: 120px;
+    max-height: none;
+  }
+
+  /* Server card mobile */
+  .server-card {
+    min-height: 90px;
+    max-height: none;
+    min-width: 0;
+  }
+
+  /* Project card mobile */
+  .project-card {
+    min-height: 280px;
+  }
+
+  .project-hscroll-container>.project-card {
+    min-width: 220px;
+    min-height: 280px;
+    max-height: none;
+  }
+
+  /* Filter bar mobile */
+  .filter-bar {
+    min-height: 48px;
+    max-height: none;
+  }
+
+  /* Skeleton profile avatar mobile */
+  .skeleton-profile-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .scrollable-content-card {
+    min-height: 160px;
   }
 
   /* Form inputs full width */
@@ -4111,6 +4338,8 @@ input[type="radio"]:focus {
 
   .stats-grid-right {
     grid-template-columns: repeat(2, 1fr);
+    min-height: 132px;
+    max-height: 172px;
   }
 
   .jobs-fixed-panel {
@@ -4125,11 +4354,38 @@ input[type="radio"]:focus {
 
   .scrollable-content-card {
     padding: 20px;
+    min-height: 180px;
   }
 
   .profile-card-horizontal {
     gap: 20px;
     padding: 20px 24px;
+    min-height: 100px;
+    max-height: 140px;
+  }
+
+  .compact-stat-card {
+    min-height: 60px;
+    max-height: 80px;
+  }
+
+  .layout-middle {
+    min-height: 120px;
+    max-height: 200px;
+  }
+
+  .layout-bottom {
+    min-height: 300px;
+  }
+
+  .card {
+    min-height: 140px;
+    max-height: 500px;
+  }
+
+  .server-card {
+    min-height: 100px;
+    max-height: 140px;
   }
 
   .server-card-grid {

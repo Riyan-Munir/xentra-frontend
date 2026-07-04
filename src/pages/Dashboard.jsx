@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspens
 import { AlertCircle, CheckCircle, Clock, LogOut, ShieldAlert, Menu } from 'lucide-react';
 import { profileService } from '../services/profileService';
 import { guildService } from '../services/guildService';
-import { checkPendingHacking, dismissHacking, captchaVerify } from '../services/api';
+import { checkPendingHacking, dismissHacking, captchaVerify, fetchCaptchaChallenge } from '../services/api';
 
 // Common Components (always needed — eager)
 import Sidebar from '../components/dashboard/common/Sidebar';
@@ -39,7 +39,23 @@ const overviewSkeleton = () => (
   <div className="fade-in flex-col gap-20">
     <div className="layout-middle">
       <div className="profile-card-horizontal flex-1">
-        <Skeleton template="profile" />
+        <div className="skeleton-profile-avatar" />
+        <div className="profile-info-horizontal">
+          <div className="profile-header-row">
+            <div className="skeleton-line skeleton-profile-username" />
+            <div className="skeleton-line skeleton-profile-status" />
+          </div>
+          <div className="level-meta-row">
+            <div className="skeleton-line skeleton-profile-level-tag" />
+            <div className="skeleton-line skeleton-profile-tier-tag" />
+          </div>
+          <div className="exp-row-container">
+            <div className="exp-bar-compact">
+              <div className="skeleton-line skeleton-profile-exp-fill" />
+            </div>
+            <div className="skeleton-line skeleton-profile-exp-text" />
+          </div>
+        </div>
       </div>
       <div className="stats-grid-right">
         {[1, 2, 3, 4].map(i => (
@@ -51,9 +67,7 @@ const overviewSkeleton = () => (
     </div>
     <div className="layout-bottom">
       <div className="scrollable-content-card flex-col">
-        <div className="text-xl mb-20">
-          <Skeleton template="text" lines={1} />
-        </div>
+        <div className="skeleton-line skel-w-60pct skel-h-20 skel-r-4 mb-20" />
         <div className="flex-1 flex-col flex-center opacity-50 py-40">
           <div className="skeleton-bottom-icon" />
           <div className="skeleton-bottom-text" />
@@ -92,7 +106,7 @@ const settingsSkeleton = (cardCount = 3) => (
        projects: horizontal-scroll project cards (320px min-width, 160px image)
    ──────────────────────────────────────────────────────────────── */
 const portfolioSkeleton = () => (
-  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative skeleton-portfolio-wrapper">
+  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative skeleton-portfolio-wrapper mx-auto">
     <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
       <div className="p-24 flex-col pb-40">
 
@@ -101,19 +115,19 @@ const portfolioSkeleton = () => (
           <div className="flex-between items-flex-start">
             <div className="flex-1">
               <div className="flex-row items-center gap-12 flex-wrap mb-20">
-                <div className="skeleton-line" style={{ width: '60%', height: 32, borderRadius: 4 }} />
+                <div className="skeleton-line skel-w-60pct skel-h-32 skel-r-4" />
                 <div className="skeleton-skill-tag" />
               </div>
             </div>
-            <div className="skeleton-line" style={{ width: 120, height: 34, borderRadius: 8 }} />
+            <div className="skeleton-line skel-w-120 skel-h-24 skel-r-8" />
           </div>
-          <div className="skeleton-line mt-16 mb-16" style={{ width: '70%', height: 14, borderRadius: 4 }} />
-          <div className="skeleton-line" style={{ width: '45%', height: 14, borderRadius: 4 }} />
+          <div className="skeleton-line mt-16 mb-16 skel-w-70pct skel-h-14 skel-r-4" />
+          <div className="skeleton-line skel-w-45pct skel-h-14 skel-r-4" />
         </div>
 
         {/* Skills section */}
         <div className="mb-32">
-          <div className="skeleton-line mb-12" style={{ width: 100, height: 12, borderRadius: 4 }} />
+          <div className="skeleton-line mb-12 skel-w-100 skel-h-12 skel-r-4" />
           <div className="flex-row flex-wrap gap-8">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="skeleton-skill-tag skeleton-line" />
@@ -124,21 +138,21 @@ const portfolioSkeleton = () => (
         {/* Projects section */}
         <div className="flex-col">
           <div className="flex-between mb-20">
-            <div className="skeleton-line" style={{ width: 120, height: 12, borderRadius: 4 }} />
+            <div className="skeleton-line skel-w-120 skel-h-12 skel-r-4" />
           </div>
           <div className="project-hscroll-container">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton-project-card">
                 <div className="skeleton-project-image skeleton-line" />
                 <div className="p-16 flex-1 flex-col gap-8">
-                  <div className="skeleton-line" style={{ width: '60%', height: 16, borderRadius: 4 }} />
-                  <div className="skeleton-line" style={{ width: '90%', height: 12, borderRadius: 4 }} />
-                  <div className="skeleton-line" style={{ width: '70%', height: 12, borderRadius: 4 }} />
+                  <div className="skeleton-line skel-w-60pct skel-h-16 skel-r-4" />
+                  <div className="skeleton-line skel-w-90pct skel-h-12 skel-r-4" />
+                  <div className="skeleton-line skel-w-70pct skel-h-12 skel-r-4" />
                   <div className="flex-row flex-wrap gap-4 mb-12 mt-4">
-                    <div className="skeleton-line" style={{ width: 40, height: 18, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 50, height: 18, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-40 skel-h-18 skel-r-4" />
+                    <div className="skeleton-line skel-w-50 skel-h-18 skel-r-4" />
                   </div>
-                  <div className="skeleton-line" style={{ width: '100%', height: 36, borderRadius: 8 }} />
+                  <div className="skeleton-line skel-w-full skel-h-24 skel-r-8" />
                 </div>
               </div>
             ))}
@@ -160,7 +174,7 @@ const applicationsSkeleton = () => (
 
     {/* Header */}
     <div className="flex-between flex-shrink-0">
-      <div className="skeleton-line" style={{ width: 160, height: 28, borderRadius: 4 }} />
+      <div className="skeleton-line skel-w-160 skel-h-28 skel-r-4" />
     </div>
 
     {/* Application Limit card */}
@@ -168,17 +182,17 @@ const applicationsSkeleton = () => (
       <div className="glass flex-col gap-16 p-20">
         <div className="flex-between items-flex-start">
           <div className="flex-col gap-4">
-            <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4 }} />
-            <div className="skeleton-line" style={{ width: 90, height: 12, borderRadius: 4 }} />
+            <div className="skeleton-line skel-w-120 skel-h-14 skel-r-4" />
+            <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
           </div>
-          <div className="skeleton-line" style={{ width: 40, height: 24, borderRadius: 4 }} />
+          <div className="skeleton-line skel-w-40 skel-h-24 skel-r-4" />
         </div>
         <div className="skeleton-limit-bar-track">
           <div className="skeleton-limit-bar-fill" />
         </div>
         <div className="flex-between">
-          <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
-          <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+          <div className="skeleton-line skel-w-60 skel-h-12 skel-r-4" />
+          <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
         </div>
       </div>
     </div>
@@ -188,13 +202,13 @@ const applicationsSkeleton = () => (
       <div className="browse-fixed-panel">
         <div className="scrollable-content-card">
           <div className="flex-between mb-16 flex-shrink-0">
-            <div className="skeleton-line" style={{ width: 160, height: 18, borderRadius: 4 }} />
-            <div className="skeleton-line" style={{ width: 70, height: 32, borderRadius: 8 }} />
+            <div className="skeleton-line skel-w-160 skel-h-18 skel-r-4" />
+            <div className="skeleton-line skel-w-70 skel-h-24 skel-r-8" />
           </div>
           <div className="filter-bar flex-shrink-0">
             <div className="skeleton-filter-item skeleton-line" />
             <div className="skeleton-filter-item skeleton-line" />
-            <div className="skeleton-filter-item skeleton-line" style={{ maxWidth: 80 }} />
+            <div className="skeleton-filter-item skeleton-line" />
             <div className="skeleton-filter-item skeleton-line" />
           </div>
           <div className="flex-col gap-12">
@@ -202,13 +216,13 @@ const applicationsSkeleton = () => (
               <div key={i} className="skeleton-listing-row">
                 <div className="skeleton-listing-icon skeleton-line" />
                 <div className="flex-1 flex-col gap-4">
-                  <div className="skeleton-line" style={{ width: '45%', height: 14, borderRadius: 4 }} />
+                  <div className="skeleton-line skel-w-45pct skel-h-14 skel-r-4" />
                   <div className="flex-row gap-8">
-                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 50, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-70 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-50 skel-h-12 skel-r-4" />
                   </div>
                 </div>
-                <div className="skeleton-line" style={{ width: 60, height: 30, borderRadius: 6 }} />
+                <div className="skeleton-line skel-w-60 skel-h-24 skel-r-6" />
               </div>
             ))}
           </div>
@@ -216,19 +230,19 @@ const applicationsSkeleton = () => (
       </div>
       <div className="browse-fixed-panel">
         <div className="scrollable-content-card">
-          <div className="skeleton-line mb-16" style={{ width: 140, height: 18, borderRadius: 4 }} />
+          <div className="skeleton-line mb-16 skel-w-140 skel-h-18 skel-r-4" />
           <div className="flex-col gap-12">
             {[1, 2].map(i => (
               <div key={i} className="skeleton-listing-row">
                 <div className="skeleton-listing-icon skeleton-line" />
                 <div className="flex-1 flex-col gap-4">
-                  <div className="skeleton-line" style={{ width: '40%', height: 14, borderRadius: 4 }} />
+                  <div className="skeleton-line skel-w-40pct skel-h-14 skel-r-4" />
                   <div className="flex-row gap-8">
-                    <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-60 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
                   </div>
                 </div>
-                <div className="skeleton-line" style={{ width: 60, height: 30, borderRadius: 6 }} />
+                <div className="skeleton-line skel-w-60 skel-h-24 skel-r-6" />
               </div>
             ))}
           </div>
@@ -249,8 +263,8 @@ const jobsSkeleton = () => (
 
     {/* Header */}
     <div className="flex-between flex-shrink-0">
-      <div className="skeleton-line" style={{ width: 140, height: 28, borderRadius: 4 }} />
-      <div className="skeleton-line" style={{ width: 120, height: 36, borderRadius: 8 }} />
+      <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />
+      <div className="skeleton-line skel-w-120 skel-h-24 skel-r-8" />
     </div>
 
     {/* Job Posting Limit card */}
@@ -258,17 +272,17 @@ const jobsSkeleton = () => (
       <div className="glass flex-col gap-16 p-20">
         <div className="flex-between items-flex-start">
           <div className="flex-col gap-4">
-            <div className="skeleton-line" style={{ width: 100, height: 14, borderRadius: 4 }} />
-            <div className="skeleton-line" style={{ width: 90, height: 12, borderRadius: 4 }} />
+            <div className="skeleton-line skel-w-100 skel-h-14 skel-r-4" />
+            <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
           </div>
-          <div className="skeleton-line" style={{ width: 40, height: 24, borderRadius: 4 }} />
+          <div className="skeleton-line skel-w-40 skel-h-24 skel-r-4" />
         </div>
         <div className="skeleton-limit-bar-track">
           <div className="skeleton-limit-bar-fill" />
         </div>
         <div className="flex-between">
-          <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
-          <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+          <div className="skeleton-line skel-w-60 skel-h-12 skel-r-4" />
+          <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
         </div>
       </div>
     </div>
@@ -279,23 +293,23 @@ const jobsSkeleton = () => (
       {/* Active Listings */}
       <div className="jobs-fixed-panel">
         <div className="scrollable-content-card">
-          <div className="skeleton-line mb-16" style={{ width: 120, height: 18, borderRadius: 4 }} />
+          <div className="skeleton-line mb-16 skel-w-120 skel-h-18 skel-r-4" />
           <div className="flex-col gap-12">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton-listing-row">
                 <div className="skeleton-listing-icon skeleton-line" />
                 <div className="flex-1 flex-col gap-4">
                   <div className="flex-row items-center gap-8">
-                    <div className="skeleton-line" style={{ width: '40%', height: 14, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 50, height: 18, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-40pct skel-h-14 skel-r-4" />
+                    <div className="skeleton-line skel-w-50 skel-h-18 skel-r-4" />
                   </div>
                   <div className="flex-row gap-8">
-                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-60 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-70 skel-h-12 skel-r-4" />
                   </div>
                 </div>
-                <div className="skeleton-line" style={{ width: 50, height: 30, borderRadius: 6 }} />
+                <div className="skeleton-line skel-w-50 skel-h-24 skel-r-6" />
               </div>
             ))}
           </div>
@@ -306,7 +320,7 @@ const jobsSkeleton = () => (
       <div className="jobs-fixed-panel">
         <div className="scrollable-content-card">
           <div className="flex-between mb-16 flex-shrink-0">
-            <div className="skeleton-line" style={{ width: 180, height: 18, borderRadius: 4 }} />
+            <div className="skeleton-line skel-w-160 skel-h-18 skel-r-4" />
             <div className="skeleton-filter-item skeleton-line" />
           </div>
           <div className="flex-col gap-12">
@@ -315,18 +329,18 @@ const jobsSkeleton = () => (
                 <div className="skeleton-listing-icon skeleton-line" />
                 <div className="flex-1 flex-col gap-4">
                   <div className="flex-row items-center gap-8">
-                    <div className="skeleton-line" style={{ width: '35%', height: 14, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 60, height: 18, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-35pct skel-h-14 skel-r-4" />
+                    <div className="skeleton-line skel-w-60 skel-h-18 skel-r-4" />
                   </div>
                   <div className="flex-row gap-8">
-                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 50, height: 12, borderRadius: 4 }} />
-                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line skel-w-70 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-50 skel-h-12 skel-r-4" />
+                    <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4" />
                   </div>
                 </div>
                 <div className="flex-row gap-8">
-                  <div className="skeleton-line" style={{ width: 55, height: 30, borderRadius: 6 }} />
-                  <div className="skeleton-line" style={{ width: 75, height: 30, borderRadius: 6 }} />
+                  <div className="skeleton-line skel-w-55 skel-h-24 skel-r-6" />
+                  <div className="skeleton-line skel-w-70 skel-h-24 skel-r-6" />
                 </div>
               </div>
             ))}
@@ -348,7 +362,16 @@ const adminOverviewSkeleton = () => (
   <div className="fade-in flex-col gap-20">
     <div className="layout-middle">
       <div className="profile-card-horizontal flex-1">
-        <Skeleton template="profile" />
+        <div className="skeleton-profile-avatar" />
+        <div className="profile-info-horizontal">
+          <div className="profile-header-row">
+            <div className="skeleton-line skeleton-profile-username" />
+            <div className="skeleton-line skeleton-profile-status" />
+          </div>
+          <div className="level-meta-row">
+            <div className="skeleton-line skeleton-profile-level-tag" />
+          </div>
+        </div>
       </div>
       <div className="stats-grid-right">
         {[1, 2, 3, 4].map(i => (
@@ -364,9 +387,9 @@ const adminOverviewSkeleton = () => (
         <div className="skeleton-server-header">
           <div className="flex-row items-center gap-8">
             <Skeleton template="circle" />
-            <div className="skeleton-line" style={{ width: 140, height: 18, borderRadius: 4 }} />
+            <div className="skeleton-line skel-w-140 skel-h-18 skel-r-4" />
           </div>
-          <div className="skeleton-line" style={{ width: 80, height: 30, borderRadius: 6 }} />
+          <div className="skeleton-line skel-w-80 skel-h-24 skel-r-6" />
         </div>
         <div className="server-card-grid">
           {[1, 2, 3, 4].map(i => (
@@ -378,8 +401,8 @@ const adminOverviewSkeleton = () => (
                 </div>
               </div>
               <div className="server-card-actions flex-row gap-8">
-                <div className="skeleton-line" style={{ width: 80, height: 30, borderRadius: 6 }} />
-                <div className="skeleton-line" style={{ width: 30, height: 30, borderRadius: 6 }} />
+                <div className="skeleton-line skel-w-80 skel-h-24 skel-r-6" />
+                <div className="skeleton-line skel-w-40 skel-h-24 skel-r-6" />
               </div>
             </div>
           ))}
@@ -397,7 +420,7 @@ const configureSkeleton = () => (
   <div className="fade-in settings-grid">
     <div className="card">
       <div className="form-header-row">
-        <Skeleton template="text" lines={1} />
+        <div className="skeleton-line skel-w-140 skel-h-18 skel-r-4" />
         <Skeleton template="circle" />
       </div>
       <div className="form-group skeleton-setting-grid">
@@ -410,10 +433,10 @@ const configureSkeleton = () => (
     <div className="card glass flex-col flex-center text-center opacity-80 p-24">
       <Skeleton template="circle" />
       <div className="mt-16">
-        <Skeleton template="text" lines={1} />
+        <div className="skeleton-line skel-w-100 skel-h-14 skel-r-4 mx-auto" />
       </div>
       <div className="mt-8">
-        <Skeleton template="text" lines={2} />
+        <div className="skeleton-line skel-w-80 skel-h-12 skel-r-4 mx-auto" />
       </div>
     </div>
   </div>
@@ -499,6 +522,16 @@ const Dashboard = () => {
     error: null,
   });
 
+  // ── Role-Switch Captcha State ────────────────────────────────
+  // When the user tries to switch roles, we first show a captcha challenge.
+  // On success we proceed with the Discord OAuth redirect.
+  const [roleSwitchCaptcha, setRoleSwitchCaptcha] = useState({
+    required: false,
+    siteKey: '',
+    pendingRole: null,
+    error: null,
+  });
+
   const addNotification = useCallback((message, type = 'error') => {
     const id = Date.now();
     setNotifications(prev => {
@@ -570,6 +603,10 @@ const Dashboard = () => {
         return;
       }
 
+      // ── DEBUG DELAY: Remove after skeleton review ──────────────────────────────
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+      // ───────────────────────────────────────────────────────────────────────────
+
       const data = await profileService.getMe(currentRole, !isSectionRefresh);
       setProfile(data);
     } catch (err) {
@@ -599,6 +636,11 @@ const Dashboard = () => {
     try {
       if (forceRefresh) setIsRefreshing(true);
       setIsServersLoading(true);
+
+      // ── DEBUG DELAY: Remove after skeleton review ──────────────────────────────
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+      // ───────────────────────────────────────────────────────────────────────────
+
       const data = await guildService.getMyServers(forceRefresh);
       setServers(data);
     } catch (err) {
@@ -779,6 +821,39 @@ const Dashboard = () => {
     window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${role}`;
   }, []);
 
+  // ── Role-Switch Captcha: fetch site key, then show modal ─────
+  const initiateRoleSwitch = useCallback(async (role) => {
+    try {
+      const data = await fetchCaptchaChallenge();
+      setRoleSwitchCaptcha({
+        required: true,
+        siteKey: data.site_key || '',
+        pendingRole: role,
+        error: null,
+      });
+    } catch {
+      // If captcha endpoint fails, fall through to direct switch
+      switchRole(role);
+    }
+  }, [switchRole]);
+
+  const handleRoleSwitchCaptchaVerified = useCallback(async (token) => {
+    setRoleSwitchCaptcha((prev) => ({ ...prev, error: null }));
+    try {
+      await captchaVerify(token);
+      const { pendingRole } = roleSwitchCaptcha;
+      setRoleSwitchCaptcha({ required: false, siteKey: '', pendingRole: null, error: null });
+      if (pendingRole) switchRole(pendingRole);
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Verification failed. Please try again.';
+      setRoleSwitchCaptcha((prev) => ({ ...prev, error: msg }));
+    }
+  }, [roleSwitchCaptcha, switchRole]);
+
+  const handleRoleSwitchCaptchaDismiss = useCallback(() => {
+    setRoleSwitchCaptcha({ required: false, siteKey: '', pendingRole: null, error: null });
+  }, []);
+
   const handleLogout = useCallback(() => {
     localStorage.clear();
     window.location.href = '/login';
@@ -825,7 +900,7 @@ const Dashboard = () => {
     const profileProps = {
       profile,
       currentRole,
-      onSwitchRole: (role) => handleNavigationAttempt(() => switchRole(role)),
+      onSwitchRole: (role) => handleNavigationAttempt(() => initiateRoleSwitch(role)),
       avatarUrl,
       isSubmitting: isSaving
     };
@@ -857,13 +932,25 @@ const Dashboard = () => {
     isRefreshing, isServersLoading, avatarUrl, handleNavigationAttempt, handleUpdateProfile,
     fetchProfile, addNotification, handleGoToConfigure, fetchServers]);
 
-  // ── Captcha Challenge Modal ───────────────────────────────────
+  // ── Captcha Challenge Modal (WAF) ──────────────────────────────
   const captchaModal = captchaState.required ? (
     <CaptchaChallenge
       siteKey={captchaState.siteKey}
       error={captchaState.error}
       onVerified={handleCaptchaVerified}
       onDismiss={handleCaptchaDismiss}
+    />
+  ) : null;
+
+  // ── Role-Switch Captcha Modal ──────────────────────────────────
+  const roleSwitchCaptchaModal = roleSwitchCaptcha.required ? (
+    <CaptchaChallenge
+      siteKey={roleSwitchCaptcha.siteKey}
+      error={roleSwitchCaptcha.error}
+      onVerified={handleRoleSwitchCaptchaVerified}
+      onDismiss={handleRoleSwitchCaptchaDismiss}
+      title="Verify Before Switching"
+      description="Please complete the security check before switching your role."
     />
   ) : null;
 
@@ -956,6 +1043,7 @@ const Dashboard = () => {
       {hackingModal}
       {sessionExpiredModal}
       {captchaModal}
+      {roleSwitchCaptchaModal}
       <div className="notification-container" />
       <Sidebar
         activeSection={activeSection}
@@ -977,7 +1065,7 @@ const Dashboard = () => {
             </button>
             <RoleSwitcher
               currentRole={currentRole}
-              onSwitch={(role) => handleNavigationAttempt(() => switchRole(role))}
+              onSwitch={(role) => handleNavigationAttempt(() => initiateRoleSwitch(role))}
             />
           </div>
           {getSectionSkeleton(activeSection, currentRole)}
@@ -991,6 +1079,7 @@ const Dashboard = () => {
       {hackingModal}
       {sessionExpiredModal}
       {captchaModal}
+      {roleSwitchCaptchaModal}
       <div className="notification-container">
         {notifications.map(n => (
           <Toast
@@ -1023,7 +1112,7 @@ const Dashboard = () => {
             </button>
             <RoleSwitcher
               currentRole={currentRole}
-              onSwitch={(role) => handleNavigationAttempt(() => switchRole(role))}
+              onSwitch={(role) => handleNavigationAttempt(() => initiateRoleSwitch(role))}
             />
           </div>
           <Suspense fallback={getSectionSkeleton(activeSection, currentRole)}>
