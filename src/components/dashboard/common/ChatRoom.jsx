@@ -198,6 +198,72 @@ function ChatSkeleton() {
     );
 }
 
+// ── Full Chat Room Skeleton (complete layout) ─────────────────────────────
+function FullChatSkeleton() {
+    const bubbleRows = [
+        { w: '55%', right: false },
+        { w: '70%', right: true },
+        { w: '40%', right: false },
+        { w: '60%', right: true },
+        { w: '45%', right: false },
+        { w: '50%', right: true },
+    ];
+    return (
+        <div className={styles.fullSkeleton}>
+            {/* Header skeleton */}
+            <div className={styles.fullSkeletonHeader}>
+                <div className={styles.skelPulse} style={{ width: 36, height: 36, borderRadius: 8 }} />
+                <div style={{ flex: 1, marginLeft: 12 }}>
+                    <div className={styles.skelPulse} style={{ width: '40%', height: 14, borderRadius: 4, marginBottom: 6 }} />
+                    <div className={styles.skelPulse} style={{ width: '25%', height: 10, borderRadius: 4 }} />
+                </div>
+                <div className={styles.skelPulse} style={{ width: 36, height: 36, borderRadius: 8 }} />
+            </div>
+
+            <div className={styles.fullSkeletonBody}>
+                {/* Side menu skeleton */}
+                <div className={styles.fullSkeletonSide}>
+                    <div className={styles.fullSkeletonSideHeader}>
+                        <div className={styles.skelPulse} style={{ width: 60, height: 14, borderRadius: 4 }} />
+                        <div className={styles.skelPulse} style={{ width: 24, height: 24, borderRadius: 6 }} />
+                    </div>
+                    {/* Tab skeletons */}
+                    <div className={styles.fullSkeletonTabs}>
+                        <div className={styles.skelPulse} style={{ flex: 1, height: 32, borderRadius: 6 }} />
+                        <div className={styles.skelPulse} style={{ flex: 1, height: 32, borderRadius: 6 }} />
+                    </div>
+                    {/* Room list skeletons */}
+                    <div className={styles.fullSkeletonRoomList}>
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className={styles.fullSkeletonRoomItem}>
+                                <div className={styles.skelPulse} style={{ width: 32, height: 32, borderRadius: 8 }} />
+                                <div style={{ flex: 1 }}>
+                                    <div className={styles.skelPulse} style={{ width: `${55 + (i % 3) * 12}%`, height: 12, borderRadius: 4, marginBottom: 6 }} />
+                                    <div className={styles.skelPulse} style={{ width: `${35 + (i % 2) * 15}%`, height: 9, borderRadius: 4 }} />
+                                </div>
+                                <div className={styles.skelPulse} style={{ width: 8, height: 8, borderRadius: '50%' }} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Chat area skeleton */}
+                <div className={styles.fullSkeletonChat}>
+                    <div className={styles.fullSkeletonMessages}>
+                        {bubbleRows.map((r, i) => (
+                            <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
+                                {!r.right && <div className={styles.skeletonAvatar} />}
+                                <div className={styles.skeletonBubbleBox} style={{ width: r.w }} />
+                                {r.right && <div className={styles.skeletonAvatar} />}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ── Room List Skeleton Loader ─────────────────────────────────────────────
 function RoomListSkeleton() {
     return (
@@ -479,7 +545,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                 <GoldDust />
                 <div className={styles.chatBody} style={{ zIndex: 2, position: 'relative' }}>
                     <div className={styles.lockedOverlay}>
-                        <div className={styles.lockedIcon}>
+                        <div className={styles.lockedIconBlue}>
                             <Lock size={28} />
                         </div>
                         <h3 className={styles.lockedTitle}>Premium Feature</h3>
@@ -615,7 +681,9 @@ const ChatRoom = ({ profile, currentRole }) => {
                 )}
 
                 {/* Chat Content */}
-                {!selectedRoomId ? (
+                {roomsLoading && !selectedRoomId ? (
+                    <FullChatSkeleton />
+                ) : !selectedRoomId ? (
                     <div className={styles.emptyState}>
                         <MessageCircle size={48} className={styles.emptyStateIcon} />
                         <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
