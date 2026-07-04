@@ -1307,6 +1307,7 @@ input[type="radio"]:focus {
 .skeleton-line {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
   position: relative;
   overflow: hidden;
 }
@@ -3021,6 +3022,122 @@ input[type="radio"]:focus {
 
 .skeleton-portfolio-container {
   padding: 24px;
+}
+
+/* --- Skeleton Section Scroll — matches section overflow padding --- */
+.skeleton-section-scroll {
+  padding-bottom: 16px;
+  padding-right: 4px;
+}
+
+/* --- Skeleton Grid Single — matches gridTemplateColumns: 1fr --- */
+.skeleton-grid-single {
+  grid-template-columns: 1fr;
+}
+
+/* --- Skeleton Portfolio Wrapper — matches FreelancerPortfolio outer div --- */
+.skeleton-portfolio-wrapper {
+  max-width: 800px;
+  width: 100%;
+}
+
+/* --- Skeleton Skill Tag — matches .skill-tag-pill dimensions --- */
+.skeleton-skill-tag {
+  height: 28px;
+  min-width: 60px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+}
+
+/* --- Skeleton Project Card — matches .project-card dimensions --- */
+.skeleton-project-card {
+  min-width: 320px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-project-image {
+  height: 160px;
+}
+
+/* --- Skeleton Limit Bar — matches application/job limit progress bar --- */
+.skeleton-limit-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--glass);
+  overflow: hidden;
+}
+
+.skeleton-limit-bar-fill {
+  height: 100%;
+  width: 30%;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* --- Skeleton Listing Row — matches job/app listing rows --- */
+.skeleton-listing-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--glass);
+  border-radius: 8px;
+}
+
+.skeleton-listing-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* --- Skeleton Filter Item — matches filter bar select inputs --- */
+.skeleton-filter-item {
+  height: 36px;
+  flex: 1;
+  max-width: 180px;
+}
+
+/* --- Skeleton Bottom Icon — matches empty state icon (48px) --- */
+.skeleton-bottom-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* --- Skeleton Bottom Text — matches empty state text --- */
+.skeleton-bottom-text {
+  width: 120px;
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* --- Skeleton Server Section Header — matches server-section-header --- */
+.skeleton-server-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* --- Skeleton Limit Track — progress bar track background --- */
+.skeleton-limit-bar-track {
+  background: var(--glass);
 }
 
 /* --- Login page role selector --- */

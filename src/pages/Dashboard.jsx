@@ -30,6 +30,11 @@ const AdminConfigure = lazy(() => import('../components/dashboard/server_admin/C
    These are used for BOTH Suspense fallback AND isSectionLoading.
    ============================================================ */
 
+/* ─── Overview Skeleton (client / freelancer) ─────────────────────
+   Matches RoleOverview layout:
+     layout-middle → RoleProfile + stats-grid-right (2×2)
+     layout-bottom → scrollable-content-card with centered empty state
+   ──────────────────────────────────────────────────────────────── */
 const overviewSkeleton = () => (
   <div className="fade-in flex-col gap-20">
     <div className="layout-middle">
@@ -45,24 +50,23 @@ const overviewSkeleton = () => (
       </div>
     </div>
     <div className="layout-bottom">
-      <div className="scrollable-content-card">
-        <div className="skeleton-portfolio-container p-24 pb-40">
-          <div className="skeleton-setting-grid mb-24">
-            <Skeleton template="form" />
-          </div>
-          <div className="server-card-grid">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="card server-card flex-col gap-12 p-16">
-                <Skeleton template="card" />
-              </div>
-            ))}
-          </div>
+      <div className="scrollable-content-card flex-col">
+        <div className="text-xl mb-20">
+          <Skeleton template="text" lines={1} />
+        </div>
+        <div className="flex-1 flex-col flex-center opacity-50 py-40">
+          <div className="skeleton-bottom-icon" />
+          <div className="skeleton-bottom-text" />
         </div>
       </div>
     </div>
   </div>
 );
 
+/* ─── Settings Skeleton (all roles) ──────────────────────────────
+   Matches settings-grid → card(s) with form-header-row + form-group
+   cardCount: 3 for client/freelancer, 1 for server_admin
+   ──────────────────────────────────────────────────────────────── */
 const settingsSkeleton = (cardCount = 3) => (
   <div className="fade-in settings-grid">
     {Array.from({ length: cardCount }, (_, i) => (
@@ -80,127 +84,270 @@ const settingsSkeleton = (cardCount = 3) => (
   </div>
 );
 
+/* ─── Portfolio Skeleton (freelancer) ────────────────────────────
+   Matches FreelancerPortfolio layout:
+     layout-bottom → scrollable-content-card → p-24 flex-col
+       header: title + field tag + edit button
+       skills: "My Expertises" + skill tag pills
+       projects: horizontal-scroll project cards (320px min-width, 160px image)
+   ──────────────────────────────────────────────────────────────── */
 const portfolioSkeleton = () => (
-  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative">
+  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative skeleton-portfolio-wrapper">
     <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
-      <div className="portfolio-container p-24 pb-40 flex-col gap-32">
-        <div className="flex-between">
-          <Skeleton template="profile" />
-          <Skeleton template="text" lines={1} />
-        </div>
-        <div>
-          <Skeleton template="text" lines={2} />
-        </div>
-        <div>
-          <div style={{ width: 100, height: 16, marginBottom: 12 }}>
-            <Skeleton template="text" lines={1} />
+      <div className="p-24 flex-col pb-40">
+
+        {/* Header: title + field tag + edit button */}
+        <div className="mb-40">
+          <div className="flex-between items-flex-start">
+            <div className="flex-1">
+              <div className="flex-row items-center gap-12 flex-wrap mb-20">
+                <div className="skeleton-line" style={{ width: '60%', height: 32, borderRadius: 4 }} />
+                <div className="skeleton-skill-tag" />
+              </div>
+            </div>
+            <div className="skeleton-line" style={{ width: 120, height: 34, borderRadius: 8 }} />
           </div>
+          <div className="skeleton-line mt-16 mb-16" style={{ width: '70%', height: 14, borderRadius: 4 }} />
+          <div className="skeleton-line" style={{ width: '45%', height: 14, borderRadius: 4 }} />
+        </div>
+
+        {/* Skills section */}
+        <div className="mb-32">
+          <div className="skeleton-line mb-12" style={{ width: 100, height: 12, borderRadius: 4 }} />
           <div className="flex-row flex-wrap gap-8">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} style={{ width: 80, height: 28 }}>
-                <Skeleton template="text" lines={1} />
+              <div key={i} className="skeleton-skill-tag skeleton-line" />
+            ))}
+          </div>
+        </div>
+
+        {/* Projects section */}
+        <div className="flex-col">
+          <div className="flex-between mb-20">
+            <div className="skeleton-line" style={{ width: 120, height: 12, borderRadius: 4 }} />
+          </div>
+          <div className="project-hscroll-container">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="skeleton-project-card">
+                <div className="skeleton-project-image skeleton-line" />
+                <div className="p-16 flex-1 flex-col gap-8">
+                  <div className="skeleton-line" style={{ width: '60%', height: 16, borderRadius: 4 }} />
+                  <div className="skeleton-line" style={{ width: '90%', height: 12, borderRadius: 4 }} />
+                  <div className="skeleton-line" style={{ width: '70%', height: 12, borderRadius: 4 }} />
+                  <div className="flex-row flex-wrap gap-4 mb-12 mt-4">
+                    <div className="skeleton-line" style={{ width: 40, height: 18, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 50, height: 18, borderRadius: 4 }} />
+                  </div>
+                  <div className="skeleton-line" style={{ width: '100%', height: 36, borderRadius: 8 }} />
+                </div>
               </div>
             ))}
           </div>
         </div>
-        <div>
-          <div style={{ width: 120, height: 16, marginBottom: 16 }}>
-            <Skeleton template="text" lines={1} />
-          </div>
-          <div className="grid-auto-fill-300">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="card"><Skeleton template="card" /></div>
-            ))}
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
 );
 
+/* ─── Applications Skeleton (freelancer) ─────────────────────────
+   Matches Applications layout:
+     flex-col → header + limit card + grid of browse-fixed-panels
+     browse-fixed-panel (480px) → scrollable-content-card → filter bar + listings
+   ──────────────────────────────────────────────────────────────── */
 const applicationsSkeleton = () => (
-  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '40px', paddingRight: '4px' }}>
-    <div className="flex-between flex-shrink-0">
-      <Skeleton template="text" lines={1} />
-    </div>
-    <div className="grid gap-20 flex-shrink-0" style={{ gridTemplateColumns: '1fr' }}>
-      <div className="glass flex-col gap-16 p-20">
-        <Skeleton template="stat" />
-      </div>
-    </div>
-    <div className="grid gap-20 minh-0" style={{ gridTemplateColumns: '1fr' }}>
-      <div className="glass minh-600 flex-col gap-16 p-24 pos-relative">
-        <div className="flex-between mb-8 flex-shrink-0">
-          <Skeleton template="text" lines={1} />
-        </div>
-        <div className="flex-col gap-12 flex-1">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="glass p-12 px-20">
-              <Skeleton template="card" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="glass minh-300 flex-col gap-16 p-24">
-        <div className="flex-row items-center gap-8 mb-8">
-          <Skeleton template="text" lines={1} />
-        </div>
-        <div className="flex-1 flex-col gap-12">
-          {[1, 2].map(i => (
-            <div key={i} className="glass p-12 px-20">
-              <Skeleton template="card" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-);
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar skeleton-section-scroll">
 
-const jobsSkeleton = () => (
-  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '40px', paddingRight: '4px' }}>
+    {/* Header */}
     <div className="flex-between flex-shrink-0">
-      <Skeleton template="text" lines={1} />
-      <Skeleton template="text" lines={1} />
+      <div className="skeleton-line" style={{ width: 160, height: 28, borderRadius: 4 }} />
     </div>
-    <div className="grid gap-20 flex-shrink-0" style={{ gridTemplateColumns: '1fr' }}>
+
+    {/* Application Limit card */}
+    <div className="grid gap-20 flex-shrink-0 skeleton-grid-single">
       <div className="glass flex-col gap-16 p-20">
-        <Skeleton template="stat" />
+        <div className="flex-between items-flex-start">
+          <div className="flex-col gap-4">
+            <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4 }} />
+            <div className="skeleton-line" style={{ width: 90, height: 12, borderRadius: 4 }} />
+          </div>
+          <div className="skeleton-line" style={{ width: 40, height: 24, borderRadius: 4 }} />
+        </div>
+        <div className="skeleton-limit-bar-track">
+          <div className="skeleton-limit-bar-fill" />
+        </div>
+        <div className="flex-between">
+          <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
+          <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+        </div>
       </div>
     </div>
-    <div className="grid gap-20" style={{ gridTemplateColumns: '1fr' }}>
-      <div className="flex-col gap-12">
-        <div className="scrollable-content-card minh-300" style={{ height: 'auto', overflow: 'visible' }}>
-          <Skeleton template="text" lines={1} />
-          <div className="flex-col gap-12 mt-16">
+
+    {/* Two browse-fixed-panels side by side */}
+    <div className="grid gap-20 minh-0 skeleton-grid-single">
+      <div className="browse-fixed-panel">
+        <div className="scrollable-content-card">
+          <div className="flex-between mb-16 flex-shrink-0">
+            <div className="skeleton-line" style={{ width: 160, height: 18, borderRadius: 4 }} />
+            <div className="skeleton-line" style={{ width: 70, height: 32, borderRadius: 8 }} />
+          </div>
+          <div className="filter-bar flex-shrink-0">
+            <div className="skeleton-filter-item skeleton-line" />
+            <div className="skeleton-filter-item skeleton-line" />
+            <div className="skeleton-filter-item skeleton-line" style={{ maxWidth: 80 }} />
+            <div className="skeleton-filter-item skeleton-line" />
+          </div>
+          <div className="flex-col gap-12">
             {[1, 2, 3].map(i => (
-              <div key={i} className="glass p-12 px-20">
-                <Skeleton template="card" />
+              <div key={i} className="skeleton-listing-row">
+                <div className="skeleton-listing-icon skeleton-line" />
+                <div className="flex-1 flex-col gap-4">
+                  <div className="skeleton-line" style={{ width: '45%', height: 14, borderRadius: 4 }} />
+                  <div className="flex-row gap-8">
+                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 50, height: 12, borderRadius: 4 }} />
+                  </div>
+                </div>
+                <div className="skeleton-line" style={{ width: 60, height: 30, borderRadius: 6 }} />
               </div>
             ))}
           </div>
         </div>
       </div>
-      <div className="flex-col gap-12">
-        <div className="scrollable-content-card minh-300" style={{ height: 'auto', overflow: 'visible' }}>
-          <Skeleton template="text" lines={1} />
-          <div className="flex-col gap-12 mt-16">
+      <div className="browse-fixed-panel">
+        <div className="scrollable-content-card">
+          <div className="skeleton-line mb-16" style={{ width: 140, height: 18, borderRadius: 4 }} />
+          <div className="flex-col gap-12">
             {[1, 2].map(i => (
-              <div key={i} className="glass p-12 px-20">
-                <Skeleton template="card" />
+              <div key={i} className="skeleton-listing-row">
+                <div className="skeleton-listing-icon skeleton-line" />
+                <div className="flex-1 flex-col gap-4">
+                  <div className="skeleton-line" style={{ width: '40%', height: 14, borderRadius: 4 }} />
+                  <div className="flex-row gap-8">
+                    <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                  </div>
+                </div>
+                <div className="skeleton-line" style={{ width: 60, height: 30, borderRadius: 6 }} />
               </div>
             ))}
           </div>
         </div>
       </div>
     </div>
+
   </div>
 );
 
+/* ─── Jobs Skeleton (client) ─────────────────────────────────────
+   Matches Jobs layout:
+     flex-col → header + limit card + grid of jobs-fixed-panels
+     jobs-fixed-panel (420px) → scrollable-content-card → listings
+   ──────────────────────────────────────────────────────────────── */
+const jobsSkeleton = () => (
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar skeleton-section-scroll">
+
+    {/* Header */}
+    <div className="flex-between flex-shrink-0">
+      <div className="skeleton-line" style={{ width: 140, height: 28, borderRadius: 4 }} />
+      <div className="skeleton-line" style={{ width: 120, height: 36, borderRadius: 8 }} />
+    </div>
+
+    {/* Job Posting Limit card */}
+    <div className="grid gap-20 flex-shrink-0 skeleton-grid-single">
+      <div className="glass flex-col gap-16 p-20">
+        <div className="flex-between items-flex-start">
+          <div className="flex-col gap-4">
+            <div className="skeleton-line" style={{ width: 100, height: 14, borderRadius: 4 }} />
+            <div className="skeleton-line" style={{ width: 90, height: 12, borderRadius: 4 }} />
+          </div>
+          <div className="skeleton-line" style={{ width: 40, height: 24, borderRadius: 4 }} />
+        </div>
+        <div className="skeleton-limit-bar-track">
+          <div className="skeleton-limit-bar-fill" />
+        </div>
+        <div className="flex-between">
+          <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
+          <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+        </div>
+      </div>
+    </div>
+
+    {/* Two jobs-fixed-panels */}
+    <div className="grid gap-20 skeleton-grid-single">
+
+      {/* Active Listings */}
+      <div className="jobs-fixed-panel">
+        <div className="scrollable-content-card">
+          <div className="skeleton-line mb-16" style={{ width: 120, height: 18, borderRadius: 4 }} />
+          <div className="flex-col gap-12">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="skeleton-listing-row">
+                <div className="skeleton-listing-icon skeleton-line" />
+                <div className="flex-1 flex-col gap-4">
+                  <div className="flex-row items-center gap-8">
+                    <div className="skeleton-line" style={{ width: '40%', height: 14, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 50, height: 18, borderRadius: 4 }} />
+                  </div>
+                  <div className="flex-row gap-8">
+                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
+                  </div>
+                </div>
+                <div className="skeleton-line" style={{ width: 50, height: 30, borderRadius: 6 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Freelancer Applications */}
+      <div className="jobs-fixed-panel">
+        <div className="scrollable-content-card">
+          <div className="flex-between mb-16 flex-shrink-0">
+            <div className="skeleton-line" style={{ width: 180, height: 18, borderRadius: 4 }} />
+            <div className="skeleton-filter-item skeleton-line" />
+          </div>
+          <div className="flex-col gap-12">
+            {[1, 2].map(i => (
+              <div key={i} className="skeleton-listing-row">
+                <div className="skeleton-listing-icon skeleton-line" />
+                <div className="flex-1 flex-col gap-4">
+                  <div className="flex-row items-center gap-8">
+                    <div className="skeleton-line" style={{ width: '35%', height: 14, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 60, height: 18, borderRadius: 4 }} />
+                  </div>
+                  <div className="flex-row gap-8">
+                    <div className="skeleton-line" style={{ width: 70, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 50, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                  </div>
+                </div>
+                <div className="flex-row gap-8">
+                  <div className="skeleton-line" style={{ width: 55, height: 30, borderRadius: 6 }} />
+                  <div className="skeleton-line" style={{ width: 75, height: 30, borderRadius: 6 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+);
+
+/* ─── Admin Overview Skeleton ────────────────────────────────────
+   Matches server_admin/Overview layout:
+     layout-middle → AdminProfile + stats-grid-right (2×2)
+     layout-bottom → scrollable-content-card → server-section-header + server-card-grid
+   ──────────────────────────────────────────────────────────────── */
 const adminOverviewSkeleton = () => (
   <div className="fade-in flex-col gap-20">
     <div className="layout-middle">
-      <div className="flex-1">
+      <div className="profile-card-horizontal flex-1">
         <Skeleton template="profile" />
       </div>
       <div className="stats-grid-right">
@@ -213,33 +360,39 @@ const adminOverviewSkeleton = () => (
     </div>
     <div className="layout-bottom">
       <div className="scrollable-content-card">
-        <div className="skeleton-portfolio-container p-24 pb-40">
-          <div className="flex-between mb-20">
-            <Skeleton template="text" lines={1} />
-            <Skeleton template="text" lines={1} />
+        {/* Server section header */}
+        <div className="skeleton-server-header">
+          <div className="flex-row items-center gap-8">
+            <Skeleton template="circle" />
+            <div className="skeleton-line" style={{ width: 140, height: 18, borderRadius: 4 }} />
           </div>
-          <div className="server-card-grid">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="card server-card">
-                <div className="server-card-row">
-                  <Skeleton template="circle" />
-                  <div className="flex-1">
-                    <Skeleton template="text" lines={2} />
-                  </div>
-                </div>
-                <div className="server-card-actions flex-row gap-8">
-                  <Skeleton template="text" lines={1} />
-                  <Skeleton template="circle" />
+          <div className="skeleton-line" style={{ width: 80, height: 30, borderRadius: 6 }} />
+        </div>
+        <div className="server-card-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="card server-card">
+              <div className="server-card-row">
+                <Skeleton template="circle" />
+                <div className="flex-1">
+                  <Skeleton template="text" lines={2} />
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="server-card-actions flex-row gap-8">
+                <div className="skeleton-line" style={{ width: 80, height: 30, borderRadius: 6 }} />
+                <div className="skeleton-line" style={{ width: 30, height: 30, borderRadius: 6 }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   </div>
 );
 
+/* ─── Configure Skeleton (server_admin) ──────────────────────────
+   Matches Configure layout:
+     settings-grid → card (Server Configuration) + card glass (Server Isolation)
+   ──────────────────────────────────────────────────────────────── */
 const configureSkeleton = () => (
   <div className="fade-in settings-grid">
     <div className="card">
@@ -254,9 +407,12 @@ const configureSkeleton = () => (
         <Skeleton template="form" />
       </div>
     </div>
-    <div className="card glass flex-col flex-center text-center p-24">
+    <div className="card glass flex-col flex-center text-center opacity-80 p-24">
       <Skeleton template="circle" />
       <div className="mt-16">
+        <Skeleton template="text" lines={1} />
+      </div>
+      <div className="mt-8">
         <Skeleton template="text" lines={2} />
       </div>
     </div>
