@@ -524,6 +524,9 @@
     color: #8A95A5;
     padding: 40px 20px;
     text-align: center;
+    background: rgba(234, 237, 242, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .lockedIcon,
@@ -573,6 +576,14 @@
     flex-direction: column;
     gap: 4px;
     padding: 16px 20px;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.messagesContainer::-webkit-scrollbar {
+    display: none;
 }
 
 .messageRow {
@@ -1063,6 +1074,9 @@
     flex-direction: column;
     gap: 16px;
     padding: 20px;
+    flex: 1;
+    justify-content: flex-end;
+    padding-bottom: 32px;
 }
 
 .skeletonBubble {
@@ -1083,14 +1097,42 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     flex-shrink: 0;
+    overflow: hidden;
+}
+
+.skeletonAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: none;
 }
 
 .skeletonBubbleBox {
-    height: 40px;
+    height: 56px;
     border-radius: 12px;
-    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 14px;
+    gap: 6px;
+}
+
+.skeletonBubbleBoxLine {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #d6d9de 25%, #e2e5ea 50%, #d6d9de 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
+}
+
+.skeletonBubbleBoxLine:first-child {
+    width: 85%;
+}
+
+.skeletonBubbleBoxLine:last-child {
+    width: 55%;
 }
 
 @keyframes shimmer {
@@ -1224,6 +1266,8 @@
     flex-direction: column;
     gap: 4px;
     flex: 1;
+    justify-content: flex-end;
+    padding-bottom: 24px;
 }
 
 .skelPulse {
@@ -1301,6 +1345,25 @@
     .bubble {
         padding: 8px 12px;
     }
+
+    .fullSkeletonSide {
+        width: 220px;
+    }
+
+    .fullSkeletonChat {
+        padding: 12px;
+    }
+
+    .skeletonBubbleBox {
+        height: 48px;
+        padding: 8px 10px;
+    }
+
+    .lockedIcon,
+    .lockedIconBlue {
+        width: 56px;
+        height: 56px;
+    }
 }
 
 /* Small phone (< 480px) */
@@ -1343,12 +1406,39 @@
         grid-template-columns: 1fr;
     }
 
-    .lockedIcon {
-        width: 52px;
-        height: 52px;
+    .lockedIcon,
+    .lockedIconBlue {
+        width: 48px;
+        height: 48px;
     }
 
     .emptyState {
         padding: 24px 16px;
+    }
+
+    .fullSkeletonSide {
+        width: 180px;
+    }
+
+    .fullSkeletonChat {
+        padding: 8px;
+    }
+
+    .skeletonBubbleBox {
+        height: 44px;
+        padding: 6px 8px;
+    }
+
+    .skeletonAvatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .skeletonBubble {
+        gap: 6px;
+    }
+
+    .fullSkeletonRoomItem {
+        padding: 8px 12px;
     }
 }

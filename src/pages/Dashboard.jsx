@@ -479,18 +479,26 @@ const chatroomsSkeleton = () => (
           ))}
         </div>
       </div>
-      {/* Chat area */}
-      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Chat area — fills remaining height, bubbles pushed to bottom */}
+      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', paddingBottom: 32 }}>
         {[
           { w: '55%', align: 'flex-start' },
           { w: '70%', align: 'flex-end' },
           { w: '40%', align: 'flex-start' },
           { w: '60%', align: 'flex-end' },
           { w: '45%', align: 'flex-start' },
+          { w: '55%', align: 'flex-end' },
+          { w: '35%', align: 'flex-start' },
+          { w: '65%', align: 'flex-end' },
+          { w: '50%', align: 'flex-start' },
+          { w: '45%', align: 'flex-end' },
         ].map((r, i) => (
           <div key={i} className={`flex-row items-end gap-8 ${r.align === 'flex-end' ? 'justify-flex-end' : ''}`}>
             {r.align === 'flex-start' && <div className="skeleton-line skel-w-32 skel-h-32 skel-r-half" />}
-            <div className="skeleton-line skel-h-40 skel-r-12" style={{ width: r.w }} />
+            <div className="skeleton-line skel-r-12" style={{ width: r.w, height: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px' }}>
+              <div className="skeleton-line skel-r-4" style={{ height: 10, width: '90%' }} />
+              <div className="skeleton-line skel-r-4" style={{ height: 10, width: '60%' }} />
+            </div>
             {r.align === 'flex-end' && <div className="skeleton-line skel-w-32 skel-h-32 skel-r-half" />}
           </div>
         ))}

@@ -176,22 +176,41 @@ function DateDivider({ label }) {
     );
 }
 
+// ── Skeleton Avatar (uses real profile image or shimmer fallback) ──────────
+function SkeletonAvatar({ url, className }) {
+    if (url) {
+        return (
+            <div className={`${styles.skeletonAvatar} ${className || ''}`}>
+                <img src={url} alt="" className={styles.avatarImg} />
+            </div>
+        );
+    }
+    return <div className={`${styles.skeletonAvatar} ${className || ''}`} />;
+}
+
 // ── Chat Skeleton Loader ──────────────────────────────────────────────────
-function ChatSkeleton() {
+function ChatSkeleton({ profile }) {
+    const avatarUrl = profile?.avatar_url || null;
     const rows = [
         { w: '55%', right: false },
         { w: '70%', right: true },
-        { w: '45%', right: false },
+        { w: '40%', right: false },
         { w: '60%', right: true },
-        { w: '50%', right: false },
+        { w: '45%', right: false },
+        { w: '50%', right: true },
+        { w: '35%', right: false },
+        { w: '55%', right: true },
     ];
     return (
         <div className={styles.skeletonContainer}>
             {rows.map((r, i) => (
                 <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
-                    {!r.right && <div className={styles.skeletonAvatar} />}
-                    <div className={styles.skeletonBubbleBox} style={{ width: r.w }} />
-                    {r.right && <div className={styles.skeletonAvatar} />}
+                    {!r.right && <SkeletonAvatar url={avatarUrl} />}
+                    <div className={styles.skeletonBubbleBox} style={{ width: r.w }}>
+                        <div className={styles.skeletonBubbleBoxLine} />
+                        <div className={styles.skeletonBubbleBoxLine} />
+                    </div>
+                    {r.right && <SkeletonAvatar url={avatarUrl} />}
                 </div>
             ))}
         </div>
@@ -199,14 +218,19 @@ function ChatSkeleton() {
 }
 
 // ── Full Chat Room Skeleton (complete layout) ─────────────────────────────
-function FullChatSkeleton() {
+function FullChatSkeleton({ profile }) {
+    const avatarUrl = profile?.avatar_url || null;
     const bubbleRows = [
         { w: '55%', right: false },
         { w: '70%', right: true },
         { w: '40%', right: false },
         { w: '60%', right: true },
         { w: '45%', right: false },
-        { w: '50%', right: true },
+        { w: '55%', right: true },
+        { w: '35%', right: false },
+        { w: '65%', right: true },
+        { w: '50%', right: false },
+        { w: '45%', right: true },
     ];
     return (
         <div className={styles.fullSkeleton}>
@@ -247,14 +271,17 @@ function FullChatSkeleton() {
                     </div>
                 </div>
 
-                {/* Chat area skeleton */}
+                {/* Chat area skeleton — fills remaining height */}
                 <div className={styles.fullSkeletonChat}>
                     <div className={styles.fullSkeletonMessages}>
                         {bubbleRows.map((r, i) => (
                             <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
-                                {!r.right && <div className={styles.skeletonAvatar} />}
-                                <div className={styles.skeletonBubbleBox} style={{ width: r.w }} />
-                                {r.right && <div className={styles.skeletonAvatar} />}
+                                {!r.right && <SkeletonAvatar url={avatarUrl} />}
+                                <div className={styles.skeletonBubbleBox} style={{ width: r.w }}>
+                                    <div className={styles.skeletonBubbleBoxLine} />
+                                    <div className={styles.skeletonBubbleBoxLine} />
+                                </div>
+                                {r.right && <SkeletonAvatar url={avatarUrl} />}
                             </div>
                         ))}
                     </div>
@@ -682,7 +709,7 @@ const ChatRoom = ({ profile, currentRole }) => {
 
                 {/* Chat Content */}
                 {roomsLoading && !selectedRoomId ? (
-                    <FullChatSkeleton />
+                    <FullChatSkeleton profile={profile} />
                 ) : !selectedRoomId ? (
                     <div className={styles.emptyState}>
                         <MessageCircle size={48} className={styles.emptyStateIcon} />
@@ -692,7 +719,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                         </p>
                     </div>
                 ) : transcriptLoading ? (
-                    <ChatSkeleton />
+                    <ChatSkeleton profile={profile} />
                 ) : !transcript || transcript.messages?.length === 0 ? (
                     <div className={styles.emptyState}>
                         <MessageCircle size={48} className={styles.emptyStateIcon} />
