@@ -24,6 +24,8 @@ const AdminOverview = lazy(() => import('../components/dashboard/server_admin/Ov
 const AdminSettings = lazy(() => import('../components/dashboard/server_admin/ProfileSettings'));
 const AdminConfigure = lazy(() => import('../components/dashboard/server_admin/Configure'));
 
+const ChatRooms = lazy(() => import('../components/dashboard/common/ChatRoom'));
+
 /* ============================================================
    Section-Specific Constant Skeletons
    Each matches the structure/layout of its real section component.
@@ -442,6 +444,28 @@ const configureSkeleton = () => (
   </div>
 );
 
+const chatroomsSkeleton = () => (
+  <div className="fade-in card" style={{ height: 'calc(100vh - 120px)' }}>
+    <div style={{ display: 'flex', height: '100%' }}>
+      <div style={{ width: 280, borderRight: '1px solid var(--border)', padding: 16 }}>
+        <div className="skeleton-line skel-w-100 skel-h-18 skel-r-4" />
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, marginBottom: 16 }}>
+          <div className="skeleton-line skel-w-80 skel-h-28 skel-r-6" />
+          <div className="skeleton-line skel-w-60 skel-h-28 skel-r-6" />
+        </div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} style={{ padding: 12, marginBottom: 8, borderRadius: 8 }}>
+            <Skeleton template="text" lines={2} />
+          </div>
+        ))}
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Skeleton template="card" lines={3} />
+      </div>
+    </div>
+  </div>
+);
+
 /** Returns the correct constant skeleton for the given section and role */
 const getSectionSkeleton = (section, role) => {
   if (section === 'overview') {
@@ -455,6 +479,7 @@ const getSectionSkeleton = (section, role) => {
   if (section === 'applications') return applicationsSkeleton();
   if (section === 'jobs') return jobsSkeleton();
   if (section === 'configure') return configureSkeleton();
+  if (section === 'chatrooms') return chatroomsSkeleton();
   return overviewSkeleton();
 };
 
@@ -910,6 +935,7 @@ const Dashboard = () => {
         case 'overview': return <ClientOverview {...profileProps} />;
         case 'settings': return <ClientSettings {...commonProps} onUpdate={handleUpdateProfile} />;
         case 'jobs': return <ClientJobs {...commonProps} />;
+        case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
         default: return <ClientOverview {...profileProps} />;
       }
     } else if (currentRole === 'freelancer') {
@@ -918,6 +944,7 @@ const Dashboard = () => {
         case 'settings': return <FreelancerSettings {...commonProps} onUpdate={handleUpdateProfile} />;
         case 'portfolio': return <FreelancerPortfolio {...commonProps} fetchProfile={fetchProfile} />;
         case 'applications': return <FreelancerApplications {...commonProps} onNavigate={setActiveSection} />;
+        case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
         default: return <FreelancerOverview {...profileProps} />;
       }
     } else if (currentRole === 'server_admin') {
@@ -1052,6 +1079,7 @@ const Dashboard = () => {
         currentRole={currentRole}
         isMobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
+        profile={profile}
       />
       <main className="main-content">
         <div className="dashboard-view-container">
@@ -1098,6 +1126,7 @@ const Dashboard = () => {
         currentRole={currentRole}
         isMobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
+        profile={profile}
       />
 
       <main className="main-content">

@@ -1,0 +1,1260 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ChatRoom.module.css — Premium Chat Room Page
+   Brand-matched to generate_transcript.py color palette
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container ─────────────────────────────────────────────────────────── */
+.chatContainer {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    min-height: 500px;
+    max-height: 900px;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #EAEDF2;
+    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 215, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.chatContainerPremium {
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 24px rgba(255, 215, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: containerGlow 6s infinite ease-in-out;
+}
+
+@keyframes containerGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 215, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(255, 215, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* ── Gold dust particles (premium ambient effect) ─────────────────────── */
+.goldDust {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.goldDustParticle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, #FFD700 0%, rgba(255, 215, 0, 0) 70%);
+    border-radius: 50%;
+    animation: goldFloat linear infinite;
+    opacity: 0;
+}
+
+.goldDustParticle:nth-child(1) {
+    left: 8%;
+    animation-duration: 12s;
+    animation-delay: 0s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(2) {
+    left: 15%;
+    animation-duration: 15s;
+    animation-delay: 2s;
+    width: 3px;
+    height: 3px;
+}
+
+.goldDustParticle:nth-child(3) {
+    left: 25%;
+    animation-duration: 10s;
+    animation-delay: 4s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(4) {
+    left: 35%;
+    animation-duration: 14s;
+    animation-delay: 1s;
+    width: 4px;
+    height: 4px;
+}
+
+.goldDustParticle:nth-child(5) {
+    left: 48%;
+    animation-duration: 11s;
+    animation-delay: 3s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(6) {
+    left: 58%;
+    animation-duration: 13s;
+    animation-delay: 5s;
+    width: 3px;
+    height: 3px;
+}
+
+.goldDustParticle:nth-child(7) {
+    left: 68%;
+    animation-duration: 16s;
+    animation-delay: 0.5s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(8) {
+    left: 78%;
+    animation-duration: 9s;
+    animation-delay: 2.5s;
+    width: 3px;
+    height: 3px;
+}
+
+.goldDustParticle:nth-child(9) {
+    left: 88%;
+    animation-duration: 12s;
+    animation-delay: 4.5s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(10) {
+    left: 95%;
+    animation-duration: 14s;
+    animation-delay: 1.5s;
+    width: 4px;
+    height: 4px;
+}
+
+.goldDustParticle:nth-child(11) {
+    left: 5%;
+    animation-duration: 11s;
+    animation-delay: 3.5s;
+    width: 2px;
+    height: 2px;
+}
+
+.goldDustParticle:nth-child(12) {
+    left: 42%;
+    animation-duration: 15s;
+    animation-delay: 6s;
+    width: 3px;
+    height: 3px;
+}
+
+@keyframes goldFloat {
+    0% {
+        transform: translateY(100%) scale(0);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.7;
+        transform: translateY(85%) scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    90% {
+        opacity: 0.6;
+        transform: translateY(-10%) scale(0.8);
+    }
+
+    100% {
+        transform: translateY(-5%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ── Chat Header ───────────────────────────────────────────────────────── */
+.chatHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    z-index: 5;
+    min-height: 52px;
+    flex-shrink: 0;
+}
+
+.toggleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #4A5568;
+    flex-shrink: 0;
+}
+
+.toggleBtn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.headerTitle {
+    flex: 1;
+    min-width: 0;
+}
+
+.headerTitle h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1A1F2E;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.headerSubtitle {
+    font-size: 0.75rem;
+    color: #8A95A5;
+    margin: 0;
+}
+
+.infoBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #8A95A5;
+    flex-shrink: 0;
+}
+
+.infoBtn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #4A5568;
+}
+
+/* ── Chat Body ─────────────────────────────────────────────────────────── */
+.chatBody {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    z-index: 2;
+}
+
+.chatBody::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Side Menu Panel ───────────────────────────────────────────────────── */
+.sideMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sideMenuOpen {
+    transform: translateX(0);
+}
+
+.sideMenuHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sideMenuTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1A1F2E;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────── */
+.tabs {
+    display: flex;
+    gap: 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8A95A5;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.tab:hover {
+    color: #4A5568;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.tabActive {
+    color: #1A7A4A;
+    background: rgba(26, 122, 74, 0.08);
+}
+
+/* ── Room List ─────────────────────────────────────────────────────────── */
+.roomList {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 8px;
+}
+
+.roomList::-webkit-scrollbar {
+    display: none;
+}
+
+.roomItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+}
+
+.roomItem:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.roomItemSelected {
+    background: rgba(26, 122, 74, 0.06);
+    border: 1px solid rgba(26, 122, 74, 0.15);
+}
+
+.roomItemIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(26, 122, 74, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1A7A4A;
+    flex-shrink: 0;
+}
+
+.roomItemInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.roomItemTitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1A1F2E;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.roomItemMeta {
+    font-size: 0.7rem;
+    color: #8A95A5;
+    margin: 2px 0 0;
+}
+
+.roomItemBadge {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1A7A4A;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Room Status Dot ───────────────────────────────────────────────────── */
+.statusDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.statusDotOpen {
+    background: #1A7A4A;
+}
+
+.statusDotIdle {
+    background: #D4A84B;
+}
+
+.statusDotClosed {
+    background: #8A95A5;
+}
+
+/* ── Empty States ──────────────────────────────────────────────────────── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: #8A95A5;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.emptyStateIcon {
+    color: #DDE1E9;
+}
+
+.emptyStateTitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin: 0;
+}
+
+.emptyStateText {
+    font-size: 0.82rem;
+    color: #8A95A5;
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.5;
+}
+
+.emptyRoomList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    gap: 8px;
+    text-align: center;
+}
+
+.emptyRoomListIcon {
+    color: #DDE1E9;
+    margin-bottom: 4px;
+}
+
+.emptyRoomListTitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin: 0;
+}
+
+.emptyRoomListText {
+    font-size: 0.72rem;
+    color: #8A95A5;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ── Locked State (free tier) ──────────────────────────────────────────── */
+.lockedOverlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: #8A95A5;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.lockedIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #D4A84B;
+}
+
+.lockedTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4A5568;
+    margin: 0;
+}
+
+.lockedText {
+    font-size: 0.85rem;
+    color: #8A95A5;
+    margin: 0;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* ── Message Bubbles ───────────────────────────────────────────────────── */
+.messagesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 20px;
+}
+
+.messageRow {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    max-width: 85%;
+}
+
+.messageRowSelf {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.messageRowOther {
+    margin-right: auto;
+}
+
+.messageRowLeave {
+    justify-content: center;
+    max-width: 100%;
+}
+
+/* ── Avatars ───────────────────────────────────────────────────────────── */
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+}
+
+.avatarFallbackClient {
+    background: linear-gradient(135deg, #2B52CC, #1E3DA0);
+}
+
+.avatarFallbackFreelancer {
+    background: linear-gradient(135deg, #1A7A4A, #125C36);
+}
+
+.avatarFallbackBot {
+    background: linear-gradient(135deg, #5B3FA6, #432E7E);
+}
+
+/* ── Bubble Base ───────────────────────────────────────────────────────── */
+.bubble {
+    border-radius: 12px;
+    padding: 10px 14px;
+    position: relative;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Self bubble (viewer's messages — sage green) */
+.bubbleSelf {
+    background: #DCF2E4;
+    border: 1px solid #9ECDB4;
+    border-bottom-right-radius: 4px;
+    color: #1A1F2E;
+}
+
+/* Other party bubble (white) */
+.bubbleOther {
+    background: #FFFFFF;
+    border: 1px solid #D1D8E4;
+    border-bottom-left-radius: 4px;
+    color: #1A1F2E;
+}
+
+/* Complaint bubble (amber) */
+.bubbleComplain {
+    background: #FEF3CD;
+    border: 1px solid #DDB95A;
+    color: #1A1F2E;
+}
+
+/* Command bubble (indigo tint) */
+.bubbleCommand {
+    background: #EBF0FF;
+    border: 1px solid #8EA8E8;
+    color: #1A1F2E;
+}
+
+/* Bot message bubble (lavender) */
+.bubbleBot {
+    background: #F3F1FA;
+    border: 1px solid #B8B0D8;
+    color: #1A1F2E;
+}
+
+/* ── Command Badge ─────────────────────────────────────────────────────── */
+.commandBadge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #6B84CC;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* ── Reply Preview ─────────────────────────────────────────────────────── */
+.replyPreview {
+    background: #F7F8FB;
+    border: 1px solid #CDD3DF;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.replyAccent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: #125C36;
+}
+
+.replySender {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #125C36;
+    margin: 0;
+}
+
+.replyText {
+    font-size: 0.72rem;
+    color: #8A95A5;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Bubble Text ───────────────────────────────────────────────────────── */
+.bubbleText {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #1A1F2E;
+    margin: 0;
+}
+
+/* ── Timestamp ─────────────────────────────────────────────────────────── */
+.bubbleTimestamp {
+    font-size: 0.62rem;
+    color: #8A95A5;
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* ── Date Divider ──────────────────────────────────────────────────────── */
+.dateDivider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.dateDividerPill {
+    background: #D6DCE8;
+    color: #4A5568;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 12px;
+}
+
+/* ── Leave Notice (centered) ──────────────────────────────────────────── */
+.leaveNotice {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.leaveNoticeCard {
+    background: rgba(138, 149, 165, 0.08);
+    border: 1px solid rgba(138, 149, 165, 0.15);
+    border-radius: 8px;
+    padding: 8px 16px;
+    text-align: center;
+    max-width: 320px;
+}
+
+.leaveNoticeTitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin: 0;
+}
+
+.leaveNoticeReason {
+    font-size: 0.7rem;
+    color: #8A95A5;
+    margin: 4px 0 0;
+}
+
+.leaveNoticeTime {
+    font-size: 0.6rem;
+    color: #8A95A5;
+    margin-top: 4px;
+}
+
+/* ── New Messages Indicator ────────────────────────────────────────────── */
+.newMessagesBtn {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1A7A4A;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(26, 122, 74, 0.3);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    animation: slideUpFade 0.3s ease;
+}
+
+.newMessagesBtn:hover {
+    background: #125C36;
+    box-shadow: 0 6px 16px rgba(26, 122, 74, 0.4);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ── Room Info Panel (overlay from right) ──────────────────────────────── */
+.infoPanel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(16px);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.infoPanel::-webkit-scrollbar {
+    display: none;
+}
+
+.infoPanelOpen {
+    transform: translateX(0);
+}
+
+.infoPanelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.infoPanelTitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1A1F2E;
+    margin: 0;
+}
+
+.infoPanelBody {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.infoSectionTitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #8A95A5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.infoLabel {
+    color: #8A95A5;
+}
+
+.infoValue {
+    color: #1A1F2E;
+    font-weight: 600;
+}
+
+.infoParticipant {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.infoParticipantAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.infoParticipantAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.infoParticipantName {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1A1F2E;
+}
+
+.infoParticipantRole {
+    font-size: 0.68rem;
+    color: #8A95A5;
+}
+
+/* ── Check Grid ────────────────────────────────────────────────────────── */
+.checkGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.checkItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: #4A5568;
+}
+
+.checkIcon {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    flex-shrink: 0;
+}
+
+.checkIconDone {
+    background: rgba(26, 122, 74, 0.1);
+    color: #1A7A4A;
+}
+
+.checkIconPending {
+    background: rgba(138, 149, 165, 0.1);
+    color: #8A95A5;
+}
+
+/* ── Milestones List ───────────────────────────────────────────────────── */
+.milestoneItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    font-size: 0.78rem;
+}
+
+.milestoneItem:last-child {
+    border-bottom: none;
+}
+
+.milestoneNumber {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(26, 122, 74, 0.08);
+    color: #1A7A4A;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.milestoneTitle {
+    flex: 1;
+    color: #1A1F2E;
+    font-weight: 500;
+}
+
+.milestoneMeta {
+    font-size: 0.68rem;
+    color: #8A95A5;
+    white-space: nowrap;
+}
+
+/* ── Yet to Implement (Job Rooms) ─────────────────────────────────────── */
+.yetToImplement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 8px;
+    text-align: center;
+}
+
+.yetToImplementIcon {
+    color: #DDE1E9;
+}
+
+.yetToImplementTitle {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin: 0;
+}
+
+.yetToImplementText {
+    font-size: 0.75rem;
+    color: #8A95A5;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ── Skeleton Loading ──────────────────────────────────────────────────── */
+.skeletonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+}
+
+.skeletonBubble {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.skeletonBubbleRight {
+    justify-content: flex-end;
+}
+
+.skeletonAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    flex-shrink: 0;
+}
+
+.skeletonBubbleBox {
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Room List Skeleton ─────────────────────────────────────────────────── */
+.roomListSkeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 0;
+}
+
+.roomListSkeletonItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.roomListSkeletonIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    flex-shrink: 0;
+}
+
+.roomListSkeletonText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.roomListSkeletonLine {
+    height: 12px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.roomListSkeletonLineSmall {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #f5f5f5 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .sideMenu {
+        width: 260px;
+    }
+
+    .headerSubtitle {
+        display: none;
+    }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+    .chatContainer {
+        height: calc(100vh - 120px);
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .chatContainerPremium {
+        border-radius: 0;
+    }
+
+    .sideMenu {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .infoPanel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .messageRow {
+        max-width: 92%;
+    }
+
+    .headerTitle h3 {
+        font-size: 0.9rem;
+    }
+
+    .lockedTitle {
+        font-size: 1rem;
+    }
+
+    .lockedText {
+        font-size: 0.8rem;
+        max-width: 260px;
+    }
+
+    .emptyStateTitle {
+        font-size: 0.85rem;
+    }
+
+    .emptyStateText {
+        font-size: 0.75rem;
+        max-width: 220px;
+    }
+
+    .messagesContainer {
+        padding: 12px 12px;
+    }
+
+    .bubble {
+        padding: 8px 12px;
+    }
+}
+
+/* Small phone (< 480px) */
+@media (max-width: 480px) {
+    .chatContainer {
+        height: calc(100vh - 140px);
+    }
+
+    .chatHeader {
+        padding: 10px 12px;
+    }
+
+    .headerTitle h3 {
+        font-size: 0.82rem;
+    }
+
+    .sideMenu {
+        max-width: 100%;
+    }
+
+    .messageRow {
+        max-width: 95%;
+    }
+
+    .avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .bubble {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+
+    .infoPanel {
+        max-width: 100%;
+    }
+
+    .checkGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .lockedIcon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .emptyState {
+        padding: 24px 16px;
+    }
+}

@@ -445,6 +445,94 @@ input[type="radio"]:focus {
   color: var(--text);
 }
 
+/* Premium-Locked Nav Item */
+.nav-item.premium-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  position: relative;
+  color: var(--text-dim);
+}
+
+.nav-item.premium-locked:hover {
+  opacity: 0.55;
+}
+
+.nav-item.premium-locked .nav-premium-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.nav-item.premium-locked .dust-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #ffd700 0%, rgba(255, 215, 0, 0) 70%);
+  border-radius: 50%;
+  animation: navDustFloat 3s ease-in-out infinite;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(1) {
+  left: 10%;
+  top: 80%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(2) {
+  left: 25%;
+  top: 70%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(3) {
+  left: 45%;
+  top: 85%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(4) {
+  left: 60%;
+  top: 75%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(5) {
+  left: 75%;
+  top: 90%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(6) {
+  left: 85%;
+  top: 65%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(7) {
+  left: 35%;
+  top: 95%;
+}
+
+.nav-item.premium-locked .dust-particle:nth-child(8) {
+  left: 55%;
+  top: 60%;
+}
+
+@keyframes navDustFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+  }
+
+  80% {
+    opacity: 0.8;
+    transform: translateY(-14px) scale(0.8);
+  }
+}
+
 /* Dashboard Layout Ratios */
 .dashboard-view-container {
   display: flex;
@@ -897,14 +985,26 @@ input[type="radio"]:focus {
   }
 }
 
-/* Premium Golden Theme */
+/* Premium Golden Theme — Production Enhanced */
 .premium-card {
-  background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(25, 25, 25, 0.9)) !important;
-  border: 1.5px solid rgba(255, 215, 0, 0.5) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.05) !important;
+  background: linear-gradient(145deg, rgba(12, 12, 12, 0.97), rgba(22, 22, 22, 0.93), rgba(18, 18, 18, 0.95)) !important;
+  border: 1.5px solid rgba(255, 215, 0, 0.45) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(255, 215, 0, 0.04),
+    inset 0 1px 0 rgba(255, 215, 0, 0.06) !important;
   position: relative;
   overflow: hidden !important;
   border-radius: 16px !important;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.premium-card:hover {
+  border-color: rgba(255, 215, 0, 0.6) !important;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.65),
+    0 0 30px rgba(255, 215, 0, 0.08),
+    inset 0 1px 0 rgba(255, 215, 0, 0.1) !important;
 }
 
 /* Reconcile inner containers to prevent "double box" look in premium mode */
@@ -914,6 +1014,7 @@ input[type="radio"]:focus {
   box-shadow: none !important;
 }
 
+/* Multi-layer shine sweep */
 .premium-card::before {
   content: '';
   position: absolute;
@@ -922,48 +1023,108 @@ input[type="radio"]:focus {
   width: 300%;
   height: 300%;
   background: linear-gradient(45deg,
-      transparent,
-      rgba(255, 215, 0, 0.2),
-      transparent);
+      transparent 30%,
+      rgba(255, 215, 0, 0.06) 40%,
+      rgba(255, 215, 0, 0.12) 50%,
+      rgba(255, 215, 0, 0.06) 60%,
+      transparent 70%);
   transform: rotate(35deg);
-  animation: premiumShine 5s infinite linear;
+  animation: premiumShine 6s ease-in-out infinite;
   pointer-events: none;
 }
 
+/* Edge glow accent on top-left corner */
+.premium-card::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 0% 0%, rgba(255, 215, 0, 0.15), transparent 70%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 .premium-card.premium-glow {
-  animation: goldenPulse 4s infinite ease-in-out;
-  border-color: rgba(255, 215, 0, 0.8) !important;
-  box-shadow: 0 0 25px rgba(255, 215, 0, 0.15) !important;
+  animation: goldenPulse 5s ease-in-out infinite;
+  border-color: rgba(255, 215, 0, 0.75) !important;
 }
 
 .premium-text {
   color: #ffd700 !important;
   font-weight: 800;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4), 0 0 20px rgba(0, 0, 0, 0.8);
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.35),
+    0 0 20px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.5px;
+}
+
+/* Premium tag — small badge */
+.premium-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #ffd700;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  animation: tagShimmer 3s ease-in-out infinite;
 }
 
 @keyframes premiumShine {
   0% {
-    transform: translateX(-100%) rotate(45deg);
+    transform: translateX(-120%) rotate(45deg);
+  }
+
+  50% {
+    transform: translateX(120%) rotate(45deg);
   }
 
   100% {
-    transform: translateX(100%) rotate(45deg);
+    transform: translateX(-120%) rotate(45deg);
   }
 }
 
 @keyframes goldenPulse {
-  0% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.1);
+
+  0%,
+  100% {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.6),
+      0 0 12px rgba(212, 175, 55, 0.08),
+      inset 0 0 0 rgba(212, 175, 55, 0);
+  }
+
+  33% {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.7),
+      0 0 28px rgba(212, 175, 55, 0.18),
+      inset 0 0 15px rgba(212, 175, 55, 0.05);
+  }
+
+  66% {
+    box-shadow:
+      0 10px 36px rgba(0, 0, 0, 0.65),
+      0 0 20px rgba(212, 175, 55, 0.12),
+      inset 0 0 8px rgba(212, 175, 55, 0.03);
+  }
+}
+
+@keyframes tagShimmer {
+
+  0%,
+  100% {
+    opacity: 0.85;
   }
 
   50% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.3), inset 0 0 20px rgba(212, 175, 55, 0.1);
-  }
-
-  100% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.1);
+    opacity: 1;
   }
 }
 
