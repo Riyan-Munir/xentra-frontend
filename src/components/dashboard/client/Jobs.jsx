@@ -163,14 +163,14 @@ const JobModal = ({ job, isOpen, onClose, onSave, onDelete, isPremium, addNotifi
         </h3>
 
         <div className="form-group">
-          <label className="form-label">Job Title (Max 32 chars) *</label>
+          <label className="form-label">Job Title (Max 64 chars) *</label>
           <input
             type="text"
             className="form-input"
             placeholder="e.g. Senior React Developer"
             value={formData.title}
             onChange={e => setFormData({ ...formData, title: e.target.value })}
-            maxLength={32}
+            maxLength={64}
           />
           {errors.title && <span className="error-text">{errors.title}</span>}
         </div>
