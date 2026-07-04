@@ -670,7 +670,7 @@ const Dashboard = () => {
       }
 
       // ── DEBUG DELAY: Remove after skeleton review ──────────────────────────────
-      await new Promise((resolve) => setTimeout(resolve, 30000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       // ───────────────────────────────────────────────────────────────────────────
 
       const data = await profileService.getMe(currentRole, !isSectionRefresh);
@@ -704,7 +704,7 @@ const Dashboard = () => {
       setIsServersLoading(true);
 
       // ── DEBUG DELAY: Remove after skeleton review ──────────────────────────────
-      await new Promise((resolve) => setTimeout(resolve, 30000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       // ───────────────────────────────────────────────────────────────────────────
 
       const data = await guildService.getMyServers(forceRefresh);
