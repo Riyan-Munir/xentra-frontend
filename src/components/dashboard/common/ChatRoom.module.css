@@ -537,38 +537,38 @@
 
 .lockedIcon,
 .lockedIconBlue {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .lockedIcon {
-    background: rgba(255, 215, 0, 0.06);
-    border: 1px solid rgba(255, 215, 0, 0.15);
-    color: #D4A84B;
+    background: transparent;
+    border: none;
+    color: #DDE1E9;
 }
 
 .lockedIconBlue {
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    color: #6366F1;
+    background: transparent;
+    border: none;
+    color: #DDE1E9;
 }
 
 .lockedTitle {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: #4A5568;
     margin: 0;
 }
 
 .lockedText {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #8A95A5;
     margin: 0;
-    max-width: 320px;
+    max-width: 280px;
     line-height: 1.5;
 }
 
@@ -1383,8 +1383,8 @@
 
     .lockedIcon,
     .lockedIconBlue {
-        width: 56px;
-        height: 56px;
+        width: 44px;
+        height: 44px;
     }
 }
 
@@ -1430,8 +1430,8 @@
 
     .lockedIcon,
     .lockedIconBlue {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
     }
 
     .emptyState {
