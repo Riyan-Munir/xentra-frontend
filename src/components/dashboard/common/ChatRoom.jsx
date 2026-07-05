@@ -197,9 +197,6 @@ function ChatSkeleton({ profile }) {
         { w: '40%', right: false },
         { w: '60%', right: true },
         { w: '45%', right: false },
-        { w: '50%', right: true },
-        { w: '35%', right: false },
-        { w: '55%', right: true },
     ];
     return (
         <div className={styles.skeletonContainer}>
@@ -226,11 +223,6 @@ function FullChatSkeleton({ profile }) {
         { w: '40%', right: false },
         { w: '60%', right: true },
         { w: '45%', right: false },
-        { w: '55%', right: true },
-        { w: '35%', right: false },
-        { w: '65%', right: true },
-        { w: '50%', right: false },
-        { w: '45%', right: true },
     ];
     return (
         <div className={styles.fullSkeleton}>
@@ -568,8 +560,7 @@ const ChatRoom = ({ profile, currentRole }) => {
     // ════════════════════════════════════════════════════════════════════
     if (!isPremium) {
         return (
-            <div className={`${styles.chatContainer} ${styles.chatContainerPremium}`}>
-                <GoldDust />
+            <div className={`${styles.chatContainer} ${styles.chatContainerLocked}`}>
                 <div className={styles.lockedOverlay}>
                     <div className={styles.lockedIconBlue}>
                         <Lock size={28} />

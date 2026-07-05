@@ -480,26 +480,21 @@ const chatroomsSkeleton = () => (
         </div>
       </div>
       {/* Chat area — fills remaining height, bubbles pushed to bottom */}
-      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', paddingBottom: 32, overflow: 'hidden', minHeight: 0 }}>
+      <div className="flex-1" style={{ padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0 }}>
         {[
-          { w: '55%', right: false },
-          { w: '70%', right: true },
-          { w: '40%', right: false },
-          { w: '60%', right: true },
-          { w: '45%', right: false },
-          { w: '55%', right: true },
-          { w: '35%', right: false },
-          { w: '65%', right: true },
-          { w: '50%', right: false },
-          { w: '45%', right: true },
+          { minW: 120, maxW: '55%', right: false },
+          { minW: 140, maxW: '50%', right: true },
+          { minW: 100, maxW: '40%', right: false },
+          { minW: 130, maxW: '45%', right: true },
+          { minW: 110, maxW: '50%', right: false },
         ].map((r, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '85%', marginLeft: r.right ? 'auto' : undefined, flexShrink: 0 }}>
-            {!r.right && <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />}
-            <div className="skeleton-line" style={{ width: r.w, height: 56, borderRadius: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px', flexShrink: 1, minWidth: 0 }}>
-              <div className="skeleton-line" style={{ height: 10, width: '90%', borderRadius: 4 }} />
-              <div className="skeleton-line" style={{ height: 10, width: '60%', borderRadius: 4 }} />
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '75%', marginLeft: r.right ? 'auto' : undefined, flexShrink: 0 }}>
+            {!r.right && <div className="skeleton-line" style={{ width: 32, height: 32, minWidth: 32, minHeight: 32, borderRadius: '50%', flexShrink: 0 }} />}
+            <div className="skeleton-line" style={{ height: 48, minWidth: r.minW, maxWidth: r.maxW, borderRadius: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, padding: '0 12px', flexShrink: 1 }}>
+              <div className="skeleton-line" style={{ height: 10, width: '85%', borderRadius: 4 }} />
+              <div className="skeleton-line" style={{ height: 10, width: '55%', borderRadius: 4 }} />
             </div>
-            {r.right && <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />}
+            {r.right && <div className="skeleton-line" style={{ width: 32, height: 32, minWidth: 32, minHeight: 32, borderRadius: '50%', flexShrink: 0 }} />}
           </div>
         ))}
       </div>

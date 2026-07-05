@@ -514,6 +514,12 @@
 }
 
 /* ── Locked State (free tier) ──────────────────────────────────────────── */
+.chatContainerLocked {
+    border-color: var(--border);
+    box-shadow: none;
+    background: var(--bg-card);
+}
+
 .lockedOverlay {
     position: absolute;
     inset: 0;
@@ -526,9 +532,7 @@
     color: #8A95A5;
     padding: 40px 20px;
     text-align: center;
-    background: linear-gradient(135deg, rgba(15, 18, 30, 0.50) 0%, rgba(20, 25, 40, 0.45) 50%, rgba(15, 18, 30, 0.50) 100%);
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    background: transparent;
 }
 
 .lockedIcon,
@@ -541,20 +545,16 @@
     justify-content: center;
 }
 
-/* Legacy gold icon (kept for compatibility) */
 .lockedIcon {
     background: rgba(255, 215, 0, 0.06);
     border: 1px solid rgba(255, 215, 0, 0.15);
     color: #D4A84B;
 }
 
-/* Blue glass icon — matches portfolio empty state style */
 .lockedIconBlue {
     background: rgba(99, 102, 241, 0.08);
     border: 1px solid rgba(99, 102, 241, 0.15);
     color: #6366F1;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
 }
 
 .lockedTitle {
@@ -1085,8 +1085,8 @@
 .skeletonBubble {
     display: flex;
     gap: 8px;
-    align-items: flex-end;
-    max-width: 85%;
+    align-items: flex-start;
+    max-width: 75%;
 }
 
 .skeletonBubbleRight {
@@ -1096,6 +1096,8 @@
 .skeletonAvatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     border-radius: 50%;
     background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
     background-size: 200% 100%;
@@ -1113,7 +1115,9 @@
 }
 
 .skeletonBubbleBox {
-    height: 56px;
+    height: 48px;
+    min-width: 100px;
+    max-width: 320px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(0, 0, 0, 0.04);
@@ -1310,6 +1314,10 @@
         border-radius: 0;
     }
 
+    .chatContainerLocked {
+        border-radius: 0;
+    }
+
     .sideMenu {
         width: 100%;
         max-width: 320px;
@@ -1364,7 +1372,13 @@
 
     .skeletonBubbleBox {
         height: 48px;
+        min-width: 80px;
+        max-width: 260px;
         padding: 8px 10px;
+    }
+
+    .skeletonBubble {
+        max-width: 85%;
     }
 
     .lockedIcon,
@@ -1433,8 +1447,14 @@
     }
 
     .skeletonBubbleBox {
-        height: 44px;
+        height: 40px;
+        min-width: 70px;
+        max-width: 220px;
         padding: 6px 8px;
+    }
+
+    .skeletonBubble {
+        max-width: 90%;
     }
 
     .skeletonAvatar {
