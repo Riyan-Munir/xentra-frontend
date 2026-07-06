@@ -41,8 +41,10 @@ async function refreshAccessToken() {
   if (!refreshToken) return null;
 
   try {
+    // Strip trailing slash from base URL to avoid double-slash in path
+    const baseUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
     const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/users/auth/token/refresh/`,
+      `${baseUrl}/users/auth/token/refresh/`,
       { refresh: refreshToken }
     );
     const newToken = response.data.access;

@@ -496,7 +496,10 @@ const ChatRoom = ({ profile, currentRole }) => {
             return;
         }
 
-        setTranscriptLoading(true);
+        // For forced refresh, keep existing messages visible (no skeleton flash)
+        if (!force) {
+            setTranscriptLoading(true);
+        }
         try {
             const data = await roomService.getTranscript(roomId, currentRole);
             setTranscript(data);
