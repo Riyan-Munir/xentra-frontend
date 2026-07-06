@@ -688,65 +688,68 @@ const ChatRoom = ({ profile, currentRole }) => {
                     </div>
                 </div>
 
-                {/* Room Info Panel */}
-                {infoOpen && (
-                    <RoomInfoPanel
-                        stats={roomStats}
-                        onClose={() => setInfoOpen(false)}
-                    />
-                )}
+                {/* ── Chat Content Wrapper (flex child on desktop) ──── */}
+                <div className={styles.chatContent}>
+                    {/* Room Info Panel */}
+                    {infoOpen && (
+                        <RoomInfoPanel
+                            stats={roomStats}
+                            onClose={() => setInfoOpen(false)}
+                        />
+                    )}
 
-                {/* Chat Content */}
-                {roomsLoading && !selectedRoomId ? (
-                    <FullChatSkeleton profile={profile} />
-                ) : !selectedRoomId ? (
-                    <div className={styles.emptyState}>
-                        <MessageCircle size={48} className={styles.emptyStateIcon} />
-                        <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
-                        <p className={styles.emptyStateText}>
-                            Click the menu button to browse your active interview rooms.
-                        </p>
-                    </div>
-                ) : transcriptLoading ? (
-                    <ChatSkeleton profile={profile} />
-                ) : !transcript || transcript.messages?.length === 0 ? (
-                    <div className={styles.emptyState}>
-                        <MessageCircle size={48} className={styles.emptyStateIcon} />
-                        <h3 className={styles.emptyStateTitle}>No messages yet</h3>
-                        <p className={styles.emptyStateText}>
-                            This room has no messages yet. Messages will appear here
-                            as they are sent via the Discord bot.
-                        </p>
-                    </div>
-                ) : (
-                    <div className={styles.messagesContainer}>
-                        {groupedMessages.map(item => {
-                            if (item.type === 'date') {
-                                return <DateDivider key={item.key} label={item.label} />;
-                            }
-                            const msg = item.data;
-                            if (msg.type === 'leave') {
-                                return <LeaveNotice key={item.key} msg={msg} />;
-                            }
-                            return (
-                                <MessageBubble
-                                    key={item.key}
-                                    msg={msg}
-                                    viewerRole={transcript.viewer_role}
-                                />
-                            );
-                        })}
-                        <div ref={bottomRef} />
-                    </div>
-                )}
+                    {/* Chat Content */}
+                    {roomsLoading && !selectedRoomId ? (
+                        <FullChatSkeleton profile={profile} />
+                    ) : !selectedRoomId ? (
+                        <div className={styles.emptyState}>
+                            <MessageCircle size={48} className={styles.emptyStateIcon} />
+                            <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
+                            <p className={styles.emptyStateText}>
+                                Click the menu button to browse your active interview rooms.
+                            </p>
+                        </div>
+                    ) : transcriptLoading ? (
+                        <ChatSkeleton profile={profile} />
+                    ) : !transcript || transcript.messages?.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <MessageCircle size={48} className={styles.emptyStateIcon} />
+                            <h3 className={styles.emptyStateTitle}>No messages yet</h3>
+                            <p className={styles.emptyStateText}>
+                                This room has no messages yet. Messages will appear here
+                                as they are sent via the Discord bot.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className={styles.messagesContainer}>
+                            {groupedMessages.map(item => {
+                                if (item.type === 'date') {
+                                    return <DateDivider key={item.key} label={item.label} />;
+                                }
+                                const msg = item.data;
+                                if (msg.type === 'leave') {
+                                    return <LeaveNotice key={item.key} msg={msg} />;
+                                }
+                                return (
+                                    <MessageBubble
+                                        key={item.key}
+                                        msg={msg}
+                                        viewerRole={transcript.viewer_role}
+                                    />
+                                );
+                            })}
+                            <div ref={bottomRef} />
+                        </div>
+                    )}
 
-                {/* New Messages Button */}
-                {showNewMsg && selectedRoomId && (
-                    <button className={styles.newMessagesBtn} onClick={scrollToBottom}>
-                        <ChevronDown size={14} />
-                        New messages
-                    </button>
-                )}
+                    {/* New Messages Button */}
+                    {showNewMsg && selectedRoomId && (
+                        <button className={styles.newMessagesBtn} onClick={scrollToBottom}>
+                            <ChevronDown size={14} />
+                            New messages
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

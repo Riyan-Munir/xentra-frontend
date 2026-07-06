@@ -4553,3 +4553,27 @@ input[type="radio"]:focus {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
+
+/* =============================================
+   Chat Room Skeleton — Responsive Layout
+   ============================================= */
+
+/* Desktop (>1024px): hide hamburger skeleton, show side menu always */
+@media (min-width: 1025px) {
+  .skel-hamburger {
+    display: none;
+  }
+  .skel-side-menu {
+    display: flex !important;
+  }
+}
+
+/* Mobile (<768px): show hamburger skeleton, hide side menu skeleton */
+@media (max-width: 768px) {
+  .skel-hamburger {
+    display: block;
+  }
+  .skel-side-menu {
+    display: none !important;
+  }
+}

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ChatRoom.module.css — Premium Chat Room Page
+   ChatRoom.module.css — Premium Chat Room Page (Dark Glassy Theme)
    Brand-matched to generate_transcript.py color palette
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -14,20 +14,19 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #dfe2e8 0%, #EAEDF2 50%, #e4e7ed 100%);
-    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(255, 215, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .chatContainerPremium {
-    border-color: rgba(255, 215, 0, 0.5);
+    border-color: rgba(255, 215, 0, 0.25);
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.5),
-        0 0 24px rgba(255, 215, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 24px rgba(255, 215, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     animation: containerGlow 6s infinite ease-in-out;
 }
 
@@ -36,17 +35,41 @@
     0%,
     100% {
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.5),
-            0 0 20px rgba(255, 215, 0, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 215, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
     50% {
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.5),
-            0 0 30px rgba(255, 215, 0, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 36px rgba(255, 215, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
+}
+
+/* ── Premium Glass Shimmer (top-edge highlight animation) ──────────────── */
+.chatContainerPremium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.4),
+        rgba(99, 102, 241, 0.3),
+        transparent
+    );
+    z-index: 20;
+    animation: premiumShimmerBorder 8s linear infinite;
+}
+
+@keyframes premiumShimmerBorder {
+    0% { left: -60%; }
+    100% { left: 160%; }
 }
 
 /* ── Gold dust particles (premium ambient effect) ─────────────────────── */
@@ -200,9 +223,10 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     z-index: 5;
     min-height: 52px;
     flex-shrink: 0;
@@ -215,17 +239,18 @@
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.6);
     flex-shrink: 0;
 }
 
 .toggleBtn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .headerTitle {
@@ -237,7 +262,7 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.92);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -245,7 +270,7 @@
 
 .headerSubtitle {
     font-size: 0.75rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.4);
     margin: 0;
 }
 
@@ -256,18 +281,18 @@
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.45);
     flex-shrink: 0;
 }
 
 .infoBtn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.12);
-    color: #4A5568;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* ── Chat Body ─────────────────────────────────────────────────────────── */
@@ -292,9 +317,10 @@
     left: 0;
     width: 280px;
     height: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
     z-index: 10;
     display: flex;
     flex-direction: column;
@@ -311,13 +337,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sideMenuTitle {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* ── Tabs ──────────────────────────────────────────────────────────────── */
@@ -325,7 +351,7 @@
     display: flex;
     gap: 0;
     padding: 8px 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .tab {
@@ -333,7 +359,7 @@
     padding: 8px 12px;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.35);
     background: transparent;
     border: none;
     border-radius: 6px;
@@ -343,13 +369,13 @@
 }
 
 .tab:hover {
-    color: #4A5568;
-    background: rgba(0, 0, 0, 0.03);
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .tabActive {
-    color: #1A7A4A;
-    background: rgba(26, 122, 74, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Room List ─────────────────────────────────────────────────────────── */
@@ -377,23 +403,23 @@
 }
 
 .roomItem:hover {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .roomItemSelected {
-    background: rgba(26, 122, 74, 0.06);
-    border: 1px solid rgba(26, 122, 74, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .roomItemIcon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: rgba(26, 122, 74, 0.08);
+    background: rgba(99, 102, 241, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1A7A4A;
+    color: rgba(165, 180, 252, 0.9);
     flex-shrink: 0;
 }
 
@@ -405,7 +431,7 @@
 .roomItemTitle {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.85);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -414,7 +440,7 @@
 
 .roomItemMeta {
     font-size: 0.7rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.35);
     margin: 2px 0 0;
 }
 
@@ -422,7 +448,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #1A7A4A;
+    background: #6366f1;
     color: white;
     font-size: 0.6rem;
     font-weight: 700;
@@ -441,15 +467,17 @@
 }
 
 .statusDotOpen {
-    background: #1A7A4A;
+    background: #34d399;
+    box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
 }
 
 .statusDotIdle {
-    background: #D4A84B;
+    background: #fbbf24;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
 }
 
 .statusDotClosed {
-    background: #8A95A5;
+    background: rgba(255, 255, 255, 0.25);
 }
 
 /* ── Empty States ──────────────────────────────────────────────────────── */
@@ -460,25 +488,25 @@
     justify-content: center;
     height: 100%;
     gap: 12px;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     padding: 40px 20px;
     text-align: center;
 }
 
 .emptyStateIcon {
-    color: #DDE1E9;
+    color: rgba(255, 255, 255, 0.12);
 }
 
 .emptyStateTitle {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.55);
     margin: 0;
 }
 
 .emptyStateText {
     font-size: 0.82rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     margin: 0;
     max-width: 280px;
     line-height: 1.5;
@@ -495,20 +523,20 @@
 }
 
 .emptyRoomListIcon {
-    color: #DDE1E9;
+    color: rgba(255, 255, 255, 0.12);
     margin-bottom: 4px;
 }
 
 .emptyRoomListTitle {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 .emptyRoomListText {
     font-size: 0.72rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.28);
     margin: 0;
     line-height: 1.4;
 }
@@ -529,7 +557,7 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     padding: 40px 20px;
     text-align: center;
     background: transparent;
@@ -548,25 +576,25 @@
 .lockedIcon {
     background: transparent;
     border: none;
-    color: #DDE1E9;
+    color: rgba(255, 255, 255, 0.15);
 }
 
 .lockedIconBlue {
     background: transparent;
     border: none;
-    color: #DDE1E9;
+    color: rgba(255, 255, 255, 0.15);
 }
 
 .lockedTitle {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 .lockedText {
     font-size: 0.82rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     margin: 0;
     max-width: 280px;
     line-height: 1.5;
@@ -637,15 +665,15 @@
 }
 
 .avatarFallbackClient {
-    background: linear-gradient(135deg, #2B52CC, #1E3DA0);
+    background: linear-gradient(135deg, #4F6BF6, #3B52CC);
 }
 
 .avatarFallbackFreelancer {
-    background: linear-gradient(135deg, #1A7A4A, #125C36);
+    background: linear-gradient(135deg, #22C55E, #16A34A);
 }
 
 .avatarFallbackBot {
-    background: linear-gradient(135deg, #5B3FA6, #432E7E);
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
 }
 
 /* ── Bubble Base ───────────────────────────────────────────────────────── */
@@ -656,44 +684,48 @@
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Self bubble (viewer's messages — sage green) */
+/* Self bubble (viewer's messages — indigo-tinted glass) */
 .bubbleSelf {
-    background: #DCF2E4;
-    border: 1px solid #9ECDB4;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.25);
     border-bottom-right-radius: 4px;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-/* Other party bubble (white) */
+/* Other party bubble (dark glass) */
 .bubbleOther {
-    background: #FFFFFF;
-    border: 1px solid #D1D8E4;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom-left-radius: 4px;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-/* Complaint bubble (amber) */
+/* Complaint bubble (amber glass) */
 .bubbleComplain {
-    background: #FEF3CD;
-    border: 1px solid #DDB95A;
-    color: #1A1F2E;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    color: rgba(252, 211, 77, 0.9);
 }
 
-/* Command bubble (indigo tint) */
+/* Command bubble (indigo glass) */
 .bubbleCommand {
-    background: #EBF0FF;
-    border: 1px solid #8EA8E8;
-    color: #1A1F2E;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: rgba(165, 180, 252, 0.9);
 }
 
-/* Bot message bubble (lavender) */
+/* Bot message bubble (purple glass) */
 .bubbleBot {
-    background: #F3F1FA;
-    border: 1px solid #B8B0D8;
-    color: #1A1F2E;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: rgba(196, 181, 253, 0.9);
 }
 
 /* ── Command Badge ─────────────────────────────────────────────────────── */
@@ -701,8 +733,8 @@
     display: inline-block;
     padding: 2px 8px;
     border-radius: 4px;
-    background: #6B84CC;
-    color: white;
+    background: rgba(99, 102, 241, 0.25);
+    color: rgba(165, 180, 252, 0.9);
     font-size: 0.65rem;
     font-weight: 700;
     margin-bottom: 6px;
@@ -710,8 +742,8 @@
 
 /* ── Reply Preview ─────────────────────────────────────────────────────── */
 .replyPreview {
-    background: #F7F8FB;
-    border: 1px solid #CDD3DF;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 6px;
     padding: 6px 10px;
     margin-bottom: 6px;
@@ -725,19 +757,19 @@
     bottom: 0;
     width: 3px;
     border-radius: 3px 0 0 3px;
-    background: #125C36;
+    background: #6366f1;
 }
 
 .replySender {
     font-size: 0.68rem;
     font-weight: 700;
-    color: #125C36;
+    color: rgba(165, 180, 252, 0.9);
     margin: 0;
 }
 
 .replyText {
     font-size: 0.72rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.35);
     margin: 2px 0 0;
     white-space: nowrap;
     overflow: hidden;
@@ -748,14 +780,14 @@
 .bubbleText {
     font-size: 0.82rem;
     line-height: 1.5;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.88);
     margin: 0;
 }
 
 /* ── Timestamp ─────────────────────────────────────────────────────────── */
 .bubbleTimestamp {
     font-size: 0.62rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     text-align: right;
     margin-top: 4px;
 }
@@ -769,12 +801,13 @@
 }
 
 .dateDividerPill {
-    background: #D6DCE8;
-    color: #4A5568;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.4);
     font-size: 0.7rem;
     font-weight: 600;
     padding: 4px 14px;
     border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ── Leave Notice (centered) ──────────────────────────────────────────── */
@@ -785,8 +818,8 @@
 }
 
 .leaveNoticeCard {
-    background: rgba(138, 149, 165, 0.08);
-    border: 1px solid rgba(138, 149, 165, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 8px;
     padding: 8px 16px;
     text-align: center;
@@ -796,19 +829,19 @@
 .leaveNoticeTitle {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 .leaveNoticeReason {
     font-size: 0.7rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     margin: 4px 0 0;
 }
 
 .leaveNoticeTime {
     font-size: 0.6rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.25);
     margin-top: 4px;
 }
 
@@ -818,7 +851,7 @@
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1A7A4A;
+    background: #6366f1;
     color: white;
     border: none;
     border-radius: 20px;
@@ -826,7 +859,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(26, 122, 74, 0.3);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
     z-index: 5;
     display: flex;
     align-items: center;
@@ -836,8 +869,8 @@
 }
 
 .newMessagesBtn:hover {
-    background: #125C36;
-    box-shadow: 0 6px 16px rgba(26, 122, 74, 0.4);
+    background: #4F46E5;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
 }
 
 @keyframes slideUpFade {
@@ -859,9 +892,10 @@
     right: 0;
     width: 320px;
     height: 100%;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(16px);
-    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
     z-index: 10;
     transform: translateX(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -884,13 +918,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .infoPanelTitle {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.85);
     margin: 0;
 }
 
@@ -910,7 +944,7 @@
 .infoSectionTitle {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.35);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0;
@@ -924,11 +958,11 @@
 }
 
 .infoLabel {
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .infoValue {
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.85);
     font-weight: 600;
 }
 
@@ -938,7 +972,7 @@
     gap: 10px;
     padding: 8px 12px;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .infoParticipantAvatar {
@@ -957,12 +991,12 @@
 .infoParticipantName {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .infoParticipantRole {
     font-size: 0.68rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.35);
 }
 
 /* ── Check Grid ────────────────────────────────────────────────────────── */
@@ -977,7 +1011,7 @@
     align-items: center;
     gap: 6px;
     font-size: 0.72rem;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .checkIcon {
@@ -992,13 +1026,13 @@
 }
 
 .checkIconDone {
-    background: rgba(26, 122, 74, 0.1);
-    color: #1A7A4A;
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
 }
 
 .checkIconPending {
-    background: rgba(138, 149, 165, 0.1);
-    color: #8A95A5;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.35);
 }
 
 /* ── Milestones List ───────────────────────────────────────────────────── */
@@ -1007,7 +1041,7 @@
     align-items: center;
     gap: 8px;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     font-size: 0.78rem;
 }
 
@@ -1019,8 +1053,8 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: rgba(26, 122, 74, 0.08);
-    color: #1A7A4A;
+    background: rgba(99, 102, 241, 0.15);
+    color: rgba(165, 180, 252, 0.9);
     font-size: 0.65rem;
     font-weight: 700;
     display: flex;
@@ -1031,13 +1065,13 @@
 
 .milestoneTitle {
     flex: 1;
-    color: #1A1F2E;
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 500;
 }
 
 .milestoneMeta {
     font-size: 0.68rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.3);
     white-space: nowrap;
 }
 
@@ -1053,24 +1087,24 @@
 }
 
 .yetToImplementIcon {
-    color: #DDE1E9;
+    color: rgba(255, 255, 255, 0.12);
 }
 
 .yetToImplementTitle {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #4A5568;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 .yetToImplementText {
     font-size: 0.75rem;
-    color: #8A95A5;
+    color: rgba(255, 255, 255, 0.28);
     margin: 0;
     line-height: 1.4;
 }
 
-/* ── Skeleton Loading ──────────────────────────────────────────────────── */
+/* ── Skeleton Loading (dark theme) ────────────────────────────────────── */
 .skeletonContainer {
     display: flex;
     flex-direction: column;
@@ -1099,7 +1133,7 @@
     min-width: 32px;
     min-height: 32px;
     border-radius: 50%;
-    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     flex-shrink: 0;
@@ -1116,11 +1150,11 @@
 
 .skeletonBubbleBox {
     height: 48px;
-    min-width: 100px;
-    max-width: 320px;
+    min-width: 160px;
+    max-width: 380px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1131,7 +1165,7 @@
 .skeletonBubbleBoxLine {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #d6d9de 25%, #e2e5ea 50%, #d6d9de 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1174,7 +1208,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     flex-shrink: 0;
@@ -1190,7 +1224,7 @@
 .roomListSkeletonLine {
     height: 12px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1198,7 +1232,7 @@
 .roomListSkeletonLineSmall {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #f5f5f5 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1215,8 +1249,8 @@
     display: flex;
     align-items: center;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.5);
 }
 
 .fullSkeletonBody {
@@ -1227,10 +1261,10 @@
 
 .fullSkeletonSide {
     width: 280px;
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(17, 24, 39, 0.4);
 }
 
 .fullSkeletonSideHeader {
@@ -1238,14 +1272,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .fullSkeletonTabs {
     display: flex;
     gap: 8px;
     padding: 8px 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .fullSkeletonRoomList {
@@ -1283,12 +1317,61 @@
 }
 
 .skelPulse {
-    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
 
-/* ── Responsive ────────────────────────────────────────────────────────── */
+/* ── Chat Content Wrapper ─────────────────────────────────────────────── */
+.chatContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESKTOP: Side menu always visible, no hamburger
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) {
+    /* Side menu always visible in desktop — positioned in flow */
+    .chatBody {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .sideMenu {
+        position: relative;
+        transform: none;
+        flex-shrink: 0;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Hide the close button inside the side menu on desktop */
+    .sideMenuHeader .toggleBtn {
+        display: none;
+    }
+
+    /* Hide the hamburger toggle in the chat header on desktop */
+    .chatHeader > .toggleBtn {
+        display: none;
+    }
+
+    /* Chat content fills remaining space */
+    .chatContent {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
@@ -1372,8 +1455,8 @@
 
     .skeletonBubbleBox {
         height: 48px;
-        min-width: 80px;
-        max-width: 260px;
+        min-width: 120px;
+        max-width: 280px;
         padding: 8px 10px;
     }
 
@@ -1448,8 +1531,8 @@
 
     .skeletonBubbleBox {
         height: 40px;
-        min-width: 70px;
-        max-width: 220px;
+        min-width: 100px;
+        max-width: 240px;
         padding: 6px 8px;
     }
 
