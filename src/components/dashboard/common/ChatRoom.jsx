@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
     Menu, X, MessageCircle, Info, Lock, ChevronDown,
-    User, Bot, AlertTriangle, LogOut, Clock,
+    User, Bot, AlertTriangle, LogOut, Clock, RefreshCw,
 } from 'lucide-react';
 import { roomService } from '../../../services/roomService';
 import styles from './ChatRoom.module.css';
@@ -460,6 +460,8 @@ const ChatRoom = ({ profile, currentRole }) => {
     const [roomStats, setRoomStats] = useState(null);
     const [infoOpen, setInfoOpen] = useState(false);
     const [showNewMsg, setShowNewMsg] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const lastFetchRef = useRef({});  // cache: { roomId: timestamp }
 
     const chatBodyRef = useRef(null);
     const bottomRef = useRef(null);
@@ -483,12 +485,22 @@ const ChatRoom = ({ profile, currentRole }) => {
     }, [fetchRooms]);
 
     // ── Fetch transcript when room selected ──────────────────────────────
-    const fetchTranscript = useCallback(async (roomId) => {
+    const fetchTranscript = useCallback(async (roomId, force = false) => {
         if (!roomId) { setTranscript(null); return; }
+
+        // Simple cache: skip if fetched < 10 seconds ago (unless forced)
+        const now = Date.now();
+        const lastFetch = lastFetchRef.current[roomId] || 0;
+        if (!force && now - lastFetch < 10000) {
+            setTranscriptLoading(false);
+            return;
+        }
+
         setTranscriptLoading(true);
         try {
             const data = await roomService.getTranscript(roomId, currentRole);
             setTranscript(data);
+            lastFetchRef.current[roomId] = Date.now();
             // Also fetch stats
             const statsData = await roomService.getRoomStats(roomId, currentRole);
             setRoomStats(statsData);
@@ -499,6 +511,15 @@ const ChatRoom = ({ profile, currentRole }) => {
             setTranscriptLoading(false);
         }
     }, [currentRole]);
+
+    // ── Manual refresh (bypasses cache) ─────────────────────────────────
+    const handleRefresh = useCallback(async () => {
+        if (!selectedRoomId || refreshing) return;
+        setRefreshing(true);
+        // Force bypass cache
+        await fetchTranscript(selectedRoomId, true);
+        setRefreshing(false);
+    }, [selectedRoomId, refreshing, fetchTranscript]);
 
     useEffect(() => {
         fetchTranscript(selectedRoomId);
@@ -603,13 +624,28 @@ const ChatRoom = ({ profile, currentRole }) => {
                     {headerSubtitle && <p className={styles.headerSubtitle}>{headerSubtitle}</p>}
                 </div>
                 {selectedRoomId && (
-                    <button
-                        className={styles.infoBtn}
-                        onClick={() => { setInfoOpen(!infoOpen); setMenuOpen(false); }}
-                        aria-label="Room info"
-                    >
-                        <Info size={18} />
-                    </button>
+                    <>
+                        <button
+                            className={styles.infoBtn}
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            aria-label="Refresh chat"
+                            title="Refresh"
+                        >
+                            <RefreshCw
+                                size={18}
+                                className={refreshing ? 'spin' : ''}
+                                style={refreshing ? { animation: 'spin 0.8s linear infinite' } : {}}
+                            />
+                        </button>
+                        <button
+                            className={styles.infoBtn}
+                            onClick={() => { setInfoOpen(!infoOpen); setMenuOpen(false); }}
+                            aria-label="Room info"
+                        >
+                            <Info size={18} />
+                        </button>
+                    </>
                 )}
             </div>
 
