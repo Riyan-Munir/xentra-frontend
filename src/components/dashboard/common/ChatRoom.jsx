@@ -330,7 +330,7 @@ function RoomListSkeleton() {
 }
 
 // ── Room Info Panel ───────────────────────────────────────────────────────
-function RoomInfoPanel({ stats, onClose }) {
+function RoomInfoPanel({ stats, infoOpen, onClose }) {
     if (!stats) return null;
 
     const checkLabels = {
@@ -354,7 +354,7 @@ function RoomInfoPanel({ stats, onClose }) {
     };
 
     return (
-        <div className={`${styles.infoPanel} ${styles.infoPanelOpen}`}>
+        <div className={`${styles.infoPanel} ${infoOpen ? styles.infoPanelOpen : ''}`}>
             <div className={styles.infoPanelHeader}>
                 <h3 className={styles.infoPanelTitle}>Room Details</h3>
                 <button className={styles.infoBtn} onClick={onClose}>
@@ -769,13 +769,12 @@ const ChatRoom = ({ profile, currentRole }) => {
 
                 {/* ── Chat Content Wrapper (flex child on desktop) ──── */}
                 <div className={styles.chatContent}>
-                    {/* Room Info Panel */}
-                    {infoOpen && (
-                        <RoomInfoPanel
-                            stats={roomStats}
-                            onClose={() => setInfoOpen(false)}
-                        />
-                    )}
+                    {/* Room Info Panel — always in DOM for slide transition */}
+                    <RoomInfoPanel
+                        stats={roomStats}
+                        infoOpen={infoOpen}
+                        onClose={() => setInfoOpen(false)}
+                    />
 
                     {/* Chat Content */}
                     {!selectedRoomId ? (
