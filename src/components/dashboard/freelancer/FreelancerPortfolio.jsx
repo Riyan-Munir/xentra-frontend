@@ -457,7 +457,7 @@ const FreelancerPortfolio = ({ profile, addNotification, setHasUnsavedChanges, t
   };
 
   return (
-    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ maxWidth: '800px', width: '100%' }}>
+    <div className={'layout-bottom flex-1 minh-0 flex-col pos-relative mx-auto' + (isPremium && !isEditing ? ' premium-card' : '')} style={{ maxWidth: '800px', width: '100%', maxHeight: '600px' }}>
       <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
         <div className={'p-24 flex-col' + (hasChanges ? ' pb-120' : ' pb-40')} style={{ minHeight: '100%' }}>
 
