@@ -305,17 +305,23 @@ function RoomInfoPanel({ stats, onClose }) {
     if (!stats) return null;
 
     const checkLabels = {
-        agreement_sent: 'Agreement Sent',
-        agreement_reviewed: 'Agreement Reviewed',
-        agreement_signed: 'Agreement Signed',
-        budget_set: 'Budget Set',
-        milestones_set: 'Milestones Set',
-        milestones_approved: 'Milestones Approved',
+        // Freelancer-side confirm flags
+        freelancer_greet_sent: 'Freelancer Greet Sent',
+        freelancer_rules_sent: 'Freelancer Rules Sent',
+        freelancer_job_details_sent: 'Freelancer Job Details Sent',
+        // Client-side confirm flags
+        client_greet_sent: 'Client Greet Sent',
+        client_rules_sent: 'Client Rules Sent',
+        client_job_details_sent: 'Client Job Details Sent',
+        // Progress flags
+        final_budget_selected: 'Budget Set',
+        milestones_selected: 'Milestones Set',
+        client_proposal_review: 'Client Proposal Review',
+        freelancer_proposal_review: 'Freelancer Proposal Review',
         client_accepted_proposal: 'Client Accepted',
         freelancer_accepted_proposal: 'Freelancer Accepted',
-        agreement_finalized: 'Agreement Finalized',
-        room_closed: 'Room Closed',
-        transcript_generated: 'Transcript Generated',
+        freelancer_transcript_sent: 'Freelancer Transcript Sent',
+        client_transcript_sent: 'Client Transcript Sent',
     };
 
     return (
