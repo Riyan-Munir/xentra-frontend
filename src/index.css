@@ -445,16 +445,60 @@ input[type="radio"]:focus {
   color: var(--text);
 }
 
-/* Premium-Locked Nav Item */
+/* Premium-Locked Nav Item (free tier — disabled look) */
 .nav-item.premium-locked {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
   position: relative;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.2);
+  filter: saturate(0.3);
 }
 
 .nav-item.premium-locked:hover {
-  opacity: 0.55;
+  opacity: 0.5;
+}
+
+/* Premium-Active Nav Item (premium user, chatrooms selected) */
+.nav-item.premium-nav-active {
+  position: relative;
+  color: rgba(255, 215, 0, 0.95);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.03));
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.06);
+  animation: premiumNavGlow 4s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.nav-item.premium-nav-active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 215, 0, 0.08),
+    transparent);
+  animation: premiumNavShimmer 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes premiumNavGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.04); }
+  50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.1); }
+}
+
+@keyframes premiumNavShimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.nav-item.premium-nav-active:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.05));
+  border-color: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
 }
 
 .nav-item.premium-locked .nav-premium-dust {

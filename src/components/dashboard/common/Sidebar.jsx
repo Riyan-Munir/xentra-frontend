@@ -38,10 +38,18 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobi
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isLocked = item.premium && !isPremium;
+            const isActive = activeSection === item.id;
+            const isPremiumActive = item.premium && isPremium && isActive;
+            const navClasses = [
+              'nav-item',
+              isActive ? 'active' : '',
+              isLocked ? 'premium-locked' : '',
+              isPremiumActive ? 'premium-nav-active' : ''
+            ].filter(Boolean).join(' ');
             return (
               <div
                 key={item.id}
-                className={`nav-item ${activeSection === item.id ? 'active' : ''} ${isLocked ? 'premium-locked' : ''}`}
+                className={navClasses}
                 onClick={() => handleNavClick(item.id)}
                 title={isLocked ? 'Premium feature — upgrade to access' : undefined}
               >
@@ -52,6 +60,11 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobi
                     {[...Array(8)].map((_, i) => (
                       <span key={i} className="dust-particle" style={{ animationDelay: `${i * 0.7}s` }} />
                     ))}
+                  </span>
+                )}
+                {isPremiumActive && (
+                  <span className="premium-tag" style={{ marginLeft: 'auto', fontSize: '0.55rem' }}>
+                    ✦
                   </span>
                 )}
               </div>

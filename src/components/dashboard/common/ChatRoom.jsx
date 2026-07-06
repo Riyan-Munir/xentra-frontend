@@ -98,7 +98,7 @@ function ReplyPreview({ reply }) {
 }
 
 // ── Message Bubble ────────────────────────────────────────────────────────
-function MessageBubble({ msg, viewerRole }) {
+function MessageBubble({ msg, viewerRole, isPremium }) {
     const isSelf = msg.sender === viewerRole;
 
     // Determine bubble class
@@ -125,7 +125,7 @@ function MessageBubble({ msg, viewerRole }) {
                     sender={msg.sender}
                 />
             )}
-            <div className={`${styles.bubble} ${bubbleClass}`}>
+            <div className={`${styles.bubble} ${bubbleClass} ${styles.bubbleFlash} ${isPremium ? styles.premiumBubble : ''}`}>
                 {msg.is_command && msg.command_name && (
                     <div className={styles.commandBadge}>/{msg.command_name}</div>
                 )}
@@ -168,9 +168,9 @@ function LeaveNotice({ msg }) {
 }
 
 // ── Date Divider ──────────────────────────────────────────────────────────
-function DateDivider({ label }) {
+function DateDivider({ label, isPremium }) {
     return (
-        <div className={styles.dateDivider}>
+        <div className={`${styles.dateDivider} ${isPremium ? styles.dateDividerPremium : ''}`}>
             <div className={styles.dateDividerPill}>{label}</div>
         </div>
     );
@@ -584,7 +584,7 @@ const ChatRoom = ({ profile, currentRole }) => {
             <GoldDust />
 
             {/* ── Header ──────────────────────────────────────────────────── */}
-            <div className={styles.chatHeader}>
+            <div className={`${styles.chatHeader} ${styles.chatHeaderPremium}`}>
                 <button
                     className={styles.toggleBtn}
                     onClick={() => { setMenuOpen(!menuOpen); setInfoOpen(false); }}
@@ -592,7 +592,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                 >
                     {menuOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
-                <div className={styles.headerTitle}>
+                <div className={`${styles.headerTitle} ${styles.headerTitlePremium}`}>
                     <h3>{headerTitle}</h3>
                     {headerSubtitle && <p className={styles.headerSubtitle}>{headerSubtitle}</p>}
                 </div>
@@ -722,7 +722,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                         <div className={styles.messagesContainer}>
                             {groupedMessages.map(item => {
                                 if (item.type === 'date') {
-                                    return <DateDivider key={item.key} label={item.label} />;
+                                    return <DateDivider key={item.key} label={item.label} isPremium={isPremium} />;
                                 }
                                 const msg = item.data;
                                 if (msg.type === 'leave') {
@@ -733,6 +733,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                                         key={item.key}
                                         msg={msg}
                                         viewerRole={transcript.viewer_role}
+                                        isPremium={isPremium}
                                     />
                                 );
                             })}
