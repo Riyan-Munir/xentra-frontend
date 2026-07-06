@@ -505,6 +505,9 @@ const chatroomsSkeleton = () => (
           { minW: 160, maxW: '45%', right: false },
           { minW: 190, maxW: '48%', right: true },
           { minW: 170, maxW: '50%', right: false },
+          { minW: 175, maxW: '52%', right: false },
+          { minW: 195, maxW: '47%', right: true },
+          { minW: 185, maxW: '50%', right: true },
         ].map((r, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '75%', marginLeft: r.right ? 'auto' : undefined, flexShrink: 0 }}>
             {!r.right && <div className="skeleton-line" style={{ width: 32, height: 32, minWidth: 32, minHeight: 32, borderRadius: '50%', flexShrink: 0 }} />}
