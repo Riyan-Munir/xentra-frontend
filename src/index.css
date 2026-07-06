@@ -1145,6 +1145,7 @@ input[type="radio"]:focus {
     flex-direction: column;
     flex: none;
     height: auto;
+    max-height: none;
   }
 
   .dashboard-view-container {
@@ -4532,7 +4533,7 @@ input[type="radio"]:focus {
 
   .layout-middle {
     min-height: 120px;
-    max-height: 200px;
+    max-height: none;
   }
 
   .layout-bottom {
