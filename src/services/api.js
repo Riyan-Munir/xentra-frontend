@@ -32,7 +32,7 @@ function processPendingRequests(newToken) {
 }
 
 /**
- * Silent JWT refresh — attempts to get a new access_token using the
+ * Silent JWT refresh, attempts to get a new access_token using the
  * stored refresh_token.  Returns the new access_token string, or null
  * if the refresh fails.
  */
@@ -51,7 +51,7 @@ async function refreshAccessToken() {
     localStorage.setItem('access_token', newToken);
     return newToken;
   } catch {
-    // Refresh failed — clear auth state
+    // Refresh failed, clear auth state
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     return null;
@@ -123,7 +123,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Global hacking-alert intercept — fires a custom DOM event so Dashboard
+    // Global hacking-alert intercept, fires a custom DOM event so Dashboard
     // can set hackingState.has_pending=true without the call site needing to
     // handle it individually.
     if (
@@ -165,13 +165,13 @@ api.interceptors.response.use(
       const newToken = await refreshAccessToken();
 
       if (newToken) {
-        // Refresh succeeded — retry all queued requests
+        // Refresh succeeded, retry all queued requests
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         processPendingRequests(newToken);
         isRefreshing = false;
         return api(originalRequest);
       } else {
-        // Refresh failed — reject all queued requests
+        // Refresh failed, reject all queued requests
         processPendingRequests(null);
         isRefreshing = false;
         return Promise.reject(error);
@@ -183,7 +183,7 @@ api.interceptors.response.use(
 );
 
 /**
- * Cached GET — returns cached response if fresh (< 30s), otherwise fetches.
+ * Cached GET, returns cached response if fresh (< 30s), otherwise fetches.
  * Pass { skipCache: true } to bypass cache (e.g., after mutation).
  */
 api.cachedGet = async (url, config = {}) => {

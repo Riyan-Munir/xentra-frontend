@@ -17,7 +17,7 @@ const UnsavedChangesBar = ({ onSave, onCancel, triggerTremble, isSubmitting }) =
       className={`unsaved-changes-bar glass fade-in ${tremble ? 'tremble' : ''}`}
     >
       <div className="unsaved-bar-text">
-        Careful — you have unsaved changes!
+        Careful, you have unsaved changes!
       </div>
       <div className="unsaved-bar-actions">
         <button

@@ -7,11 +7,11 @@ import RoleProfile from './RoleProfile';
  * section in layout-bottom.
  *
  * Props:
- * - profile, avatarUrl, role — forwarded to RoleProfile
- * - statItems — array of { label, value, premium? } for the stats grid
- * - bottomIcon — lucide icon component for the bottom placeholder
- * - bottomTitle — title text for the bottom placeholder
- * - bottomText — description text for the bottom placeholder
+ * - profile, avatarUrl, role, forwarded to RoleProfile
+ * - statItems, array of { label, value, premium? } for the stats grid
+ * - bottomIcon, lucide icon component for the bottom placeholder
+ * - bottomTitle, title text for the bottom placeholder
+ * - bottomText, description text for the bottom placeholder
  */
 const RoleOverview = ({ profile, avatarUrl, role, statItems = [], bottomIcon: BottomIcon, bottomTitle, bottomText }) => {
   return (

@@ -2,13 +2,13 @@ import React, { lazy, Suspense, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Route-level code splitting — each page is a separate chunk loaded on demand
+// Route-level code splitting, each page is a separate chunk loaded on demand
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const BannedPage = lazy(() => import('./pages/BannedPage'));
 
-// Minimal loading state — zero layout shift, pure skeleton placeholder
+// Minimal loading state, zero layout shift, pure skeleton placeholder
 const RouteFallback = memo(() => (
   <div className="dashboard-layout">
     <main className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

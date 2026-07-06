@@ -51,7 +51,7 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobi
                 key={item.id}
                 className={navClasses}
                 onClick={() => handleNavClick(item.id)}
-                title={isLocked ? 'Premium feature — upgrade to access' : undefined}
+                title={isLocked ? 'Premium feature, upgrade to access' : undefined}
               >
                 <Icon size={20} />
                 {item.label}

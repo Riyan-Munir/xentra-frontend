@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ShieldAlert, ShieldCheck, RefreshCw } from 'lucide-react';
 
 /**
- * CaptchaChallenge — Cloudflare Turnstile widget overlay.
+ * CaptchaChallenge, Cloudflare Turnstile widget overlay.
  *
  * Renders a modal overlay containing the Turnstile challenge widget.
  * When the user completes the challenge successfully, calls `onVerified`
@@ -10,13 +10,13 @@ import { ShieldAlert, ShieldCheck, RefreshCw } from 'lucide-react';
  *
  * Props
  * -----
- * - siteKey: string — Turnstile site key (from backend 403 response)
- * - onVerified: (token) => void — called when captcha is solved
- * - onDismiss: () => void — called if user closes without solving
- * - error: string | null — optional error message to display
- * - title: string — modal title (default: "Security Verification")
- * - description: string — modal description text
- * - icon: React.ComponentType — icon component to display (default: ShieldAlert)
+ * - siteKey: string, Turnstile site key (from backend 403 response)
+ * - onVerified: (token) => void, called when captcha is solved
+ * - onDismiss: () => void, called if user closes without solving
+ * - error: string | null, optional error message to display
+ * - title: string, modal title (default: "Security Verification")
+ * - description: string, modal description text
+ * - icon: React.ComponentType, icon component to display (default: ShieldAlert)
  */
 const CaptchaChallenge = ({
   siteKey,
@@ -49,7 +49,7 @@ const CaptchaChallenge = ({
     document.body.appendChild(script);
 
     return () => {
-      // Don't remove the script — it may be needed if component re-mounts
+      // Don't remove the script, it may be needed if component re-mounts
     };
   }, []);
 
@@ -69,7 +69,7 @@ const CaptchaChallenge = ({
       'retry': 'auto',
       'refresh-expired': 'auto',
       callback: (token) => {
-        // User completed the challenge — show authenticating state, then notify parent
+        // User completed the challenge, show authenticating state, then notify parent
         setIsExpired(false);
         setVerifying(true);
         onVerified(token);
@@ -95,7 +95,7 @@ const CaptchaChallenge = ({
     if (error) setVerifying(false);
   }, [error]);
 
-  // Retry handler — re-mounts the widget by bumping retryKey
+  // Retry handler, re-mounts the widget by bumping retryKey
   const handleRetry = useCallback(() => {
     setIsExpired(false);
     setRetryKey((k) => k + 1);
@@ -143,7 +143,7 @@ const CaptchaChallenge = ({
             style={{ background: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)', marginBottom: 12 }}
           >
             <RefreshCw size={16} />
-            Challenge expired — Tap to retry
+            Challenge expired, Tap to retry
           </button>
         )}
 

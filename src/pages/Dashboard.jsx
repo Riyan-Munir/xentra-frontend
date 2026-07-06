@@ -4,13 +4,13 @@ import { profileService } from '../services/profileService';
 import { guildService } from '../services/guildService';
 import { checkPendingHacking, dismissHacking, captchaVerify, fetchCaptchaChallenge } from '../services/api';
 
-// Common Components (always needed — eager)
+// Common Components (always needed, eager)
 import Sidebar from '../components/dashboard/common/Sidebar';
 import RoleSwitcher from '../components/dashboard/common/RoleSwitcher';
 import Skeleton from '../components/common/Skeleton';
 import CaptchaChallenge from '../components/dashboard/common/CaptchaChallenge';
 
-// Lazy-loaded section components — each is a separate chunk loaded on demand
+// Lazy-loaded section components, each is a separate chunk loaded on demand
 const ClientOverview = lazy(() => import('../components/dashboard/client/Overview'));
 const ClientSettings = lazy(() => import('../components/dashboard/client/ProfileSettings'));
 const ClientJobs = lazy(() => import('../components/dashboard/client/Jobs'));
@@ -456,9 +456,9 @@ const chatroomsSkeleton = () => (
     border: '1px solid var(--border)',
     boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
   }}>
-    {/* Header — matches .chatHeader exactly: min-height 52px, padding 12px 16px */}
+    {/* Header, matches .chatHeader exactly: min-height 52px, padding 12px 16px */}
     <div className="flex-row items-center gap-12" style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, minHeight: 52, background: 'rgba(17,24,39,0.6)' }}>
-      {/* Hamburger skeleton — hidden on desktop via CSS, visible on mobile */}
+      {/* Hamburger skeleton, hidden on desktop via CSS, visible on mobile */}
       <div className="skel-hamburger skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
       <div className="flex-1" style={{ minWidth: 0 }}>
         <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 6 }} />
@@ -466,9 +466,9 @@ const chatroomsSkeleton = () => (
       </div>
       <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
     </div>
-    {/* Body — flex row, side menu + chat area */}
+    {/* Body, flex row, side menu + chat area */}
     <div className="flex-row" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-      {/* Side menu — matches .sideMenu: width 280px, always visible on desktop */}
+      {/* Side menu, matches .sideMenu: width 280px, always visible on desktop */}
       <div className="skel-side-menu" style={{
         width: 280,
         borderRight: '1px solid rgba(255,255,255,0.06)',
@@ -498,7 +498,7 @@ const chatroomsSkeleton = () => (
           ))}
         </div>
       </div>
-      {/* Chat area — messages start from top, no gap after header */}
+      {/* Chat area, messages start from top, no gap after header */}
       <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden', minHeight: 0, position: 'relative' }}>
         {[
           { minW: 180, maxW: '55%', right: false },
@@ -541,7 +541,7 @@ const getSectionSkeleton = (section, role) => {
   return overviewSkeleton();
 };
 
-// Toast component extracted — defined outside Dashboard to avoid re-creation
+// Toast component extracted, defined outside Dashboard to avoid re-creation
 const Toast = React.memo(({ message, type = 'error', forceVanish, onRemove }) => {
   const [isVanishing, setIsVanishing] = useState(false);
 
@@ -693,13 +693,13 @@ const Dashboard = () => {
       const data = await profileService.getMe(currentRole, !isSectionRefresh);
       setProfile(data);
     } catch (err) {
-      // ── Hacking notification block — don't logout, show modal ──
+      // ── Hacking notification block, don't logout, show modal ──
       if (err.response?.data?.require_dismiss) {
         setHackingState((prev) => ({ ...prev, has_pending: true, loading: false }));
         setIsProfileLoading(false);
         return;
       }
-      // ── Ban block — redirect to banned page ──
+      // ── Ban block, redirect to banned page ──
       if (err.response?.status === 403 && err.response?.data?.is_banned) {
         window.location.href = '/banned';
         return;
@@ -796,7 +796,7 @@ const Dashboard = () => {
     setCaptchaState((prev) => ({ ...prev, error: null }));
     try {
       await captchaVerify(token);
-      // Verification succeeded — dismiss the overlay
+      // Verification succeeded, dismiss the overlay
       setCaptchaState({ required: false, siteKey: '', error: null });
       // Optionally re-fetch profile/data now that WAF will let requests through
       fetchProfile();
@@ -963,7 +963,7 @@ const Dashboard = () => {
         <div className="flex-col flex-center gap-16" style={{ minHeight: 300, opacity: 0.35, pointerEvents: 'none', userSelect: 'none' }}>
           <ShieldAlert size={64} />
           <p style={{ fontSize: 16, textAlign: 'center', maxWidth: 340 }}>
-            Dashboard locked — acknowledge the security alert to continue.
+            Dashboard locked, acknowledge the security alert to continue.
           </p>
         </div>
       );
@@ -1066,7 +1066,7 @@ const Dashboard = () => {
     const tierMap = {
       1: { icon: '🔍', title: 'Security Notice', severity: 'info', msg: 'Please review your recent activity.' },
       2: { icon: '⚠️', title: 'Security Warning', severity: 'warning', msg: 'Continued suspicious activity may result in feature restrictions.' },
-      3: { icon: '🚨', title: 'Security Alert — Action Required', severity: 'danger', msg: 'Some dashboard features may be restricted until this is resolved.' },
+      3: { icon: '🚨', title: 'Security Alert, Action Required', severity: 'danger', msg: 'Some dashboard features may be restricted until this is resolved.' },
       4: { icon: '⛔', title: 'Critical Security Alert', severity: 'critical', msg: 'Your account is at risk of automatic suspension. Contact an administrator immediately.' },
     };
     return tierMap[tier] || tierMap[1];
@@ -1093,10 +1093,10 @@ const Dashboard = () => {
                 <p className="hacking-modal-detail">
                   Recent: <strong>{hackingState.latest.event_type}</strong>
                   {hackingState.latest.attempt_count && (
-                    <> — Total attempts: <strong>{hackingState.latest.attempt_count}</strong></>
+                    <>, Total attempts: <strong>{hackingState.latest.attempt_count}</strong></>
                   )}
                   {hackingState.latest.bypass_tier && (
-                    <> — Tier: <strong>{hackingState.latest.bypass_tier}</strong></>
+                    <>, Tier: <strong>{hackingState.latest.bypass_tier}</strong></>
                   )}
                 </p>
               )}
@@ -1122,7 +1122,7 @@ const Dashboard = () => {
   ) : null;
 
 
-  // Initial full-page loading state — no profile yet
+  // Initial full-page loading state, no profile yet
   if (!profile) return (
     <div className="dashboard-layout">
       {hackingModal}

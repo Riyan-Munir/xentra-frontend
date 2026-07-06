@@ -1,5 +1,5 @@
 /**
- * Analytics Collector — frontend-side utility for sending structured analytics
+ * Analytics Collector, frontend-side utility for sending structured analytics
  * events to the backend.
  *
  * Provides a fire-and-forget interface for dashboard components to log user actions
@@ -54,7 +54,7 @@ class AnalyticsCollector {
   /**
    * Internal fire-and-forget sender with dedup.
    * Posts event data to the backend analytics endpoint.
-   * Never blocks the UI — errors are silently caught.
+   * Never blocks the UI, errors are silently caught.
    *
    * @param {Object} eventData - Structured event data matching LogEvent schema.
    */
@@ -66,7 +66,7 @@ class AnalyticsCollector {
     api
       .post(this.ANALYTICS_ENDPOINT, { event: eventData })
       .catch(() => {
-        // Silently fail — analytics must never break the user experience.
+        // Silently fail, analytics must never break the user experience.
       });
   }
 

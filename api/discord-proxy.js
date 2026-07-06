@@ -1,5 +1,5 @@
 // ────────────────────────────────────────────────────────────
-// Vercel Serverless Function — Discord API Proxy
+// Vercel Serverless Function, Discord API Proxy
 // ────────────────────────────────────────────────────────────
 // Route:    POST /api/discord-proxy
 // Auth:     X-Proxy-Key header matching DISCORD_PROXY_KEY env var
@@ -7,7 +7,7 @@
 // Response: { status_code, body }
 //
 // This function runs on AWS Lambda (Vercel's infrastructure),
-// which uses unblocked IP ranges — Cloudflare Bot Management
+// which uses unblocked IP ranges, Cloudflare Bot Management
 // blocks HF Spaces' IP range at the TLS handshake level, so
 // we route all Discord API calls through here.
 // ────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ status: 'error', message: 'Missing required fields: method, url' });
     }
 
-    // ── Validate URL — only allow Discord domains ──────────
+    // ── Validate URL, only allow Discord domains ──────────
     let parsedUrl;
     try {
         parsedUrl = new URL(targetUrl);

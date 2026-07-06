@@ -7,7 +7,7 @@
  *
  * - **Bot** → **Backend**: Uses this signing utility server-side (secure).
  * - **Frontend** → **Backend**: Uses JWT Bearer tokens (Discord OAuth2).
- *   HMAC signing for the frontend is DISABLED by default — the frontend
+ *   HMAC signing for the frontend is DISABLED by default, the frontend
  *   authenticates via Bearer tokens, which is the correct approach for
  *   browser-based clients.
  *
@@ -66,7 +66,7 @@ async function hmacSha256Hex(secret, data) {
 }
 
 /**
- * Compute HMAC-SHA256 signature — identical algorithm to backend's
+ * Compute HMAC-SHA256 signature, identical algorithm to backend's
  * ``_compute_signature()`` in ``common/signing.py``.
  *
  * @param {string} method - HTTP method (GET, POST, PATCH, DELETE, …)

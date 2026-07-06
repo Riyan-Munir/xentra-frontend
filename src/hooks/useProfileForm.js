@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
 /**
- * useProfileForm — shared hook for profile edit forms with unsaved changes tracking.
+ * useProfileForm, shared hook for profile edit forms with unsaved changes tracking.
  *
  * Manages form state, syncs from profile data, detects changes,
  * and provides cancel/save helpers.

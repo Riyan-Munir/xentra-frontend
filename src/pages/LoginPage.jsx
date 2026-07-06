@@ -36,11 +36,11 @@ const LoginPage = () => {
       if (siteKey) {
         setCaptcha({ required: true, siteKey, error: null, isLoading: false });
       } else {
-        // No site key configured — skip captcha and redirect directly.
+        // No site key configured, skip captcha and redirect directly.
         redirectToDiscord();
       }
     } catch {
-      // Backend unreachable or error — graceful degradation: skip captcha.
+      // Backend unreachable or error, graceful degradation: skip captcha.
       redirectToDiscord();
     }
   };
@@ -48,7 +48,7 @@ const LoginPage = () => {
   const handleCaptchaVerified = useCallback(async (token) => {
     try {
       await captchaVerify(token);
-      // Verification succeeded — close modal and proceed to Discord OAuth.
+      // Verification succeeded, close modal and proceed to Discord OAuth.
       setCaptcha({ required: false, siteKey: '', error: null, isLoading: false });
       redirectToDiscord();
     } catch (err) {

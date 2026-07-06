@@ -1,16 +1,16 @@
 import React, { useState, useLayoutEffect, useRef } from 'react';
 
 /**
- * Auto-Sizing Skeleton — renders generic geometric patterns that auto-size
+ * Auto-Sizing Skeleton, renders generic geometric patterns that auto-size
  * to the container using ResizeObserver. No hardcoded pixel dimensions.
  *
  * Templates define consistent geometric patterns (NOT data-field-specific):
- *   "profile" — avatar circle + name/subtitle lines
- *   "card"    — icon + title + description block (reusable)
- *   "form"    — label + input bar + hint groups
- *   "stat"    — compact value + label, centered
- *   "text"    — N text lines filling available height
- *   "circle"  — perfect circle placeholder
+ *   "profile", avatar circle + name/subtitle lines
+ *   "card"   , icon + title + description block (reusable)
+ *   "form"   , label + input bar + hint groups
+ *   "stat"   , compact value + label, centered
+ *   "text"   , N text lines filling available height
+ *   "circle" , perfect circle placeholder
  *
  * Usage:
  *   <Skeleton template="profile" />
@@ -25,7 +25,7 @@ const GAP = 6;
 
 /* ─── Generic Geometric Templates ─── */
 /* Each receives { w, h, lines } and returns geometric bars only.
-   No pixel dimensions are stored — all values are computed from { w, h }. */
+   No pixel dimensions are stored, all values are computed from { w, h }. */
 
 const TEMPLATES = {
   /** Large circle + name line + subtitle line (side-by-side) */
@@ -177,7 +177,7 @@ const Skeleton = ({ template = 'text', lines = 1, count = 1, className = '' }) =
       }
     };
 
-    // Synchronous measure — captures dimensions before first paint
+    // Synchronous measure, captures dimensions before first paint
     measure();
 
     // Observe parent for size changes (throttled via rAF)
@@ -205,7 +205,7 @@ const Skeleton = ({ template = 'text', lines = 1, count = 1, className = '' }) =
           </div>
         ))
       ) : (
-        /* Invisible space-fillers — maintain layout dimensions before first measure.
+        /* Invisible space-fillers, maintain layout dimensions before first measure.
            The parent container (flex/grid) determines size, these empty flex-1 divs
            fill that space without causing layout shift. */
         Array.from({ length: count }, (_, i) => (

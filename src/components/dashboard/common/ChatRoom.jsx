@@ -7,7 +7,7 @@ import { roomService } from '../../../services/roomService';
 import styles from './ChatRoom.module.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ChatRoom — Premium-only live chat room page for Client & Freelancer
+   ChatRoom, Premium-only live chat room page for Client & Freelancer
    ═══════════════════════════════════════════════════════════════════════════ */
 
 // ── Helper: format timestamp ──────────────────────────────────────────────
@@ -266,7 +266,7 @@ function FullChatSkeleton({ profile }) {
                     </div>
                 </div>
 
-                {/* Chat area skeleton — fills remaining height */}
+                {/* Chat area skeleton, fills remaining height */}
                 <div className={styles.fullSkeletonChat}>
                     <div className={styles.fullSkeletonMessages}>
                         {bubbleRows.map((r, i) => (
@@ -594,7 +594,7 @@ const ChatRoom = ({ profile, currentRole }) => {
         : null;
 
     // ════════════════════════════════════════════════════════════════════
-    // RENDER — Locked (free tier)
+    // RENDER, Locked (free tier)
     // ════════════════════════════════════════════════════════════════════
     if (!isPremium) {
         return (
@@ -615,7 +615,7 @@ const ChatRoom = ({ profile, currentRole }) => {
     }
 
     // ════════════════════════════════════════════════════════════════════
-    // RENDER — Premium (unlocked)
+    // RENDER, Premium (unlocked)
     // ════════════════════════════════════════════════════════════════════
     return (
         <div className={`${styles.chatContainer} ${styles.chatContainerPremium}`}>
@@ -743,7 +743,7 @@ const ChatRoom = ({ profile, currentRole }) => {
 
                 {/* ── Chat Content Wrapper (flex child on desktop) ──── */}
                 <div className={styles.chatContent}>
-                    {/* Room Info Panel — always in DOM for slide transition */}
+                    {/* Room Info Panel, always in DOM for slide transition */}
                     <RoomInfoPanel
                         stats={roomStats}
                         infoOpen={infoOpen}
