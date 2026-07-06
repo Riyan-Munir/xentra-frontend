@@ -130,8 +130,8 @@ function MessageBubble({ msg, viewerRole, isPremium }) {
                     <div className={styles.commandBadge}>/{msg.command_name}</div>
                 )}
                 {msg.type === 'complain' && !msg.is_command && (
-                    <div className={styles.commandBadge} style={{ background: '#DDB95A', marginBottom: 6 }}>
-                        <AlertTriangle size={10} style={{ marginRight: 4 }} />
+                    <div className={styles.complainBadge}>
+                        <AlertTriangle size={10} className={styles.complainBadgeIcon} />
                         Complaint
                     </div>
                 )}
@@ -186,32 +186,6 @@ function SkeletonAvatar({ url, className }) {
         );
     }
     return <div className={`${styles.skeletonAvatar} ${className || ''}`} />;
-}
-
-// ── Chat Skeleton Loader (initial room select) ────────────────────────────
-function ChatSkeleton({ profile }) {
-    const avatarUrl = profile?.avatar_url || null;
-    const rows = [
-        { w: '55%', right: false },
-        { w: '70%', right: true },
-        { w: '40%', right: false },
-        { w: '60%', right: true },
-        { w: '45%', right: false },
-    ];
-    return (
-        <div className={styles.skeletonContainer}>
-            {rows.map((r, i) => (
-                <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
-                    {!r.right && <SkeletonAvatar url={avatarUrl} />}
-                    <div className={styles.skeletonBubbleBox} style={{ width: r.w }}>
-                        <div className={styles.skeletonBubbleBoxLine} />
-                        <div className={styles.skeletonBubbleBoxLine} />
-                    </div>
-                    {r.right && <SkeletonAvatar url={avatarUrl} />}
-                </div>
-            ))}
-        </div>
-    );
 }
 
 // ── Refresh Chat Skeleton (8-msg bubbles, chat box only) ──────────────────
