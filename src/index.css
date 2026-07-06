@@ -3268,6 +3268,26 @@ input[type="radio"]:focus {
   width: 100%;
 }
 
+/* --- Portfolio Wrapper — responsive min/max height (PC larger, iPad smaller) --- */
+.portfolio-wrapper {
+  min-height: 400px;
+  max-height: calc(100vh - 180px);
+}
+
+@media (max-width: 1024px) {
+  .portfolio-wrapper {
+    min-height: 350px;
+    max-height: calc(100vh - 260px);
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-wrapper {
+    min-height: 0;
+    max-height: none;
+  }
+}
+
 /* --- Skeleton Skill Tag — matches .skill-tag-pill dimensions --- */
 .skeleton-skill-tag {
   height: 28px;

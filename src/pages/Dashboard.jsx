@@ -108,7 +108,7 @@ const settingsSkeleton = (cardCount = 3) => (
        projects: horizontal-scroll project cards (320px min-width, 160px image)
    ──────────────────────────────────────────────────────────────── */
 const portfolioSkeleton = () => (
-  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative skeleton-portfolio-wrapper mx-auto" style={{ minHeight: '350px', maxHeight: 'calc(100vh - 260px)' }}>
+  <div className="layout-bottom flex-1 minh-0 flex-col pos-relative skeleton-portfolio-wrapper portfolio-wrapper mx-auto">
     <div className="scrollable-content-card hide-scrollbar pos-relative flex-1 overflow-y-auto">
       <div className="p-24 flex-col pb-40">
 
