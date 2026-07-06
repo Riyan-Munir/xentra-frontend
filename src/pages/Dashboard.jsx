@@ -445,25 +445,42 @@ const configureSkeleton = () => (
 );
 
 const chatroomsSkeleton = () => (
-  <div className="fade-in card" style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-    {/* Header */}
-    <div className="flex-row items-center gap-12" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-      {/* Hamburger skeleton — hidden on desktop via CSS class, visible on mobile */}
-      <div className="skel-hamburger" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
-      <div className="flex-1">
+  <div className="fade-in skel-chat-container" style={{
+    height: 'calc(100vh - 80px)',
+    borderRadius: 16,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
+  }}>
+    {/* Header — matches .chatHeader exactly: min-height 52px, padding 12px 16px */}
+    <div className="flex-row items-center gap-12" style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, minHeight: 52, background: 'rgba(17,24,39,0.6)' }}>
+      {/* Hamburger skeleton — hidden on desktop via CSS, visible on mobile */}
+      <div className="skel-hamburger skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
+      <div className="flex-1" style={{ minWidth: 0 }}>
         <div className="skeleton-line" style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 6 }} />
         <div className="skeleton-line" style={{ width: 80, height: 10, borderRadius: 4 }} />
       </div>
       <div className="skeleton-line" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
     </div>
+    {/* Body — flex row, side menu + chat area */}
     <div className="flex-row" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-      {/* Side menu — always visible on desktop, hidden on mobile */}
-      <div className="skel-side-menu" style={{ width: 280, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div className="flex-row items-center justify-between" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+      {/* Side menu — matches .sideMenu: width 280px, always visible on desktop */}
+      <div className="skel-side-menu" style={{
+        width: 280,
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        background: 'rgba(17,24,39,0.85)',
+      }}>
+        <div className="flex-row items-center justify-between" style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="skeleton-line" style={{ width: 60, height: 14, borderRadius: 4 }} />
           <div className="skeleton-line" style={{ width: 24, height: 24, borderRadius: 6 }} />
         </div>
-        <div className="flex-row gap-8" style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
+        <div className="flex-row gap-8" style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
           <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
           <div className="skeleton-line" style={{ flex: 1, height: 32, borderRadius: 6 }} />
         </div>
@@ -471,7 +488,7 @@ const chatroomsSkeleton = () => (
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-row items-center gap-12" style={{ padding: '12px 16px' }}>
               <div className="skeleton-line" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
-              <div className="flex-1">
+              <div className="flex-1" style={{ minWidth: 0 }}>
                 <div className="skeleton-line" style={{ height: 12, borderRadius: 4, marginBottom: 6, width: `${55 + (i % 3) * 12}%` }} />
                 <div className="skeleton-line" style={{ height: 10, borderRadius: 4, width: `${35 + (i % 2) * 15}%` }} />
               </div>
@@ -480,8 +497,8 @@ const chatroomsSkeleton = () => (
           ))}
         </div>
       </div>
-      {/* Chat area — fills remaining height, bubbles pushed to bottom */}
-      <div className="flex-1" style={{ padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0 }}>
+      {/* Chat area — messages start from top, no gap after header */}
+      <div className="flex-1" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden', minHeight: 0, position: 'relative' }}>
         {[
           { minW: 180, maxW: '55%', right: false },
           { minW: 200, maxW: '50%', right: true },

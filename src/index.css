@@ -4563,17 +4563,48 @@ input[type="radio"]:focus {
   .skel-hamburger {
     display: none;
   }
+
   .skel-side-menu {
     display: flex !important;
   }
 }
 
-/* Mobile (<768px): show hamburger skeleton, hide side menu skeleton */
+/* Tablet (641px - 1024px): hide side menu, show hamburger */
+@media (max-width: 1024px) {
+  .skel-hamburger {
+    display: block;
+  }
+
+  .skel-side-menu {
+    display: none !important;
+  }
+}
+
+/* Mobile (<768px): match actual .chatContainer mobile dimensions */
 @media (max-width: 768px) {
   .skel-hamburger {
     display: block;
   }
+
   .skel-side-menu {
     display: none !important;
+  }
+
+  .skel-chat-container {
+    height: calc(100vh - 120px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+}
+
+/* Small phone (<480px) */
+@media (max-width: 480px) {
+  .skel-chat-container {
+    height: calc(100vh - 140px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 }

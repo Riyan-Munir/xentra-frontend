@@ -56,20 +56,23 @@
     left: -100%;
     width: 60%;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 215, 0, 0.4),
-        rgba(99, 102, 241, 0.3),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 215, 0, 0.4),
+            rgba(99, 102, 241, 0.3),
+            transparent);
     z-index: 20;
     animation: premiumShimmerBorder 8s linear infinite;
 }
 
 @keyframes premiumShimmerBorder {
-    0% { left: -60%; }
-    100% { left: 160%; }
+    0% {
+        left: -60%;
+    }
+
+    100% {
+        left: 160%;
+    }
 }
 
 /* ── Gold dust particles (premium ambient effect) ─────────────────────── */
@@ -298,12 +301,15 @@
 /* ── Chat Body ─────────────────────────────────────────────────────────── */
 .chatBody {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
     position: relative;
     z-index: 2;
+    min-height: 0;
 }
 
 .chatBody::-webkit-scrollbar {
@@ -1133,7 +1139,7 @@
     min-width: 32px;
     min-height: 32px;
     border-radius: 50%;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     flex-shrink: 0;
@@ -1165,7 +1171,7 @@
 .skeletonBubbleBoxLine {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1208,7 +1214,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     flex-shrink: 0;
@@ -1224,7 +1230,7 @@
 .roomListSkeletonLine {
     height: 12px;
     border-radius: 4px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1232,7 +1238,7 @@
 .roomListSkeletonLineSmall {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.03) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1317,7 +1323,7 @@
 }
 
 .skelPulse {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
@@ -1336,6 +1342,7 @@
    DESKTOP: Side menu always visible, no hamburger
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 1025px) {
+
     /* Side menu always visible in desktop — positioned in flow */
     .chatBody {
         display: flex;
@@ -1355,7 +1362,7 @@
     }
 
     /* Hide the hamburger toggle in the chat header on desktop */
-    .chatHeader > .toggleBtn {
+    .chatHeader>.toggleBtn {
         display: none;
     }
 
@@ -1388,6 +1395,8 @@
 @media (max-width: 768px) {
     .chatContainer {
         height: calc(100vh - 120px);
+        min-height: 0;
+        max-height: none;
         border-radius: 0;
         border-left: none;
         border-right: none;
@@ -1475,6 +1484,8 @@
 @media (max-width: 480px) {
     .chatContainer {
         height: calc(100vh - 140px);
+        min-height: 0;
+        max-height: none;
     }
 
     .chatHeader {

@@ -699,9 +699,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                     )}
 
                     {/* Chat Content */}
-                    {roomsLoading && !selectedRoomId ? (
-                        <FullChatSkeleton profile={profile} />
-                    ) : !selectedRoomId ? (
+                    {!selectedRoomId ? (
                         <div className={styles.emptyState}>
                             <MessageCircle size={48} className={styles.emptyStateIcon} />
                             <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
