@@ -786,9 +786,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                                 Click the menu button to browse your active interview rooms.
                             </p>
                         </div>
-                    ) : transcriptLoading ? (
-                        <ChatSkeleton profile={profile} />
-                    ) : refreshing ? (
+                    ) : (transcriptLoading || refreshing) ? (
                         <RefreshChatSkeleton profile={profile} />
                     ) : !transcript || transcript.messages?.length === 0 ? (
                         <div className={styles.emptyState}>
