@@ -188,7 +188,7 @@ function SkeletonAvatar({ url, className }) {
     return <div className={`${styles.skeletonAvatar} ${className || ''}`} />;
 }
 
-// ── Chat Skeleton Loader ──────────────────────────────────────────────────
+// ── Chat Skeleton Loader (initial room select) ────────────────────────────
 function ChatSkeleton({ profile }) {
     const avatarUrl = profile?.avatar_url || null;
     const rows = [
@@ -200,6 +200,35 @@ function ChatSkeleton({ profile }) {
     ];
     return (
         <div className={styles.skeletonContainer}>
+            {rows.map((r, i) => (
+                <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
+                    {!r.right && <SkeletonAvatar url={avatarUrl} />}
+                    <div className={styles.skeletonBubbleBox} style={{ width: r.w }}>
+                        <div className={styles.skeletonBubbleBoxLine} />
+                        <div className={styles.skeletonBubbleBoxLine} />
+                    </div>
+                    {r.right && <SkeletonAvatar url={avatarUrl} />}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// ── Refresh Chat Skeleton (8-msg bubbles, chat box only) ──────────────────
+function RefreshChatSkeleton({ profile }) {
+    const avatarUrl = profile?.avatar_url || null;
+    const rows = [
+        { w: '55%', right: false },
+        { w: '70%', right: true },
+        { w: '40%', right: false },
+        { w: '60%', right: true },
+        { w: '45%', right: false },
+        { w: '65%', right: false },
+        { w: '50%', right: true },
+        { w: '55%', right: false },
+    ];
+    return (
+        <div className={styles.messagesContainer}>
             {rows.map((r, i) => (
                 <div key={i} className={`${styles.skeletonBubble} ${r.right ? styles.skeletonBubbleRight : ''}`}>
                     {!r.right && <SkeletonAvatar url={avatarUrl} />}
@@ -512,14 +541,22 @@ const ChatRoom = ({ profile, currentRole }) => {
         }
     }, [currentRole]);
 
-    // ── Manual refresh (bypasses cache) ─────────────────────────────────
+    // ── Manual refresh (bypasses cache, no transcriptLoading skeleton) ──
     const handleRefresh = useCallback(async () => {
         if (!selectedRoomId || refreshing) return;
         setRefreshing(true);
-        // Force bypass cache
-        await fetchTranscript(selectedRoomId, true);
-        setRefreshing(false);
-    }, [selectedRoomId, refreshing, fetchTranscript]);
+        try {
+            const data = await roomService.getTranscript(selectedRoomId, currentRole);
+            setTranscript(data);
+            lastFetchRef.current[selectedRoomId] = Date.now();
+            const statsData = await roomService.getRoomStats(selectedRoomId, currentRole);
+            setRoomStats(statsData);
+        } catch {
+            // keep existing data on refresh failure
+        } finally {
+            setRefreshing(false);
+        }
+    }, [selectedRoomId, refreshing, currentRole]);
 
     useEffect(() => {
         fetchTranscript(selectedRoomId);
@@ -751,6 +788,8 @@ const ChatRoom = ({ profile, currentRole }) => {
                         </div>
                     ) : transcriptLoading ? (
                         <ChatSkeleton profile={profile} />
+                    ) : refreshing ? (
+                        <RefreshChatSkeleton profile={profile} />
                     ) : !transcript || transcript.messages?.length === 0 ? (
                         <div className={styles.emptyState}>
                             <MessageCircle size={48} className={styles.emptyStateIcon} />
