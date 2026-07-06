@@ -3271,7 +3271,7 @@ input[type="radio"]:focus {
 /* --- Portfolio Wrapper — responsive min/max height (PC larger, iPad smaller) --- */
 .portfolio-wrapper {
   min-height: 400px;
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 40px);
 }
 
 @media (max-width: 1024px) {
