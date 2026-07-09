@@ -478,21 +478,33 @@ input[type="radio"]:focus {
   width: 60%;
   height: 100%;
   background: linear-gradient(90deg,
-    transparent,
-    rgba(255, 215, 0, 0.08),
-    transparent);
+      transparent,
+      rgba(255, 215, 0, 0.08),
+      transparent);
   animation: premiumNavShimmer 4s linear infinite;
   pointer-events: none;
 }
 
 @keyframes premiumNavGlow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.04); }
-  50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.1); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.04);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.1);
+  }
 }
 
 @keyframes premiumNavShimmer {
-  0% { left: -100%; }
-  100% { left: 200%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 200%;
+  }
 }
 
 .nav-item.premium-nav-active:hover {
@@ -4668,5 +4680,339 @@ input[type="radio"]:focus {
     height: calc(100vh - 140px) !important;
     min-height: 0 !important;
     max-height: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WALLETS SECTION — ATM Card Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* --- Fixed-height panel for Wallets section --- */
+.wallets-fixed-panel {
+  height: 520px;
+  min-height: 480px;
+  max-height: 580px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wallets-fixed-panel .scrollable-content-card {
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior-y: unset;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Wallet card grid --- */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 4px;
+}
+
+/* --- Empty state --- */
+.wallet-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0.5;
+  gap: 12px;
+}
+
+.wallet-empty-state p {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- ATM Wallet Card --- */
+.wallet-card {
+  width: 100%;
+  max-width: 380px;
+  min-width: 300px;
+  height: 220px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Texture overlay — diagonal lines */
+.wallet-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.02) 10px,
+      rgba(255, 255, 255, 0.02) 11px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Xentra Watermark — diagonal text like airplane taking off (~35°) */
+.wallet-card::after {
+  content: 'XENTRA';
+  position: absolute;
+  left: 20px;
+  bottom: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+  color: white;
+  transform: rotate(-35deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Default card variant */
+.wallet-card--default {
+  background: linear-gradient(135deg,
+      rgba(99, 102, 241, 0.35),
+      rgba(139, 92, 246, 0.25),
+      rgba(236, 72, 153, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Normal (verified, non-default) card variant */
+.wallet-card--verified {
+  background: linear-gradient(135deg,
+      rgba(17, 24, 39, 0.95),
+      rgba(30, 41, 59, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Pending (unverified) card variant */
+.wallet-card--pending {
+  background: linear-gradient(135deg,
+      rgba(17, 24, 39, 0.85),
+      rgba(30, 41, 59, 0.75));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0.85;
+}
+
+/* Hover effect */
+.wallet-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+  border-color: var(--primary);
+}
+
+/* Card inner content */
+.wallet-card-inner {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Chip icon (visual ATM element) */
+.wallet-card-chip {
+  width: 36px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #d4af37, #f0d060);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Address display */
+.wallet-card-address {
+  font-family: 'Outfit', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.9);
+  word-break: break-all;
+}
+
+/* Divider */
+.wallet-card-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
+  margin: 8px 0;
+}
+
+/* Bottom info row */
+.wallet-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Badge: DEFAULT */
+.wallet-badge-default {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 3;
+}
+
+/* Badge: Set as Default button (top-right on non-default cards) */
+.wallet-badge-set-default {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+}
+
+/* Action row below card */
+.wallet-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* Shimmer animation for default card */
+@keyframes cardShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.wallet-card--default::before {
+  background:
+    repeating-linear-gradient(135deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.02) 10px,
+      rgba(255, 255, 255, 0.02) 11px),
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%);
+  background-size: 100% 100%, 200% 100%;
+  animation: cardShimmer 4s infinite ease-in-out;
+}
+
+/* Card entrance animation */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wallet-card-animate {
+  animation: cardSlideIn 0.4s ease-out forwards;
+}
+
+/* Verified badge pulse */
+@keyframes verifiedPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.wallet-status-verified {
+  animation: verifiedPulse 2s infinite ease-in-out;
+}
+
+/* --- Wallet section responsive --- */
+@media (max-width: 1100px) {
+  .wallets-fixed-panel {
+    height: 520px;
+  }
+}
+
+@media (max-width: 900px) {
+  .wallet-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .wallet-card {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .wallets-fixed-panel {
+    min-height: 400px;
+    height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .wallets-fixed-panel {
+    min-height: 360px;
+  }
+
+  .wallet-card {
+    height: 200px;
+  }
+
+  .wallet-card-inner {
+    padding: 18px;
+  }
+
+  .wallet-card-address {
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallets-fixed-panel {
+    min-height: 300px;
+  }
+
+  .wallet-card {
+    height: 180px;
+    border-radius: 16px;
+  }
+
+  .wallet-card-inner {
+    padding: 14px;
+  }
+
+  .wallet-card-actions {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }

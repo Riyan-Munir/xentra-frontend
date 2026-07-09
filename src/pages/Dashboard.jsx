@@ -25,6 +25,7 @@ const AdminSettings = lazy(() => import('../components/dashboard/server_admin/Pr
 const AdminConfigure = lazy(() => import('../components/dashboard/server_admin/Configure'));
 
 const ChatRooms = lazy(() => import('../components/dashboard/common/ChatRoom'));
+const Wallets = lazy(() => import('../components/dashboard/common/Wallets'));
 
 /* ============================================================
    Section-Specific Constant Skeletons
@@ -525,17 +526,67 @@ const chatroomsSkeleton = () => (
 );
 
 /** Returns the correct constant skeleton for the given section and role */
+const walletsSkeleton = () => (
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar skeleton-section-scroll">
+
+    {/* Header */}
+    <div className="flex-between flex-shrink-0">
+      <Skeleton template="text" lines={1} />
+      <Skeleton template="button" lines={1} />
+    </div>
+
+    {/* wallets-fixed-panel with 2 ATM-card-sized skeletons */}
+    <div className="wallets-fixed-panel">
+      <div className="scrollable-content-card">
+        <div className="wallet-grid">
+          {[1, 2].map(i => (
+            <div key={i} className="wallet-card wallet-card--verified wallet-card-animate"
+              style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}>
+              <div className="wallet-card-inner">
+                {/* Top row: chip + logo */}
+                <div className="flex-between items-flex-start">
+                  <div className="flex-row items-center gap-8">
+                    <div className="skeleton-line" style={{ width: 36, height: 28, borderRadius: 6 }} />
+                    <div className="skeleton-line" style={{ width: 60, height: 12, borderRadius: 4 }} />
+                  </div>
+                  <div className="skeleton-line" style={{ width: 70, height: 20, borderRadius: 6 }} />
+                </div>
+                {/* Address */}
+                <div className="mt-16">
+                  <div className="skeleton-line" style={{ width: 240, height: 16, borderRadius: 4 }} />
+                </div>
+                {/* Divider */}
+                <div className="wallet-card-divider" />
+                {/* Footer */}
+                <div className="flex-between">
+                  <div className="flex-col gap-4">
+                    <div className="skeleton-line" style={{ width: 100, height: 12, borderRadius: 4 }} />
+                    <div className="skeleton-line" style={{ width: 80, height: 10, borderRadius: 4 }} />
+                  </div>
+                  <div className="skeleton-line" style={{ width: 60, height: 14, borderRadius: 4 }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+  </div>
+);
+
 const getSectionSkeleton = (section, role) => {
   if (section === 'overview') {
     return role === 'server_admin' ? adminOverviewSkeleton() : overviewSkeleton();
   }
   if (section === 'settings') {
-    const cardCount = role === 'server_admin' ? 1 : 3;
+    const cardCount = role === 'server_admin' ? 1 : 4;
     return settingsSkeleton(cardCount);
   }
   if (section === 'portfolio') return portfolioSkeleton();
   if (section === 'applications') return applicationsSkeleton();
   if (section === 'jobs') return jobsSkeleton();
+  if (section === 'wallets') return walletsSkeleton();
   if (section === 'configure') return configureSkeleton();
   if (section === 'chatrooms') return chatroomsSkeleton();
   return overviewSkeleton();
@@ -991,17 +1042,19 @@ const Dashboard = () => {
     if (currentRole === 'client') {
       switch (activeSection) {
         case 'overview': return <ClientOverview {...profileProps} />;
-        case 'settings': return <ClientSettings {...commonProps} onUpdate={handleUpdateProfile} />;
+        case 'settings': return <ClientSettings {...commonProps} onUpdate={handleUpdateProfile} onNavigate={setActiveSection} />;
         case 'jobs': return <ClientJobs {...commonProps} />;
+        case 'wallets': return <Wallets currentRole={currentRole} addNotification={addNotification} />;
         case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
         default: return <ClientOverview {...profileProps} />;
       }
     } else if (currentRole === 'freelancer') {
       switch (activeSection) {
         case 'overview': return <FreelancerOverview {...profileProps} />;
-        case 'settings': return <FreelancerSettings {...commonProps} onUpdate={handleUpdateProfile} />;
+        case 'settings': return <FreelancerSettings {...commonProps} onUpdate={handleUpdateProfile} onNavigate={setActiveSection} />;
         case 'portfolio': return <FreelancerPortfolio {...commonProps} fetchProfile={fetchProfile} />;
         case 'applications': return <FreelancerApplications {...commonProps} onNavigate={setActiveSection} />;
+        case 'wallets': return <Wallets currentRole={currentRole} addNotification={addNotification} />;
         case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
         default: return <FreelancerOverview {...profileProps} />;
       }
