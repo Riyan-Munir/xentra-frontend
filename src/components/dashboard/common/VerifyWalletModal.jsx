@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Shield, X, AlertTriangle, ExternalLink, Plug } from 'lucide-react';
 import walletService from '../../../services/walletService';

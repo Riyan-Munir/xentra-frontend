@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Wallet, X, Info, Plug } from 'lucide-react';
 import walletService from '../../../services/walletService';
 import { connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
-import CustomSelect from './CustomSelect';
 
 // Wallet provider options (must match web3Wallet.js provider keys)
-const PROVIDER_OPTIONS = [
-  { value: 'METAMASK', label: 'MetaMask' },
-  { value: 'TRUST_WALLET', label: 'Trust Wallet' },
-  { value: 'PHANTOM', label: 'Phantom' },
-  { value: 'RABBY', label: 'Rabby Wallet' },
-  { value: 'COINBASE_WALLET', label: 'Coinbase Wallet' },
-  { value: 'OKX_WALLET', label: 'OKX Wallet' },
-  { value: 'BINANCE_WALLET', label: 'Binance Wallet' },
-  { value: 'WALLETCONNECT', label: 'WalletConnect' },
-  { value: 'OTHER', label: 'Other' },
-];
+const PROVIDER_DISPLAY_NAMES = {
+  METAMASK: 'MetaMask',
+  TRUST_WALLET: 'Trust Wallet',
+  PHANTOM: 'Phantom',
+  RABBY: 'Rabby Wallet',
+  COINBASE_WALLET: 'Coinbase Wallet',
+  OKX_WALLET: 'OKX Wallet',
+  BINANCE_WALLET: 'Binance Wallet',
+  WALLETCONNECT: 'WalletConnect',
+  OTHER: 'Other',
+};
 
 const MAX_LABEL_LENGTH = 32;
 
@@ -98,12 +97,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     }
   };
 
-  // Handle provider dropdown change (allow manual override)
-  const handleProviderChange = (val) => {
-    setProvider(val);
-    setErrors((prev) => ({ ...prev, provider: '' }));
-  };
-
   // Handle label change with live validation
   const handleLabelChange = (e) => {
     const value = e.target.value;
@@ -120,10 +113,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       newErrors.address = 'Connect your wallet to auto-fill the address';
     } else if (!/^0x[0-9a-fA-F]{40}$/.test(address.trim())) {
       newErrors.address = 'Invalid BSC address format';
-    }
-
-    if (!provider) {
-      newErrors.provider = 'Select a wallet provider';
     }
 
     if (label.length > MAX_LABEL_LENGTH) {
@@ -281,16 +270,22 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
           {errors.address && <span className="error-text">{errors.address}</span>}
         </div>
 
-        {/* Provider dropdown — auto-detected, can be overridden */}
+        {/* Provider — auto-detected, read-only */}
         <div className="form-group">
-          <label className="form-label">Wallet Provider *</label>
-          <CustomSelect
-            options={PROVIDER_OPTIONS}
-            value={provider}
-            onChange={handleProviderChange}
-            placeholder="Select Provider"
-          />
-          {errors.provider && <span className="error-text">{errors.provider}</span>}
+          <label className="form-label">Wallet Provider</label>
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: 8,
+              background: provider ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)',
+              opacity: provider ? 1 : 0.5,
+              fontFamily: 'monospace',
+              fontSize: 13,
+              color: provider ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
+            }}
+          >
+            {provider ? (PROVIDER_DISPLAY_NAMES[provider] || provider) : 'Connect wallet to detect'}
+          </div>
         </div>
 
         {/* Label field with live counter */}

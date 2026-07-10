@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Wallet, CreditCard } from 'lucide-react';
+import { Plus, CreditCard } from 'lucide-react';
 import walletService from '../../../services/walletService';
 import WalletCard from './WalletCard';
 import AddWalletModal from './AddWalletModal';

@@ -5,14 +5,15 @@
 
 // Provider detection map: checks window.ethereum / window global properties
 const PROVIDER_DETECTORS = [
-  { key: 'METAMASK', check: (eth) => eth?.isMetaMask && !eth?.isBraveWallet },
+  // Order matters! Many wallets set isMetaMask=true for compatibility.
+  // Check specific wallets BEFORE MetaMask to avoid false positives.
   { key: 'TRUST_WALLET', check: (eth) => eth?.isTrust },
   { key: 'PHANTOM', check: (eth) => eth?.isPhantom },
   { key: 'RABBY', check: (eth) => eth?.isRabby },
   { key: 'COINBASE_WALLET', check: (eth) => eth?.isCoinbaseWallet },
   { key: 'OKX_WALLET', check: () => !!window.okxwallet },
   { key: 'BINANCE_WALLET', check: () => !!window.BinanceChain },
-  { key: 'WALLETCONNECT', check: () => false }, // WalletConnect requires separate SDK
+  { key: 'METAMASK', check: (eth) => eth?.isMetaMask && !eth?.isBraveWallet },
   { key: 'OTHER', check: () => true }, // fallback
 ];
 
@@ -48,26 +49,6 @@ export function detectProvider() {
   }
 
   return 'OTHER';
-}
-
-/**
- * Get a readable display name for a provider key.
- * @param {string} key
- * @returns {string}
- */
-export function getProviderName(key) {
-  const names = {
-    METAMASK: 'MetaMask',
-    TRUST_WALLET: 'Trust Wallet',
-    PHANTOM: 'Phantom',
-    RABBY: 'Rabby Wallet',
-    COINBASE_WALLET: 'Coinbase Wallet',
-    OKX_WALLET: 'OKX Wallet',
-    BINANCE_WALLET: 'Binance Wallet',
-    WALLETCONNECT: 'WalletConnect',
-    OTHER: 'Wallet',
-  };
-  return names[key] || 'Wallet';
 }
 
 /**
