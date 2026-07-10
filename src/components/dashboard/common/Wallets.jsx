@@ -118,10 +118,8 @@ const Wallets = ({ currentRole, addNotification }) => {
                 <div className="scrollable-content-card">
 
                     {isLoading ? (
-                        /* Loading state — skeleton handled by Dashboard.jsx */
-                        <div className="wallet-empty-state">
-                            <span className="text-sm" style={{ opacity: 0.4 }}>Loading wallets...</span>
-                        </div>
+                        /* Loading state — skeleton handled by Dashboard.jsx, return nothing */
+                        null
                     ) : activeWallets.length === 0 ? (
                         /* Empty state — matches "Portfolio Required" theme */
                         <div className="flex-1 flex-col flex-center gap-16 text-center" style={{ minHeight: 200 }}>
