@@ -9,6 +9,8 @@ const PROVIDER_OPTIONS = [
   { value: 'METAMASK', label: 'MetaMask' },
   { value: 'TRUST_WALLET', label: 'Trust Wallet' },
   { value: 'PHANTOM', label: 'Phantom' },
+  { value: 'RABBY', label: 'Rabby Wallet' },
+  { value: 'COINBASE_WALLET', label: 'Coinbase Wallet' },
   { value: 'OKX_WALLET', label: 'OKX Wallet' },
   { value: 'BINANCE_WALLET', label: 'Binance Wallet' },
   { value: 'WALLETCONNECT', label: 'WalletConnect' },
