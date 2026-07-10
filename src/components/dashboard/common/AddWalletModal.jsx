@@ -106,10 +106,32 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
 
   // Handle disconnect — revoke permissions from the extension
   const handleDisconnect = async () => {
-    await disconnectWallet();
-    setAddress('');
-    setProvider('');
-    setConnected(false);
+    try {
+      const { revoked, stillConnected } = await disconnectWallet();
+
+      if (stillConnected) {
+        // The wallet extension doesn't support wallet_revokePermissions (EIP-3326).
+        // Clear local state but warn the user that the extension may auto-reconnect.
+        if (addNotification) {
+          addNotification(
+            'Your wallet extension does not support permission revocation. ' +
+            'When you reconnect, it may auto-approve without a popup. ' +
+            'To fully disconnect, revoke Xentra\'s access from the extension settings.',
+            'warning'
+          );
+        }
+      }
+
+      setAddress('');
+      setProvider('');
+      setConnected(false);
+    } catch (err) {
+      console.error('Disconnect error:', err);
+      // Still clear local state even if revoke threw unexpectedly
+      setAddress('');
+      setProvider('');
+      setConnected(false);
+    }
   };
 
   // Handle label change with live validation

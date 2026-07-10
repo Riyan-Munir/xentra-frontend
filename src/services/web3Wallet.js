@@ -154,12 +154,17 @@ export async function getConnectedAddress() {
  * This clears the connection from the wallet extension so it won't
  * auto-reconnect on the next modal open.
  *
+ * After revoking, verifies by checking eth_accounts. If the wallet
+ * still returns accounts, the revoke failed (unsupported wallet).
+ *
  * @param {object} [targetProvider] - Optional specific provider to disconnect from.
- * @returns {Promise<boolean>} true if successfully disconnected.
+ * @returns {Promise<{ revoked: boolean, stillConnected: boolean }>}
  */
 export async function disconnectWallet(targetProvider) {
   const eth = targetProvider || window.ethereum;
-  if (!eth) return false;
+  if (!eth) return { revoked: false, stillConnected: false };
+
+  let revoked = false;
 
   try {
     // EIP-3326: wallet_revokePermissions
@@ -167,12 +172,22 @@ export async function disconnectWallet(targetProvider) {
       method: 'wallet_revokePermissions',
       params: [{ eth_accounts: {} }],
     });
-    return true;
+    revoked = true;
   } catch (err) {
     // Some wallets don't support wallet_revokePermissions
     console.warn('wallet_revokePermissions not supported:', err.message);
-    return false;
   }
+
+  // Verify the revoke actually worked
+  let stillConnected = false;
+  try {
+    const accounts = await eth.request({ method: 'eth_accounts' });
+    stillConnected = accounts && accounts.length > 0;
+  } catch {
+    // ignore
+  }
+
+  return { revoked, stillConnected };
 }
 
 // ── Signing ─────────────────────────────────────────────────────────────────
