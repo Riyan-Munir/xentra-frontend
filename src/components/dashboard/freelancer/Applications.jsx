@@ -60,6 +60,12 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
   });
 
   const [focusedField, setFocusedField] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  const toggleCardExpand = (cardId) => {
+    setExpandedCard(prev => prev === cardId ? null : cardId);
+  };
 
   const fetchAvailableJobs = useCallback(async (isLoadMore = false) => {
     if (!profile?.portfolios || profile.portfolios.length === 0) {
@@ -104,6 +110,14 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
       setIsJobsLoading(false);
     }
   }, [filters, profile?.portfolios]);
+
+  useEffect(() => {
+    if (expandedCard !== null) {
+      const handler = () => setExpandedCard(null);
+      document.addEventListener('click', handler);
+      return () => document.removeEventListener('click', handler);
+    }
+  }, [expandedCard]);
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -175,7 +189,7 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
   };
 
   return (
-    <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '16px', paddingRight: '4px' }}>
+    <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '16px', paddingRight: '4px', overflowX: 'hidden' }}>
       <div className="flex-between flex-shrink-0">
         <h2 className="text-2xl font-bold">My Applications</h2>
       </div>
@@ -250,7 +264,16 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
               </div>
             ) : (
               <>
-                <div className="filter-bar flex-shrink-0">
+                {/* Filter toggle for mobile */}
+                <button
+                  className="btn btn-secondary filter-toggle-btn"
+                  onClick={() => setFiltersOpen(prev => !prev)}
+                >
+                  <Filter size={14} /> Filters
+                  <ChevronDown size={14} style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                </button>
+
+                <div className={`filter-bar flex-shrink-0${filtersOpen ? ' filter-bar--open' : ''}`}>
                   <div className="flex-1 minw-180">
                     <CustomSelect
                       placeholder="All Categories"
@@ -303,29 +326,43 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                         <div
                           key={job.id}
                           className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (job.is_featured ? ' premium-card premium-glow' : '')}
+                          style={{ overflow: 'hidden' }}
                         >
-                          <div className="flex-row items-center gap-16 flex-1">
+                          <div className="flex-row items-center gap-16 flex-1" style={{ minWidth: 0, overflow: 'hidden' }}>
                             <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: job.is_featured ? '#ffd700' : 'var(--primary)' }}>
                               <Briefcase size={20} />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1" style={{ minWidth: 0 }}>
                               <div className="flex-row items-center gap-8">
-                                <span className="text-sm font-bold">{job.title}</span>
+                                <span className="text-sm font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.title}</span>
                                 {job.is_featured && <span className="premium-tag"><Star size={10} fill="currentColor" /> Featured</span>}
                               </div>
-                              <div className="flex-row gap-12 text-sm text-dim mt-2">
-                                <span className="flex-row items-center gap-4"><Tag size={12} /> {job.category}</span>
+                              <div className="flex-row gap-8 text-sm text-dim mt-2" style={{ flexWrap: 'wrap' }}>
+                                <span className="flex-row items-center gap-4"><Tag size={12} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{job.category}</span></span>
                                 <span className="flex-row items-center gap-4"><DollarSign size={12} /> ${job.budget_min}-${job.budget_max}</span>
-                                <span className="primary-text font-semibold">ID: {job.job_id}</span>
                               </div>
+                              {expandedCard === `job-${job.id}` && (
+                                <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
+                                  <span className="primary-text font-semibold">Job ID: {job.job_id}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <button
-                            className="btn btn-secondary px-12 py-6 text-xs radius-6"
-                            onClick={() => handleApplyClick(job)}
-                          >
-                            Apply <ChevronRight size={14} />
-                          </button>
+                          <div className="flex-row gap-8 flex-shrink-0 items-center">
+                            <button
+                              className="expand-card-btn"
+                              onClick={(e) => { e.stopPropagation(); toggleCardExpand(`job-${job.id}`); }}
+                              title="Show more details"
+                            >
+                              <ChevronDown size={16} style={{ transform: expandedCard === `job-${job.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                            </button>
+                            <button
+                              className="btn btn-secondary px-12 py-6 text-xs radius-6"
+                              onClick={() => handleApplyClick(job)}
+                            >
+                              Apply <ChevronRight size={14} />
+                            </button>
+                          </div>
                         </div>
                       ))}
 
@@ -373,14 +410,15 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                     <div
                       key={app.id}
                       className="glass flex-row items-center flex-between gap-16 p-12 px-20"
+                      style={{ overflow: 'hidden' }}
                     >
-                      <div className="flex-row items-center gap-16 flex-1">
+                      <div className="flex-row items-center gap-16 flex-1" style={{ minWidth: 0, overflow: 'hidden' }}>
                         <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: 'var(--primary)' }}>
                           <Briefcase size={20} />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1" style={{ minWidth: 0 }}>
                           <div className="flex-row items-center gap-8">
-                            <span className="text-sm font-bold">{app.job_title}</span>
+                            <span className="text-sm font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{app.job_title}</span>
                             <span className={'text-xs px-4 py-3 radius-4 font-semibold text-uppercase ' + (
                               app.status === 'accepted' ? 'bg-success-10 success-text border-success-light' :
                                 app.status === 'rejected' ? 'bg-error-10 error-text border-error-light' :
@@ -389,20 +427,33 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                               {app.status.toUpperCase()}
                             </span>
                           </div>
-                          <div className="flex-row gap-12 text-sm text-dim mt-2">
+                          <div className="flex-row gap-8 text-sm text-dim mt-2" style={{ flexWrap: 'wrap' }}>
                             <span className="flex-row items-center gap-4"><DollarSign size={12} /> Bid: ${app.bid_amount}</span>
                             <span className="flex-row items-center gap-4"><Clock size={12} /> {new Date(app.created_at).toLocaleDateString()}</span>
-                            <span className="primary-text font-semibold">Job ID: {app.job_id}</span>
-                            <span className="primary-text font-semibold">App ID: {app.application_id}</span>
                           </div>
+                          {expandedCard === `app-${app.id}` && (
+                            <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
+                              <span className="primary-text font-semibold">Job ID: {app.job_id}</span>
+                              <span className="primary-text font-semibold">App ID: {app.application_id}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <button
-                        className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text"
-                        onClick={() => handleWithdraw(app.id)}
-                      >
-                        <Trash2 size={14} /> Withdraw
-                      </button>
+                      <div className="flex-row gap-8 flex-shrink-0 items-center">
+                        <button
+                          className="expand-card-btn"
+                          onClick={(e) => { e.stopPropagation(); toggleCardExpand(`app-${app.id}`); }}
+                          title="Show more details"
+                        >
+                          <ChevronDown size={16} style={{ transform: expandedCard === `app-${app.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                        <button
+                          className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text"
+                          onClick={() => handleWithdraw(app.id)}
+                        >
+                          <Trash2 size={14} /> Withdraw
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

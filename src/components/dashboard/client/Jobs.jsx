@@ -9,6 +9,7 @@ import {
   DollarSign,
   Clock,
   ChevronRight,
+  ChevronDown,
   X,
   Save,
   AlertCircle,
@@ -507,6 +508,11 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   const [focusedField, setFocusedField] = useState(null);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [interviewApp, setInterviewApp] = useState(null);
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  const toggleCardExpand = (cardId) => {
+    setExpandedCard(prev => prev === cardId ? null : cardId);
+  };
 
   const isPremium = profile?.premium_tier === 'premium';
 
@@ -542,6 +548,14 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
       setApplications([]);
     }
   }, [selectedJobId, jobs]);
+
+  useEffect(() => {
+    if (expandedCard !== null) {
+      const handler = () => setExpandedCard(null);
+      document.addEventListener('click', handler);
+      return () => document.removeEventListener('click', handler);
+    }
+  }, [expandedCard]);
 
   const handleCreateJob = () => {
     setEditingJob(null);
@@ -606,7 +620,7 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   const selectedJob = jobs.find(j => j.id === selectedJobId);
 
   return (
-    <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '16px', paddingRight: '4px' }}>
+    <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar" style={{ paddingBottom: '16px', paddingRight: '4px', overflowX: 'hidden' }}>
 
       {/* Header with Create Button */}
       <div className="flex-between flex-shrink-0">
@@ -665,29 +679,43 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
                     <div
                       key={job.id}
                       className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (job.is_featured ? ' premium-card premium-glow' : '')}
+                      style={{ overflow: 'hidden' }}
                     >
-                      <div className="flex-row items-center gap-16 flex-1">
+                      <div className="flex-row items-center gap-16 flex-1" style={{ minWidth: 0, overflow: 'hidden' }}>
                         <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: job.is_featured ? '#ffd700' : 'var(--primary)' }}>
                           <Briefcase size={20} />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1" style={{ minWidth: 0 }}>
                           <div className="flex-row items-center gap-8">
-                            <span className="text-sm font-bold">{job.title}</span>
+                            <span className="text-sm font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.title}</span>
                             {job.is_featured && <span className="premium-tag"><Star size={10} fill="currentColor" /> Featured</span>}
                           </div>
-                          <div className="flex-row gap-12 text-sm text-dim mt-2">
-                            <span className="flex-row items-center gap-4"><Tag size={12} /> {job.category}</span>
+                          <div className="flex-row gap-8 text-sm text-dim mt-2" style={{ flexWrap: 'wrap' }}>
+                            <span className="flex-row items-center gap-4"><Tag size={12} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{job.category}</span></span>
                             <span className="flex-row items-center gap-4"><Clock size={12} /> Expires: {job.job_expiry || 'N/A'}</span>
-                            <span className="primary-text font-semibold">ID: {job.job_id}</span>
                           </div>
+                          {expandedCard === `job-${job.id}` && (
+                            <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
+                              <span className="primary-text font-semibold">ID: {job.job_id}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <button
-                        className="btn btn-secondary px-12 py-6 text-xs radius-6"
-                        onClick={() => handleEditJob(job)}
-                      >
-                        <Edit3 size={14} /> Edit
-                      </button>
+                      <div className="flex-row gap-8 flex-shrink-0 items-center">
+                        <button
+                          className="expand-card-btn"
+                          onClick={(e) => { e.stopPropagation(); toggleCardExpand(`job-${job.id}`); }}
+                          title="Show more details"
+                        >
+                          <ChevronDown size={16} style={{ transform: expandedCard === `job-${job.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                        <button
+                          className="btn btn-secondary px-12 py-6 text-xs radius-6"
+                          onClick={() => handleEditJob(job)}
+                        >
+                          <Edit3 size={14} /> Edit
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -729,46 +757,60 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
                     <div
                       key={app.id}
                       className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (app.is_premium_freelancer ? ' premium-card premium-glow' : '')}
+                      style={{ overflow: 'hidden' }}
                     >
-                      <div className="flex-row items-center gap-16 flex-1">
+                      <div className="flex-row items-center gap-16 flex-1" style={{ minWidth: 0, overflow: 'hidden' }}>
                         <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: app.is_premium_freelancer ? '#ffd700' : 'var(--primary)' }}>
                           <User size={20} />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1" style={{ minWidth: 0 }}>
                           <div className="flex-row items-center gap-8">
-                            <span className="text-sm font-bold">{app.freelancer_name}</span>
+                            <span className="text-sm font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{app.freelancer_name}</span>
                             {app.is_premium_freelancer && <span className="premium-tag"><Star size={10} fill="currentColor" /> PREMIUM</span>}
                           </div>
-                          <div className="flex-row gap-12 text-sm text-dim mt-2">
-                            <span className="flex-row items-center gap-4"><Briefcase size={12} /> {app.freelancer_field}</span>
+                          <div className="flex-row gap-8 text-sm text-dim mt-2" style={{ flexWrap: 'wrap' }}>
+                            <span className="flex-row items-center gap-4"><Briefcase size={12} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100px' }}>{app.freelancer_field}</span></span>
                             <span className="flex-row items-center gap-4"><DollarSign size={12} /> Bid: ${app.bid_amount}</span>
                             <span className="flex-row items-center gap-4"><Star size={12} /> {app.freelancer_level}</span>
-                            <span className="primary-text font-semibold">Freelancer ID: {app.effective_freelancer_id}</span>
-                            <span className="primary-text font-semibold">App ID: {app.application_id}</span>
                           </div>
+                          {expandedCard === `app-${app.id}` && (
+                            <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
+                              <span className="primary-text font-semibold">Freelancer ID: {app.effective_freelancer_id}</span>
+                              <span className="primary-text font-semibold">App ID: {app.application_id}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      {selectedJob?.status === 'open' ? (
-                        <div className="flex-row gap-8">
-                          <button
-                            className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text border-error"
-                            onClick={() => handleRejectApplication(app.id)}
-                          >
-                            Reject
-                          </button>
-                          <button
-                            className="btn btn-primary px-12 py-6 text-xs radius-6"
-                            onClick={() => handleInterviewClick(app)}
-                          >
-                            <MessageSquare size={14} /> Interview
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-xs px-4 py-3 radius-4 font-semibold text-uppercase bg-white-5 text-dim">
-                          {app.status}
-                        </span>
-                      )}
+                      <div className="flex-row gap-8 flex-shrink-0 items-center">
+                        <button
+                          className="expand-card-btn"
+                          onClick={(e) => { e.stopPropagation(); toggleCardExpand(`app-${app.id}`); }}
+                          title="Show more details"
+                        >
+                          <ChevronDown size={16} style={{ transform: expandedCard === `app-${app.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                        {selectedJob?.status === 'open' ? (
+                          <div className="flex-row gap-8">
+                            <button
+                              className="btn btn-secondary px-12 py-6 text-xs radius-6 error-text border-error"
+                              onClick={() => handleRejectApplication(app.id)}
+                            >
+                              Reject
+                            </button>
+                            <button
+                              className="btn btn-primary px-12 py-6 text-xs radius-6"
+                              onClick={() => handleInterviewClick(app)}
+                            >
+                              <MessageSquare size={14} /> Interview
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs px-4 py-3 radius-4 font-semibold text-uppercase bg-white-5 text-dim">
+                            {app.status}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

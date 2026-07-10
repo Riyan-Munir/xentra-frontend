@@ -3983,7 +3983,7 @@ input[type="radio"]:focus {
 
 /* --- Fixed-height panels for Jobs section containers --- */
 .jobs-fixed-panel {
-  height: 420px;
+  height: 520px;
   display: flex;
   flex-direction: column;
 }
@@ -4010,7 +4010,7 @@ input[type="radio"]:focus {
 
 /* --- Fixed-height panels for Applications section containers --- */
 .browse-fixed-panel {
-  height: 480px;
+  height: 560px;
   display: flex;
   flex-direction: column;
 }
@@ -4033,6 +4033,12 @@ input[type="radio"]:focus {
 
 .browse-fixed-panel .scroll-area::-webkit-scrollbar {
   display: none;
+}
+
+/* Prevent horizontal overflow in job/application sections */
+.browse-fixed-panel,
+.jobs-fixed-panel {
+  overflow: hidden;
 }
 
 /* --- Premium toggle bars - remove form-label font interference --- */
@@ -4383,12 +4389,12 @@ input[type="radio"]:focus {
 
   /* Fixed-height panels become min-height */
   .jobs-fixed-panel {
-    min-height: 280px;
+    min-height: 380px;
     height: auto;
   }
 
   .browse-fixed-panel {
-    min-height: 280px;
+    min-height: 380px;
     height: auto;
   }
 
@@ -4541,10 +4547,32 @@ input[type="radio"]:focus {
     max-height: none;
   }
 
-  /* Filter bar mobile */
+  /* Show filter toggle button on mobile */
+  .filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Filter bar collapsed by default on mobile */
   .filter-bar {
+    min-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 16px;
+    opacity: 0;
+    flex-direction: column;
+    align-items: stretch;
+    transition: all 0.3s ease;
+  }
+
+  .filter-bar--open {
     min-height: 48px;
-    max-height: none;
+    max-height: 300px;
+    padding: 12px 16px;
+    opacity: 1;
   }
 
   /* Skeleton profile avatar mobile */
@@ -4581,12 +4609,12 @@ input[type="radio"]:focus {
   }
 
   .jobs-fixed-panel {
-    min-height: 320px;
+    min-height: 380px;
     height: auto;
   }
 
   .browse-fixed-panel {
-    min-height: 320px;
+    min-height: 380px;
     height: auto;
   }
 
@@ -4882,12 +4910,42 @@ input[type="radio"]:focus {
   z-index: 3;
 }
 
-/* Action row below card */
+/* Action row inside card */
 .wallet-card-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: auto;
+}
+
+/* Filter toggle button (mobile hamburger for filters) */
+.filter-toggle-btn {
+  display: none;
+}
+
+/* Expand card dropdown button */
+.expand-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.expand-card-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Shimmer animation for default card */

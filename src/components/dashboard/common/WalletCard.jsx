@@ -103,28 +103,28 @@ const WalletCard = ({
               </span>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Action buttons below card */}
-      <div className="wallet-card-actions">
-        {isPending && (
-          <button
-            className="btn btn-primary text-xs"
-            style={{ padding: '5px 10px' }}
-            onClick={() => onVerify?.(wallet)}
-          >
-            <Shield size={14} /> Verify
-          </button>
-        )}
-        <button
-          className="btn btn-secondary text-xs"
-          style={{ padding: '5px 10px', opacity: canRemove ? 1 : 0.4 }}
-          disabled={!canRemove}
-          onClick={() => canRemove && onRemove?.(wallet)}
-        >
-          <X size={14} /> Remove
-        </button>
+          {/* Action buttons inside card */}
+          <div className="wallet-card-actions">
+            {isPending && (
+              <button
+                className="btn btn-primary text-xs"
+                style={{ padding: '5px 10px' }}
+                onClick={() => onVerify?.(wallet)}
+              >
+                <Shield size={14} /> Verify
+              </button>
+            )}
+            <button
+              className="btn btn-secondary text-xs"
+              style={{ padding: '5px 10px', opacity: canRemove ? 1 : 0.4 }}
+              disabled={!canRemove}
+              onClick={() => canRemove && onRemove?.(wallet)}
+            >
+              <X size={14} /> Remove
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
