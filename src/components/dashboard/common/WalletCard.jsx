@@ -20,7 +20,6 @@ const WalletCard = ({
   onVerify,
   onRemove,
   index = 0,
-  canRemove = true,
 }) => {
   // Determine card variant
   const variant = isDefault
@@ -64,9 +63,8 @@ const WalletCard = ({
           )}
           <button
             className="btn btn-secondary text-xs"
-            style={{ padding: '4px 8px', fontSize: 10, opacity: canRemove ? 1 : 0.4 }}
-            disabled={!canRemove}
-            onClick={() => canRemove && onRemove?.(wallet)}
+            style={{ padding: '4px 8px', fontSize: 10 }}
+            onClick={() => onRemove?.(wallet)}
           >
             <X size={12} /> Remove
           </button>

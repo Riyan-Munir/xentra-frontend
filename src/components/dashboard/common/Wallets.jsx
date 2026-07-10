@@ -151,7 +151,6 @@ const Wallets = ({ currentRole, addNotification }) => {
                                     onVerify={handleVerifyClick}
                                     onRemove={handleRemoveClick}
                                     index={idx}
-                                    canRemove={!wallet.is_default}
                                 />
                             ))}
                         </div>
