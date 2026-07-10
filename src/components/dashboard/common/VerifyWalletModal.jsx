@@ -254,10 +254,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         setSignError('');
 
         try {
-            // Build the message to sign (same format as before)
-            const message = `Xentra wallet verification\nnonce: ${challenge}`;
-
-            // Trigger wallet popup for signing
+            // Wrap the challenge with a text prefix so MetaMask treats it as
+            // UTF-8 text (not hex bytes). Backend verifies the same wrapping.
+            const message = `Xentra verify:${challenge}`;
             const signature = await signMessage(message, connectedAddress);
 
             // Submit signature to backend
