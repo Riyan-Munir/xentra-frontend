@@ -38,14 +38,22 @@ const WalletCard = ({
         className={`wallet-card wallet-card--${variant} wallet-card-animate`}
         style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
       >
-        {/* Badge: top-right */}
-        {isDefault ? (
-          <span className="wallet-badge-default">
-            <Star size={10} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-            DEFAULT
-          </span>
-        ) : (
-          <span className="wallet-badge-set-default">
+        {/* Action row: top-right — badge/status + action buttons */}
+        <div className="wallet-card-top-actions">
+          {isDefault ? (
+            <span className="wallet-badge-default">
+              <Star size={10} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+              DEFAULT
+            </span>
+          ) : isPending ? (
+            <button
+              className="btn btn-primary text-xs"
+              style={{ padding: '4px 8px', fontSize: 10 }}
+              onClick={() => onVerify?.(wallet)}
+            >
+              <Shield size={12} /> Verify
+            </button>
+          ) : (
             <button
               className="btn btn-secondary text-xs"
               style={{ padding: '4px 8px', fontSize: 10 }}
@@ -53,8 +61,16 @@ const WalletCard = ({
             >
               Set as Default
             </button>
-          </span>
-        )}
+          )}
+          <button
+            className="btn btn-secondary text-xs"
+            style={{ padding: '4px 8px', fontSize: 10, opacity: canRemove ? 1 : 0.4 }}
+            disabled={!canRemove}
+            onClick={() => canRemove && onRemove?.(wallet)}
+          >
+            <X size={12} /> Remove
+          </button>
+        </div>
 
         <div className="wallet-card-inner">
           {/* Top row: Xentra logo + chip */}
@@ -102,27 +118,6 @@ const WalletCard = ({
                 Pending
               </span>
             )}
-          </div>
-
-          {/* Action buttons inside card */}
-          <div className="wallet-card-actions">
-            {isPending && (
-              <button
-                className="btn btn-primary text-xs"
-                style={{ padding: '5px 10px' }}
-                onClick={() => onVerify?.(wallet)}
-              >
-                <Shield size={14} /> Verify
-              </button>
-            )}
-            <button
-              className="btn btn-secondary text-xs"
-              style={{ padding: '5px 10px', opacity: canRemove ? 1 : 0.4 }}
-              disabled={!canRemove}
-              onClick={() => canRemove && onRemove?.(wallet)}
-            >
-              <X size={14} /> Remove
-            </button>
           </div>
         </div>
       </div>

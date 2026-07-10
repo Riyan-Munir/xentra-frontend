@@ -1133,6 +1133,39 @@ input[type="radio"]:focus {
   animation: tagShimmer 3s ease-in-out infinite;
 }
 
+/* Status tag — matches premium-tag badge styling */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-tag--accepted {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.status-tag--rejected {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.status-tag--pending {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 @keyframes premiumShine {
   0% {
     transform: translateX(-120%) rotate(45deg);
@@ -4206,6 +4239,11 @@ input[type="radio"]:focus {
   display: none;
 }
 
+/* Filter toggle button (hidden on desktop, shown on mobile via media query) */
+.filter-toggle-btn {
+  display: none;
+}
+
 /* --- Mobile: max-width 768px --- */
 @media (max-width: 768px) {
 
@@ -4401,6 +4439,50 @@ input[type="radio"]:focus {
   /* Scrollable cards reduce padding */
   .scrollable-content-card {
     padding: 16px;
+  }
+
+  /* Smaller card text on mobile */
+  .scroll-area .glass .font-bold {
+    font-size: 13px;
+  }
+
+  .scroll-area .glass .text-dim {
+    font-size: 11px;
+  }
+
+  .scroll-area .status-tag,
+  .scroll-area .premium-tag {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .scroll-area .glass .flex-row.gap-8 {
+    gap: 6px;
+  }
+
+  .scroll-area .glass {
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .scroll-area .glass .flex-center {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .scroll-area .glass .flex-center svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .scroll-area .expand-card-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .scroll-area .expand-card-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   /* Card padding reduction */
@@ -4910,19 +4992,15 @@ input[type="radio"]:focus {
   z-index: 3;
 }
 
-/* Action row inside card */
-.wallet-card-actions {
+/* Top-right action row: badge + buttons side by side */
+.wallet-card-top-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  margin-top: auto;
-}
-
-/* Filter toggle button (mobile hamburger for filters) */
-.filter-toggle-btn {
-  display: none;
+  gap: 6px;
+  align-items: center;
 }
 
 /* Expand card dropdown button */
@@ -4946,6 +5024,61 @@ input[type="radio"]:focus {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
   border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Card expand popup — fixed overlay */
+.card-expand-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: transparent;
+}
+
+/* Card expand popup — floating info box */
+.card-expand-popup {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(18, 18, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  min-width: 180px;
+  max-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  animation: popupFadeIn 0.15s ease-out;
+}
+
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-expand-popup .popup-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.card-expand-popup .popup-item + .popup-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-expand-popup .popup-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.card-expand-popup .popup-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  word-break: break-all;
+  text-align: right;
 }
 
 /* Shimmer animation for default card */
@@ -5056,8 +5189,10 @@ input[type="radio"]:focus {
     padding: 14px;
   }
 
-  .wallet-card-actions {
+  .wallet-card-top-actions {
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-end;
+    right: 10px;
+    top: 10px;
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Plus,
@@ -508,11 +508,29 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   const [focusedField, setFocusedField] = useState(null);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [interviewApp, setInterviewApp] = useState(null);
-  const [expandedCard, setExpandedCard] = useState(null);
+  const [popupState, setPopupState] = useState(null);
 
-  const toggleCardExpand = (cardId) => {
-    setExpandedCard(prev => prev === cardId ? null : cardId);
-  };
+  const closePopup = useCallback(() => {
+    setPopupState(null);
+  }, []);
+
+  const handleExpandClick = useCallback((e, cardId, items) => {
+    e.stopPropagation();
+    if (popupState?.cardId === cardId) {
+      closePopup();
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const above = spaceBelow < 140;
+    setPopupState({
+      cardId,
+      items,
+      x: Math.min(rect.left, window.innerWidth - 260),
+      y: above ? rect.top : rect.bottom + 6,
+      above,
+    });
+  }, [popupState, closePopup]);
 
   const isPremium = profile?.premium_tier === 'premium';
 
@@ -550,12 +568,12 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   }, [selectedJobId, jobs]);
 
   useEffect(() => {
-    if (expandedCard !== null) {
-      const handler = () => setExpandedCard(null);
+    if (popupState !== null) {
+      const handler = () => closePopup();
       document.addEventListener('click', handler);
       return () => document.removeEventListener('click', handler);
     }
-  }, [expandedCard]);
+  }, [popupState, closePopup]);
 
   const handleCreateJob = () => {
     setEditingJob(null);
@@ -694,20 +712,17 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
                             <span className="flex-row items-center gap-4"><Tag size={12} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{job.category}</span></span>
                             <span className="flex-row items-center gap-4"><Clock size={12} /> Expires: {job.job_expiry || 'N/A'}</span>
                           </div>
-                          {expandedCard === `job-${job.id}` && (
-                            <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
-                              <span className="primary-text font-semibold">ID: {job.job_id}</span>
-                            </div>
-                          )}
                         </div>
                       </div>
                       <div className="flex-row gap-8 flex-shrink-0 items-center">
                         <button
                           className="expand-card-btn"
-                          onClick={(e) => { e.stopPropagation(); toggleCardExpand(`job-${job.id}`); }}
+                          onClick={(e) => handleExpandClick(e, `job-${job.id}`, [
+                            { label: 'Job ID', value: job.job_id }
+                          ])}
                           title="Show more details"
                         >
-                          <ChevronDown size={16} style={{ transform: expandedCard === `job-${job.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                          <ChevronDown size={16} style={{ transform: popupState?.cardId === `job-${job.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                         </button>
                         <button
                           className="btn btn-secondary px-12 py-6 text-xs radius-6"
@@ -773,22 +788,19 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
                             <span className="flex-row items-center gap-4"><DollarSign size={12} /> Bid: ${app.bid_amount}</span>
                             <span className="flex-row items-center gap-4"><Star size={12} /> {app.freelancer_level}</span>
                           </div>
-                          {expandedCard === `app-${app.id}` && (
-                            <div className="flex-row gap-12 text-sm text-dim mt-4" style={{ flexWrap: 'wrap' }}>
-                              <span className="primary-text font-semibold">Freelancer ID: {app.effective_freelancer_id}</span>
-                              <span className="primary-text font-semibold">App ID: {app.application_id}</span>
-                            </div>
-                          )}
                         </div>
                       </div>
 
                       <div className="flex-row gap-8 flex-shrink-0 items-center">
                         <button
                           className="expand-card-btn"
-                          onClick={(e) => { e.stopPropagation(); toggleCardExpand(`app-${app.id}`); }}
+                          onClick={(e) => handleExpandClick(e, `app-${app.id}`, [
+                            { label: 'Freelancer ID', value: app.effective_freelancer_id },
+                            { label: 'App ID', value: app.application_id }
+                          ])}
                           title="Show more details"
                         >
-                          <ChevronDown size={16} style={{ transform: expandedCard === `app-${app.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                          <ChevronDown size={16} style={{ transform: popupState?.cardId === `app-${app.id}` ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                         </button>
                         {selectedJob?.status === 'open' ? (
                           <div className="flex-row gap-8">
@@ -806,7 +818,7 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs px-4 py-3 radius-4 font-semibold text-uppercase bg-white-5 text-dim">
+                          <span className="status-tag status-tag--pending">
                             {app.status}
                           </span>
                         )}
@@ -868,6 +880,30 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
         confirmText="Delete Listing"
         type="danger"
       />
+
+      {/* Expand popup overlay */}
+      {popupState && (
+        <div className="card-expand-overlay" onClick={closePopup}>
+          <div
+            className="card-expand-popup"
+            style={{
+              left: popupState.x,
+              ...(popupState.above
+                ? { bottom: `${window.innerHeight - popupState.y + 6}px` }
+                : { top: popupState.y }
+              ),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {popupState.items.map((item, i) => (
+              <div className="popup-item" key={i}>
+                <span className="popup-label">{item.label}</span>
+                <span className="popup-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   );
