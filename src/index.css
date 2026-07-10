@@ -4710,6 +4710,7 @@ input[type="radio"]:focus {
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   padding: 4px;
+  justify-items: center;
 }
 
 /* --- Empty state --- */

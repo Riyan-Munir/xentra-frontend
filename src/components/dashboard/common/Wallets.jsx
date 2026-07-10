@@ -104,8 +104,8 @@ const Wallets = ({ currentRole, addNotification }) => {
             {/* Header */}
             <div className="flex-between flex-shrink-0">
                 <h2>Wallets</h2>
-                <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>
-                    <Plus size={16} /> Add Wallet
+                <button className="btn btn-secondary px-16 py-8 text-sm" onClick={() => setAddModalOpen(true)}>
+                    <Plus size={18} /> Add Wallet
                 </button>
             </div>
 
@@ -128,9 +128,6 @@ const Wallets = ({ currentRole, addNotification }) => {
                             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)', maxWidth: 320, lineHeight: 1.5 }}>
                                 Add a BSC wallet to send & receive USDT through Xentra escrow payments.
                             </p>
-                            <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>
-                                <Plus size={16} /> Add Wallet
-                            </button>
                         </div>
                     ) : (
                         /* Wallet grid */

@@ -531,8 +531,8 @@ const walletsSkeleton = () => (
 
     {/* Header */}
     <div className="flex-between flex-shrink-0">
-      <Skeleton template="text" lines={1} />
-      <Skeleton template="button" lines={1} />
+      <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />
+      <div className="skeleton-line skel-w-120 skel-h-24 skel-r-8" />
     </div>
 
     {/* wallets-fixed-panel with 2 ATM-card-sized skeletons */}
