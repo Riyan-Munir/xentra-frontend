@@ -8,78 +8,91 @@ const PROVIDER_INSTRUCTIONS = {
     METAMASK: {
         name: 'MetaMask',
         steps: [
-            { text: 'Open MetaMask and go to', link: { text: 'MetaMask Test DApp', url: 'https://metamask.github.io/test-dapp/' } },
-            { text: '→ Connect your wallet to the test DApp' },
-            { text: '→ Scroll down to the "Sign" section' },
-            { text: '→ Click "Sign" under Personal Sign' },
-            { text: '→ Paste the message when prompted → Confirm' },
-            { text: '→ Copy the signature result from the console/output' },
+            'Open the MetaMask Test DApp linked below',
+            'Click "Connect" to connect your wallet',
+            'Scroll to the "Sign" section → click "Sign" under Personal Sign',
+            'MetaMask popup will appear → confirm the signature',
+            'Copy the resulting signature from the output',
         ],
-        altNote: 'Alternatively, open MetaMask → Profile icon → Settings → Advanced → enable "Sign method" to sign directly from the extension.',
+        link: { text: 'MetaMask Test DApp', url: 'https://metamask.github.io/test-dapp/' },
+        linkSecondary: { text: 'How to sign data (docs)', url: 'https://docs.metamask.io/wallet/how-to/sign-data/' },
+        altNote: null,
     },
     TRUST_WALLET: {
         name: 'Trust Wallet',
         steps: [
-            { text: 'Open Trust Wallet app' },
-            { text: '→ Go to Settings →', link: { text: 'Sign Message', url: 'https://community.trustwallet.com/t/how-to-sign-a-message-using-trust-wallet/225' } },
-            { text: '→ Select the wallet address' },
-            { text: '→ Paste the message above' },
-            { text: '→ Tap "Sign" → Copy the resulting signature' },
+            'Open Trust Wallet app',
+            'Go to Settings → Sign Message',
+            'Select the wallet address you registered',
+            'Paste the message above into the text field',
+            'Tap "Sign" → copy the resulting signature',
         ],
+        link: { text: 'Trust Wallet Help Center', url: 'https://community.trustwallet.com/' },
+        linkSecondary: null,
         altNote: null,
     },
     PHANTOM: {
         name: 'Phantom',
         steps: [
-            { text: 'Open Phantom wallet extension or app' },
-            { text: '→ Navigate to a DApp that supports', link: { text: 'personal_sign', url: 'https://docs.phantom.com/solana/how-to-sign-a-message' } },
-            { text: '→ Connect your wallet' },
-            { text: '→ Trigger a message sign request (or use the console)' },
-            { text: '→ Paste the message → Sign → Copy the signature' },
+            'Open Phantom wallet extension or mobile app',
+            'Go to a DApp that supports personal_sign (see link below)',
+            'Connect your Phantom wallet',
+            'Trigger a message sign request and paste the message',
+            'Approve the signature → copy the result',
         ],
-        altNote: 'Phantom does not have a built-in "Sign Message" UI. You need a DApp or use the Phantom developer console.',
+        link: { text: 'Phantom Documentation', url: 'https://docs.phantom.app/' },
+        linkSecondary: null,
+        altNote: 'Phantom does not have a standalone "Sign Message" UI. You need to use a DApp or the developer console.',
     },
     OKX_WALLET: {
         name: 'OKX Wallet',
         steps: [
-            { text: 'Open OKX Wallet app or extension' },
-            { text: '→ Go to Settings →', link: { text: 'Sign Message', url: 'https://www.okx.com/help/what-is-message-signing-and-how-do-i-use-it' } },
-            { text: '→ Select your wallet' },
-            { text: '→ Paste the message above' },
-            { text: '→ Tap "Sign" → Copy the resulting signature' },
+            'Open OKX Wallet app or browser extension',
+            'Go to Settings → Sign Message',
+            'Select your wallet',
+            'Paste the message above',
+            'Tap "Sign" → copy the resulting signature',
         ],
+        link: { text: 'OKX Help Center', url: 'https://www.okx.com/help/' },
+        linkSecondary: null,
         altNote: null,
     },
     BINANCE_WALLET: {
         name: 'Binance Wallet',
         steps: [
-            { text: 'Open Binance Wallet (extension or app)' },
-            { text: '→ Go to Settings or DApp browser' },
-            { text: '→ Connect to a DApp that triggers', link: { text: 'personal_sign', url: 'https://www.binance.com/en/support/faq/how-to-use-message-signing-in-binance-web3-wallet-29d521e5e9b64234a9e4f0c3e3e3e3e3' } },
-            { text: '→ Paste the message when prompted → Sign' },
-            { text: '→ Copy the signature from the result' },
+            'Open Binance Wallet (extension or mobile app)',
+            'Connect to a DApp that supports personal_sign',
+            'Approve the connection request',
+            'Paste the message when prompted to sign',
+            'Confirm → copy the signature from the result',
         ],
+        link: { text: 'Binance Wallet Guide', url: 'https://www.binance.com/en/wallet' },
+        linkSecondary: null,
         altNote: 'Binance Wallet does not have a standalone message signing feature. Use a DApp like the MetaMask Test DApp.',
     },
     WALLETCONNECT: {
         name: 'WalletConnect',
         steps: [
-            { text: 'Open your wallet app that supports WalletConnect' },
-            { text: '→ Go to Settings → Sign Message (if available)' },
-            { text: '→ Or connect to a DApp via', link: { text: 'WalletConnect Test', url: 'https://app.walletconnect.com/' } },
-            { text: '→ Paste the message when prompted → Sign' },
-            { text: '→ Copy the resulting signature' },
+            'WalletConnect is a protocol — signing depends on your wallet app',
+            'Open your wallet app that supports WalletConnect',
+            'Go to Settings → Sign Message (if available)',
+            'Or connect to a DApp via the WalletConnect modal',
+            'Paste the message → Sign → copy the result',
         ],
-        altNote: 'WalletConnect is a protocol — signing depends on your specific wallet app. Check your wallet app settings for "Sign Message".',
+        link: { text: 'WalletConnect Docs', url: 'https://docs.walletconnect.com/' },
+        linkSecondary: null,
+        altNote: null,
     },
     OTHER: {
         name: null,
         steps: [
-            { text: 'Search online for how to sign a personal message with your wallet app' },
-            { text: '→ Look for "Sign Message" or "Sign Personal Message" in your wallet settings' },
-            { text: '→ If not available, use a DApp like the', link: { text: 'MetaMask Test DApp', url: 'https://metamask.github.io/test-dapp/' }, textAfter: '' },
-            { text: '→ Connect your wallet → Sign the message → Copy the signature' },
+            'Search your wallet app\'s documentation for "Sign Message"',
+            'Look in Settings for "Sign Message" or "Sign Personal Message"',
+            'If not available, use a DApp like the MetaMask Test DApp (link below)',
+            'Connect your wallet → sign the message → copy the signature',
         ],
+        link: { text: 'MetaMask Test DApp (universal fallback)', url: 'https://metamask.github.io/test-dapp/' },
+        linkSecondary: null,
         altNote: null,
     },
 };
@@ -316,35 +329,63 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             color: 'rgba(255,255,255,0.5)',
                         }}
                     >
-                        {instructions.steps.map((step, i) => (
+                        {instructions.steps.map((text, i) => (
                             <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
                                 <span style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0, minWidth: 14 }}>
                                     {i + 1}.
                                 </span>
-                                <span>
-                                    {step.text}
-                                    {step.link && (
-                                        <a
-                                            href={step.link.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                                color: 'var(--primary)',
-                                                textDecoration: 'none',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: 3,
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {step.link.text}
-                                            <ExternalLink size={11} style={{ opacity: 0.7 }} />
-                                        </a>
-                                    )}
-                                    {step.textAfter || ''}
-                                </span>
+                                <span>{text}</span>
                             </div>
                         ))}
+
+                        {/* Primary link */}
+                        {instructions.link && (
+                            <div style={{ marginTop: 10 }}>
+                                <a
+                                    href={instructions.link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        color: 'var(--primary)',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        fontWeight: 500,
+                                        fontSize: 12,
+                                    }}
+                                >
+                                    {instructions.link.text}
+                                    <ExternalLink size={11} style={{ opacity: 0.7 }} />
+                                </a>
+                            </div>
+                        )}
+
+                        {/* Secondary link */}
+                        {instructions.linkSecondary && (
+                            <div style={{ marginTop: 4 }}>
+                                <a
+                                    href={instructions.linkSecondary.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        color: 'var(--primary)',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        fontWeight: 500,
+                                        fontSize: 12,
+                                        opacity: 0.7,
+                                    }}
+                                >
+                                    {instructions.linkSecondary.text}
+                                    <ExternalLink size={11} style={{ opacity: 0.7 }} />
+                                </a>
+                            </div>
+                        )}
+
+                        {/* Alt note */}
                         {instructions.altNote && (
                             <div
                                 style={{
