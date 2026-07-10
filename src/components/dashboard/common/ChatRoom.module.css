@@ -617,7 +617,6 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    color: rgba(255, 255, 255, 0.3);
     padding: 40px 20px;
     text-align: center;
     background: transparent;
@@ -625,38 +624,38 @@
 
 .lockedIcon,
 .lockedIconBlue {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    color: rgba(99, 102, 241, 0.8);
 }
 
 .lockedIcon {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.15);
+    background: rgba(99, 102, 241, 0.1);
+    color: rgba(99, 102, 241, 0.8);
 }
 
 .lockedIconBlue {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.15);
+    background: rgba(99, 102, 241, 0.1);
+    color: rgba(99, 102, 241, 0.8);
 }
 
 .lockedTitle {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
 }
 
 .lockedText {
-    font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.45);
     margin: 0;
-    max-width: 280px;
+    max-width: 320px;
     line-height: 1.5;
 }
 
@@ -1589,8 +1588,9 @@
 
     .lockedIcon,
     .lockedIconBlue {
-        width: 44px;
-        height: 44px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
     }
 }
 
@@ -1643,8 +1643,9 @@
 
     .lockedIcon,
     .lockedIconBlue {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
     }
 
     .emptyState {

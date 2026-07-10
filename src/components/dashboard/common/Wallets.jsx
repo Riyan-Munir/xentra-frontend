@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, CreditCard } from 'lucide-react';
+import { Plus, Wallet } from 'lucide-react';
 import walletService from '../../../services/walletService';
 import WalletCard from './WalletCard';
 import AddWalletModal from './AddWalletModal';
@@ -123,15 +123,23 @@ const Wallets = ({ currentRole, addNotification }) => {
                             <span className="text-sm" style={{ opacity: 0.4 }}>Loading wallets...</span>
                         </div>
                     ) : activeWallets.length === 0 ? (
-                        /* Empty state */
-                        <div className="wallet-empty-state">
-                            <CreditCard size={48} style={{ opacity: 0.3 }} />
-                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                                Connect Your First Wallet
-                            </p>
-                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)', maxWidth: 320, lineHeight: 1.5 }}>
-                                Add a BSC wallet to send & receive USDT through Xentra escrow payments.
-                            </p>
+                        /* Empty state — matches "Portfolio Required" theme */
+                        <div className="flex-1 flex-col flex-center gap-16 text-center" style={{ minHeight: 200 }}>
+                            <div className="flex-center flex-shrink-0" style={{ width: 64, height: 64, background: 'rgba(99, 102, 241, 0.1)', borderRadius: 16 }}>
+                                <Wallet size={28} className="primary-text" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-lg mb-6">Connect Your First Wallet</p>
+                                <p className="text-sm text-dim" style={{ maxWidth: 320 }}>
+                                    Add a BSC wallet to send & receive USDT through Xentra escrow payments.
+                                </p>
+                            </div>
+                            <button
+                                className="btn btn-primary px-32 py-12 text-sm"
+                                onClick={() => setAddModalOpen(true)}
+                            >
+                                <Plus size={16} /> Add Wallet
+                            </button>
                         </div>
                     ) : (
                         /* Wallet grid */

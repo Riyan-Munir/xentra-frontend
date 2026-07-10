@@ -4913,11 +4913,11 @@ input[type="radio"]:focus {
   align-items: flex-end;
 }
 
-/* Badge: DEFAULT */
+/* Badge: DEFAULT — lives inside .wallet-card-top-actions flex row */
 .wallet-badge-default {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   padding: 4px 10px;
@@ -4926,15 +4926,13 @@ input[type="radio"]:focus {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  z-index: 3;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Badge: Set as Default button (top-right on non-default cards) */
 .wallet-badge-set-default {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 3;
+  flex-shrink: 0;
 }
 
 /* Top-right action row: badge + buttons side by side */
