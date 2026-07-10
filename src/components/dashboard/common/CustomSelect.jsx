@@ -49,6 +49,7 @@ const CustomSelect = ({ options, value, onChange, placeholder }) => {
         <div
           className="custom-select-dropdown hide-scrollbar"
           onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
           {options.map((opt, index) => {
             const val = getOptionValue(opt);
