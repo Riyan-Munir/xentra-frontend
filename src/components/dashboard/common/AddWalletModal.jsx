@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Wallet, X, Info, Plug } from 'lucide-react';
+import { Wallet, X, Info, Plug, ChevronDown } from 'lucide-react';
 import walletService from '../../../services/walletService';
-import { connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
-
-// Wallet provider options (must match web3Wallet.js provider keys)
-const PROVIDER_DISPLAY_NAMES = {
-  METAMASK: 'MetaMask',
-  TRUST_WALLET: 'Trust Wallet',
-  PHANTOM: 'Phantom',
-  RABBY: 'Rabby Wallet',
-  COINBASE_WALLET: 'Coinbase Wallet',
-  OKX_WALLET: 'OKX Wallet',
-  BINANCE_WALLET: 'Binance Wallet',
-  WALLETCONNECT: 'WalletConnect',
-  OTHER: 'Other',
-};
+import {
+  connectWallet,
+  disconnectWallet,
+  detectProvider,
+  isWalletAvailable,
+  startProviderDiscovery,
+  getDiscoveredProviders,
+  getProviderLabel,
+} from '../../../services/web3Wallet';
 
 const MAX_LABEL_LENGTH = 32;
 
@@ -27,6 +22,8 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [discoveredWallets, setDiscoveredWallets] = useState([]);
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -38,7 +35,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     };
   }, [isOpen]);
 
-  // Reset form when modal opens
+  // Reset form when modal opens — do NOT auto-connect
   useEffect(() => {
     if (isOpen) {
       setAddress('');
@@ -48,44 +45,35 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       setIsSubmitting(false);
       setIsConnecting(false);
       setConnected(false);
+      setShowWalletPicker(false);
 
-      // Check if wallet is already connected
-      getConnectedAddress().then((addr) => {
-        if (addr) {
-          setAddress(addr);
-          setProvider(detectProvider());
-          setConnected(true);
-        }
-      });
+      // Start EIP-6963 discovery and collect wallets after a short delay
+      startProviderDiscovery();
+      const timer = setTimeout(() => {
+        const wallets = getDiscoveredProviders();
+        setDiscoveredWallets(wallets);
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // Listen for account changes while modal is open
-  useEffect(() => {
-    if (!isOpen) return;
-    const unsub = onAccountChange((addr) => {
-      if (addr) {
-        setAddress(addr);
-        setProvider(detectProvider());
-        setConnected(true);
-        setErrors((prev) => ({ ...prev, address: '' }));
-      } else {
-        setAddress('');
-        setProvider('');
-        setConnected(false);
-      }
-    });
-    return unsub;
-  }, [isOpen]);
-
-  // Handle "Connect Wallet" button click
+  // Handle "Connect Wallet" — if multiple wallets, show picker; otherwise connect directly
   const handleConnectWallet = async () => {
     if (isConnecting) return;
+
+    // If we have multiple discovered wallets, show the picker
+    if (discoveredWallets.length > 1) {
+      setShowWalletPicker(true);
+      return;
+    }
+
+    // Single wallet or fallback to window.ethereum
     setIsConnecting(true);
     setErrors((prev) => ({ ...prev, connect: '' }));
 
     try {
-      const { address: addr, provider: prov } = await connectWallet();
+      const targetProvider = discoveredWallets.length === 1 ? discoveredWallets[0].provider : undefined;
+      const { address: addr, provider: prov } = await connectWallet(targetProvider);
       setAddress(addr);
       setProvider(prov);
       setConnected(true);
@@ -95,6 +83,33 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     } finally {
       setIsConnecting(false);
     }
+  };
+
+  // Connect to a specific wallet from the picker
+  const handlePickWallet = async (wallet) => {
+    setShowWalletPicker(false);
+    setIsConnecting(true);
+    setErrors((prev) => ({ ...prev, connect: '' }));
+
+    try {
+      const { address: addr, provider: prov } = await connectWallet(wallet.provider);
+      setAddress(addr);
+      setProvider(prov);
+      setConnected(true);
+      setErrors((prev) => ({ ...prev, address: '', connect: '' }));
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, connect: err.message || 'Failed to connect wallet' }));
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // Handle disconnect — revoke permissions from the extension
+  const handleDisconnect = async () => {
+    await disconnectWallet();
+    setAddress('');
+    setProvider('');
+    setConnected(false);
   };
 
   // Handle label change with live validation
@@ -188,7 +203,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
           </div>
         </div>
 
-        {/* Connect Wallet button */}
+        {/* Connect Wallet / Connected State */}
         <div className="form-group">
           <label className="form-label">Wallet Address *</label>
           {connected ? (
@@ -223,13 +238,48 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
               <button
                 className="btn btn-secondary text-xs"
                 style={{ padding: '4px 8px', fontSize: 11, flexShrink: 0 }}
-                onClick={() => {
-                  setAddress('');
-                  setProvider('');
-                  setConnected(false);
-                }}
+                onClick={handleDisconnect}
               >
                 Disconnect
+              </button>
+            </div>
+          ) : showWalletPicker ? (
+            /* Wallet picker — shown when multiple extensions detected */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+                Multiple wallets detected — choose one:
+              </span>
+              {discoveredWallets.map((w) => (
+                <button
+                  key={w.uuid}
+                  className="btn btn-secondary w-full"
+                  style={{
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    fontSize: 13,
+                    justifyContent: 'flex-start',
+                  }}
+                  onClick={() => handlePickWallet(w)}
+                >
+                  {w.icon && (
+                    <img
+                      src={w.icon}
+                      alt={w.name}
+                      style={{ width: 20, height: 20, borderRadius: 4 }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                  <span>{w.name}</span>
+                </button>
+              ))}
+              <button
+                className="btn btn-secondary text-xs"
+                style={{ padding: '6px 10px', fontSize: 11, marginTop: 4 }}
+                onClick={() => setShowWalletPicker(false)}
+              >
+                ← Back
               </button>
             </div>
           ) : (
@@ -256,6 +306,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
                   <>
                     <Plug size={16} />
                     {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                    {discoveredWallets.length > 1 && <ChevronDown size={14} />}
                   </>
                 )}
               </button>
@@ -284,7 +335,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
               color: provider ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
             }}
           >
-            {provider ? (PROVIDER_DISPLAY_NAMES[provider] || provider) : 'Connect wallet to detect'}
+            {provider ? getProviderLabel(provider) : 'Connect wallet to detect'}
           </div>
         </div>
 
