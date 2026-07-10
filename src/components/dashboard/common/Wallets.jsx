@@ -65,6 +65,14 @@ const Wallets = ({ currentRole, addNotification }) => {
         setVerifyModal({ open: true, wallet });
     };
 
+    const handleRemoveClick = (wallet) => {
+        if (wallet.is_default) {
+            addNotification?.('Default wallet cannot be removed. Set another wallet as default first.', 'error');
+            return;
+        }
+        setRemoveModal({ open: true, wallet });
+    };
+
     const handleSetDefault = async (wallet) => {
         try {
             await walletService.setDefault(walletType, wallet.id);
@@ -74,10 +82,6 @@ const Wallets = ({ currentRole, addNotification }) => {
             const msg = err?.response?.data?.error || 'Failed to set default wallet';
             addNotification?.(msg, 'error');
         }
-    };
-
-    const handleRemoveClick = (wallet) => {
-        setRemoveModal({ open: true, wallet });
     };
 
     const handleConfirmRemove = async () => {
@@ -141,7 +145,7 @@ const Wallets = ({ currentRole, addNotification }) => {
                                     onVerify={handleVerifyClick}
                                     onRemove={handleRemoveClick}
                                     index={idx}
-                                    canRemove={activeWallets.length > 1 || !wallet.is_default}
+                                    canRemove={!wallet.is_default}
                                 />
                             ))}
                         </div>

@@ -4780,9 +4780,8 @@ input[type="radio"]:focus {
       rgba(99, 102, 241, 0.35),
       rgba(139, 92, 246, 0.25),
       rgba(236, 72, 153, 0.15));
-  border: 1px solid rgba(99, 102, 241, 0.5);
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Normal (verified, non-default) card variant */
@@ -4908,13 +4907,8 @@ input[type="radio"]:focus {
       transparent,
       transparent 10px,
       rgba(255, 255, 255, 0.02) 10px,
-      rgba(255, 255, 255, 0.02) 11px),
-    linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      transparent 100%);
-  background-size: 100% 100%, 200% 100%;
-  animation: cardShimmer 4s infinite ease-in-out;
+      rgba(255, 255, 255, 0.02) 11px);
+  background-size: 100% 100%;
 }
 
 /* Card entrance animation */
@@ -4965,14 +4959,15 @@ input[type="radio"]:focus {
   }
 
   .wallets-fixed-panel {
-    min-height: 400px;
+    min-height: 640px;
     height: auto;
+    max-height: none;
   }
 }
 
 @media (max-width: 768px) {
   .wallets-fixed-panel {
-    min-height: 360px;
+    min-height: 600px;
   }
 
   .wallet-card {
@@ -4991,7 +4986,7 @@ input[type="radio"]:focus {
 
 @media (max-width: 480px) {
   .wallets-fixed-panel {
-    min-height: 300px;
+    min-height: 560px;
   }
 
   .wallet-card {

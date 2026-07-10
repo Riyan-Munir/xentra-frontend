@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { Wallet, Plus } from 'lucide-react';
+import { Wallet, Plus, ShieldCheck, AlertTriangle } from 'lucide-react';
 import UnsavedChangesBar from '../common/UnsavedChangesBar';
 import CustomSelect from '../common/CustomSelect';
 import DisplayNameCard from '../common/DisplayNameCard';
@@ -138,9 +138,9 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
           {walletsLoading ? (
             <Skeleton template="text" lines={1} />
           ) : hasVerifiedWallet ? (
-            <span style={{ color: 'var(--success, #22c55e)', fontSize: '0.85rem', fontWeight: 600 }}>✅ Verified</span>
+            <span style={{ color: 'var(--success, #22c55e)', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}><ShieldCheck size={16} /> Verified</span>
           ) : (
-            <span style={{ color: 'var(--warning, #f59e0b)', fontSize: '0.85rem', fontWeight: 600 }}>⚠ Not Verified</span>
+            <span style={{ color: 'var(--warning, #f59e0b)', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}><AlertTriangle size={16} /> Not Verified</span>
           )}
         </div>
 
@@ -149,7 +149,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
             <Skeleton template="form" />
           </div>
         ) : hasVerifiedWallet ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minHeight: '120px', justifyContent: 'center' }}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-dim, #94a3b8)' }}>
               Your payment method is verified and ready for escrow transactions.
             </p>
@@ -163,7 +163,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minHeight: '120px', justifyContent: 'center' }}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-dim, #94a3b8)' }}>
               Add and verify a BSC wallet to enable payments and escrow transactions.
             </p>
