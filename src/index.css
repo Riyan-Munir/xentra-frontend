@@ -3393,13 +3393,6 @@ input[type="radio"]:focus {
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-/* --- Skeleton Filter Item — matches filter bar select inputs --- */
-.skeleton-filter-item {
-  height: 36px;
-  flex: 1;
-  max-width: 180px;
-}
-
 /* --- Skeleton Bottom Icon — matches empty state icon (48px) --- */
 .skeleton-bottom-icon {
   width: 48px;
@@ -3983,21 +3976,6 @@ input[type="radio"]:focus {
   }
 }
 
-/* --- Professional filter bar for Browse Opportunities --- */
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  flex-shrink: 0;
-  min-height: 56px;
-  max-height: 64px;
-}
-
 @keyframes bannedFadeIn {
   from {
     opacity: 0;
@@ -4236,11 +4214,6 @@ input[type="radio"]:focus {
 
 /* --- Mobile Sidebar Overlay (hidden on desktop) --- */
 .sidebar-mobile-overlay {
-  display: none;
-}
-
-/* Filter toggle button (hidden on desktop, shown on mobile via media query) */
-.filter-toggle-btn {
   display: none;
 }
 
@@ -4627,34 +4600,6 @@ input[type="radio"]:focus {
     min-width: 220px;
     min-height: 280px;
     max-height: none;
-  }
-
-  /* Show filter toggle button on mobile */
-  .filter-toggle-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Filter bar collapsed by default on mobile */
-  .filter-bar {
-    min-height: 0;
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 16px;
-    opacity: 0;
-    flex-direction: column;
-    align-items: stretch;
-    transition: all 0.3s ease;
-  }
-
-  .filter-bar--open {
-    min-height: 48px;
-    max-height: 300px;
-    padding: 12px 16px;
-    opacity: 1;
   }
 
   /* Skeleton profile avatar mobile */

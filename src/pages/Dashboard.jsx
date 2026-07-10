@@ -206,13 +206,10 @@ const applicationsSkeleton = () => (
         <div className="scrollable-content-card">
           <div className="flex-between mb-16 flex-shrink-0">
             <div className="skeleton-line skel-w-160 skel-h-18 skel-r-4" />
-            <div className="skeleton-line skel-w-70 skel-h-24 skel-r-8" />
-          </div>
-          <div className="filter-bar flex-shrink-0">
-            <div className="skeleton-filter-item skeleton-line" />
-            <div className="skeleton-filter-item skeleton-line" />
-            <div className="skeleton-filter-item skeleton-line" />
-            <div className="skeleton-filter-item skeleton-line" />
+            <div className="flex-row gap-8">
+              <div className="skeleton-line skel-w-60 skel-h-24 skel-r-8" />
+              <div className="skeleton-line skel-w-70 skel-h-24 skel-r-8" />
+            </div>
           </div>
           <div className="flex-col gap-12">
             {[1, 2, 3].map(i => (
@@ -324,7 +321,7 @@ const jobsSkeleton = () => (
         <div className="scrollable-content-card">
           <div className="flex-between mb-16 flex-shrink-0">
             <div className="skeleton-line skel-w-160 skel-h-18 skel-r-4" />
-            <div className="skeleton-filter-item skeleton-line" />
+            <div className="skeleton-line skel-w-120 skel-h-24 skel-r-8" />
           </div>
           <div className="flex-col gap-12">
             {[1, 2].map(i => (

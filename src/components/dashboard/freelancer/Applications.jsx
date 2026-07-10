@@ -60,8 +60,9 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
   });
 
   const [focusedField, setFocusedField] = useState(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [popupState, setPopupState] = useState(null);
+  const [filterPopupOpen, setFilterPopupOpen] = useState(false);
+  const [filterPopupPos, setFilterPopupPos] = useState({ x: 0, y: 0, above: false });
 
   const closePopup = useCallback(() => {
     setPopupState(null);
@@ -136,6 +137,27 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
       return () => document.removeEventListener('click', handler);
     }
   }, [popupState, closePopup]);
+
+  useEffect(() => {
+    if (filterPopupOpen) {
+      const handler = () => setFilterPopupOpen(false);
+      document.addEventListener('click', handler);
+      return () => document.removeEventListener('click', handler);
+    }
+  }, [filterPopupOpen]);
+
+  const handleFilterClick = (e) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const above = spaceBelow < 320;
+    setFilterPopupPos({
+      x: Math.min(rect.left, window.innerWidth - 320),
+      y: above ? rect.top : rect.bottom + 6,
+      above,
+    });
+    setFilterPopupOpen(prev => !prev);
+  };
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -255,12 +277,20 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                 <Search size={18} /> Browse Opportunities
               </h3>
               {profile?.portfolios?.length > 0 && (
-                <button
-                  className="btn btn-secondary px-10 py-6 radius-6"
-                  onClick={() => fetchAvailableJobs()}
-                >
-                  <RefreshCw size={14} className={isJobsLoading ? 'spin-animation' : ''} /> Refresh
-                </button>
+                <div className="flex-row gap-8 items-center">
+                  <button
+                    className="btn btn-secondary px-10 py-6 radius-6"
+                    onClick={handleFilterClick}
+                  >
+                    <Filter size={14} /> Filters
+                  </button>
+                  <button
+                    className="btn btn-secondary px-10 py-6 radius-6"
+                    onClick={() => fetchAvailableJobs()}
+                  >
+                    <RefreshCw size={14} className={isJobsLoading ? 'spin-animation' : ''} /> Refresh
+                  </button>
+                </div>
               )}
             </div>
 
@@ -282,60 +312,6 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
               </div>
             ) : (
               <>
-                {/* Filter toggle for mobile */}
-                <button
-                  className="btn btn-secondary filter-toggle-btn"
-                  onClick={() => setFiltersOpen(prev => !prev)}
-                >
-                  <Filter size={14} /> Filters
-                  <ChevronDown size={14} style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                </button>
-
-                <div className={`filter-bar flex-shrink-0${filtersOpen ? ' filter-bar--open' : ''}`}>
-                  <div className="flex-1 minw-180">
-                    <CustomSelect
-                      placeholder="All Categories"
-                      options={[{ label: 'All Categories', value: '' }, ...CATEGORIES.map(c => ({ label: c, value: c }))]}
-                      value={filters.category}
-                      onChange={(val) => setFilters(prev => ({ ...prev, category: val }))}
-                    />
-                  </div>
-                  <div style={{ width: '100%', maxWidth: '160px' }}>
-                    <CustomSelect
-                      placeholder="Any Budget"
-                      options={[
-                        { label: 'Any Budget', value: '' },
-                        { label: 'Low', value: 'low' },
-                        { label: 'Medium', value: 'medium' },
-                        { label: 'High', value: 'high' }
-                      ]}
-                      value={filters.budget_level}
-                      onChange={(val) => setFilters(prev => ({ ...prev, budget_level: val }))}
-                    />
-                  </div>
-                  <label className="flex-row items-center gap-8 cursor-pointer text-sm user-select-none text-dim">
-                    <input
-                      type="checkbox"
-                      checked={filters.is_featured}
-                      onChange={(e) => setFilters(prev => ({ ...prev, is_featured: e.target.checked }))}
-                      className="cursor-pointer"
-                    />
-                    <Zap size={14} className={filters.is_featured ? 'primary-text' : ''} /> Featured
-                  </label>
-                  <div style={{ width: '100%', maxWidth: '150px' }}>
-                    <CustomSelect
-                      placeholder="Sort By"
-                      options={[
-                        { label: 'Newest First', value: 'newest' },
-                        { label: 'Highest Pay', value: 'budget_max_desc' },
-                        { label: 'Lowest Pay', value: 'budget_max_asc' },
-                        { label: 'Soonest Deadline', value: 'deadline' }
-                      ]}
-                      value={filters.sort_by}
-                      onChange={(val) => setFilters(prev => ({ ...prev, sort_by: val }))}
-                    />
-                  </div>
-                </div>
 
                 {availableJobs.length > 0 ? (
                   <div className="scroll-area">
@@ -598,6 +574,67 @@ const Applications = ({ profile, addNotification, fetchProfile, onNavigate }) =>
                 <span className="popup-value">{item.value}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filter popup overlay */}
+      {filterPopupOpen && (
+        <div className="card-expand-overlay" onClick={() => setFilterPopupOpen(false)}>
+          <div
+            className="card-expand-popup"
+            style={{
+              left: filterPopupPos.x,
+              ...(filterPopupPos.above
+                ? { bottom: `${window.innerHeight - filterPopupPos.y + 6}px` }
+                : { top: filterPopupPos.y }
+              ),
+              minWidth: '280px',
+              maxWidth: '340px',
+              padding: '16px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex-col gap-12">
+              <span className="text-sm font-bold text-dim">Filters</span>
+              <CustomSelect
+                placeholder="All Categories"
+                options={[{ label: 'All Categories', value: '' }, ...CATEGORIES.map(c => ({ label: c, value: c }))]}
+                value={filters.category}
+                onChange={(val) => setFilters(prev => ({ ...prev, category: val }))}
+              />
+              <CustomSelect
+                placeholder="Any Budget"
+                options={[
+                  { label: 'Any Budget', value: '' },
+                  { label: 'Low', value: 'low' },
+                  { label: 'Medium', value: 'medium' },
+                  { label: 'High', value: 'high' }
+                ]}
+                value={filters.budget_level}
+                onChange={(val) => setFilters(prev => ({ ...prev, budget_level: val }))}
+              />
+              <label className="flex-row items-center gap-8 cursor-pointer text-sm user-select-none text-dim">
+                <input
+                  type="checkbox"
+                  checked={filters.is_featured}
+                  onChange={(e) => setFilters(prev => ({ ...prev, is_featured: e.target.checked }))}
+                  className="cursor-pointer"
+                />
+                <Zap size={14} className={filters.is_featured ? 'primary-text' : ''} /> Featured Only
+              </label>
+              <CustomSelect
+                placeholder="Sort By"
+                options={[
+                  { label: 'Newest First', value: 'newest' },
+                  { label: 'Highest Pay', value: 'budget_max_desc' },
+                  { label: 'Lowest Pay', value: 'budget_max_asc' },
+                  { label: 'Soonest Deadline', value: 'deadline' }
+                ]}
+                value={filters.sort_by}
+                onChange={(val) => setFilters(prev => ({ ...prev, sort_by: val }))}
+              />
+            </div>
           </div>
         </div>
       )}
