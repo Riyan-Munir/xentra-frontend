@@ -4822,59 +4822,14 @@ input[type="radio"]:focus {
   justify-content: space-between;
 }
 
-/* Chip icon (realistic EMV contact chip) */
+/* Chip icon (visual ATM element) */
 .wallet-card-chip {
   width: 36px;
   height: 28px;
   border-radius: 6px;
-  background: linear-gradient(135deg, #c9a227, #e8c84a, #d4af37);
+  background: linear-gradient(135deg, #d4af37, #f0d060);
   opacity: 0.7;
   flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.15);
-}
-
-/* EMV chip — horizontal divider line across the middle */
-.wallet-card-chip::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  right: 4px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.18);
-  box-shadow:
-    /* Vertical line: top half, from top to middle */
-    calc(14px - 4px) calc(2px - 50%) 0 0 rgba(0, 0, 0, 0.15),
-    /* Vertical line: bottom half, from middle to ~70% */
-    calc(14px - 4px) 0 0 0 rgba(0, 0, 0, 0.12),
-    /* Second horizontal line near top */
-    0 calc(-10px) 0 0 rgba(0, 0, 0, 0.08),
-    /* Second horizontal line near bottom */
-    0 calc(10px) 0 0 rgba(0, 0, 0, 0.08);
-  transform: translateY(-50%);
-}
-
-/* EMV chip — vertical lines and curved contact pads */
-.wallet-card-chip::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 50%;
-  width: 1px;
-  height: calc(100% - 6px);
-  background: rgba(0, 0, 0, 0.12);
-  box-shadow:
-    /* Left vertical line */
-    -8px 0 0 0 rgba(0, 0, 0, 0.12),
-    /* Right vertical line */
-    8px 0 0 0 rgba(0, 0, 0, 0.12),
-    /* Top-right corner curve accent */
-    8px -1px 0 2px rgba(0, 0, 0, 0.04),
-    /* Bottom-left corner curve accent */
-    -8px 1px 0 2px rgba(0, 0, 0, 0.04);
-  transform: translateX(-50%);
 }
 
 /* Address display */
