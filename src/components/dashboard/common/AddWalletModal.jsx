@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Wallet, X, Info } from 'lucide-react';
+import { Wallet, X, Info, Plug } from 'lucide-react';
 import walletService from '../../../services/walletService';
+import { connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
 import CustomSelect from './CustomSelect';
 
-// Wallet provider options
+// Wallet provider options (must match web3Wallet.js provider keys)
 const PROVIDER_OPTIONS = [
   { value: 'METAMASK', label: 'MetaMask' },
   { value: 'TRUST_WALLET', label: 'Trust Wallet' },
@@ -17,8 +18,6 @@ const PROVIDER_OPTIONS = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-// BSC address regex: 0x + 40 hex chars
-const ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const MAX_LABEL_LENGTH = 32;
 
 const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotification }) => {
@@ -27,6 +26,8 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
   const [provider, setProvider] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -46,34 +47,61 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       setProvider('');
       setErrors({});
       setIsSubmitting(false);
+      setIsConnecting(false);
+      setConnected(false);
+
+      // Check if wallet is already connected
+      getConnectedAddress().then((addr) => {
+        if (addr) {
+          setAddress(addr);
+          setProvider(detectProvider());
+          setConnected(true);
+        }
+      });
     }
   }, [isOpen]);
 
-  // Validate address field
-  const validateAddress = useCallback((value) => {
-    if (!value.trim()) return 'Wallet address is required';
-    if (!ADDRESS_REGEX.test(value.trim())) return 'Invalid BSC address format (0x + 40 hex characters)';
-    return '';
-  }, []);
+  // Listen for account changes while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsub = onAccountChange((addr) => {
+      if (addr) {
+        setAddress(addr);
+        setProvider(detectProvider());
+        setConnected(true);
+        setErrors((prev) => ({ ...prev, address: '' }));
+      } else {
+        setAddress('');
+        setProvider('');
+        setConnected(false);
+      }
+    });
+    return unsub;
+  }, [isOpen]);
 
-  // Validate label field
-  const validateLabel = useCallback((value) => {
-    if (value.length > MAX_LABEL_LENGTH) return `Label must be ${MAX_LABEL_LENGTH} characters or fewer`;
-    return '';
-  }, []);
+  // Handle "Connect Wallet" button click
+  const handleConnectWallet = async () => {
+    if (isConnecting) return;
+    setIsConnecting(true);
+    setErrors((prev) => ({ ...prev, connect: '' }));
 
-  // Validate provider field
-  const validateProvider = useCallback((value) => {
-    if (!value) return 'Select a wallet provider';
-    return '';
-  }, []);
+    try {
+      const { address: addr, provider: prov } = await connectWallet();
+      setAddress(addr);
+      setProvider(prov);
+      setConnected(true);
+      setErrors((prev) => ({ ...prev, address: '', connect: '' }));
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, connect: err.message || 'Failed to connect wallet' }));
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
-  // Handle address change with live validation
-  const handleAddressChange = (e) => {
-    const value = e.target.value;
-    setAddress(value);
-    const error = validateAddress(value);
-    setErrors((prev) => ({ ...prev, address: error }));
+  // Handle provider dropdown change (allow manual override)
+  const handleProviderChange = (val) => {
+    setProvider(val);
+    setErrors((prev) => ({ ...prev, provider: '' }));
   };
 
   // Handle label change with live validation
@@ -82,23 +110,28 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     if (value.length <= MAX_LABEL_LENGTH + 1) {
       setLabel(value);
     }
-    const error = validateLabel(value);
-    setErrors((prev) => ({ ...prev, label: error }));
   };
 
   // Full form validation
   const validateForm = () => {
-    const addrError = validateAddress(address);
-    const lblError = validateLabel(label);
-    const provError = validateProvider(provider);
+    const newErrors = {};
 
-    setErrors({
-      address: addrError,
-      label: lblError,
-      provider: provError,
-    });
+    if (!address.trim()) {
+      newErrors.address = 'Connect your wallet to auto-fill the address';
+    } else if (!/^0x[0-9a-fA-F]{40}$/.test(address.trim())) {
+      newErrors.address = 'Invalid BSC address format';
+    }
 
-    return !addrError && !lblError && !provError;
+    if (!provider) {
+      newErrors.provider = 'Select a wallet provider';
+    }
+
+    if (label.length > MAX_LABEL_LENGTH) {
+      newErrors.label = `Label must be ${MAX_LABEL_LENGTH} characters or fewer`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Handle form submission
@@ -111,6 +144,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       await walletService.create(walletType, {
         address: address.trim(),
         label: label.trim(),
+        provider: provider,
       });
       addNotification?.('Wallet added successfully. Verify ownership to activate.', 'success');
       onSuccess?.();
@@ -125,7 +159,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
 
   // Handle Enter key
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !isSubmitting) {
+    if (e.key === 'Enter' && !isSubmitting && !isConnecting) {
       e.preventDefault();
       handleSubmit();
     }
@@ -165,24 +199,98 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
           </div>
         </div>
 
-        {/* Address field */}
+        {/* Connect Wallet button */}
         <div className="form-group">
           <label className="form-label">Wallet Address *</label>
-          <input
-            type="text"
-            className={`form-input ${errors.address ? 'input-error' : ''}`}
-            placeholder="0x..."
-            value={address}
-            onChange={handleAddressChange}
-            autoComplete="off"
-            spellCheck={false}
-          />
-          {errors.address && <span className="error-text">{errors.address}</span>}
-          {!errors.address && address && (
-            <span className="text-xs" style={{ color: 'var(--success)' }}>
-              Valid BSC address format
-            </span>
+          {connected ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 8,
+                background: 'rgba(34, 197, 94, 0.08)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="text-xs font-semibold" style={{ color: 'var(--success)', marginBottom: 2 }}>
+                  ✓ Wallet Connected
+                </div>
+                <div
+                  className="text-xs"
+                  style={{
+                    fontFamily: 'monospace',
+                    color: 'rgba(255,255,255,0.7)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {address}
+                </div>
+              </div>
+              <button
+                className="btn btn-secondary text-xs"
+                style={{ padding: '4px 8px', fontSize: 11, flexShrink: 0 }}
+                onClick={() => {
+                  setAddress('');
+                  setProvider('');
+                  setConnected(false);
+                }}
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                className="btn btn-secondary w-full"
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  fontSize: 13,
+                }}
+                onClick={handleConnectWallet}
+                disabled={isConnecting || !isWalletAvailable()}
+              >
+                {isConnecting ? (
+                  <>
+                    <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Plug size={16} />
+                    {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                  </>
+                )}
+              </button>
+              {!isWalletAvailable() && (
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'block' }}>
+                  Install MetaMask, Trust Wallet, or another EVM wallet extension to connect.
+                </span>
+              )}
+            </>
           )}
+          {errors.connect && <span className="error-text">{errors.connect}</span>}
+          {errors.address && <span className="error-text">{errors.address}</span>}
+        </div>
+
+        {/* Provider dropdown — auto-detected, can be overridden */}
+        <div className="form-group">
+          <label className="form-label">Wallet Provider *</label>
+          <CustomSelect
+            options={PROVIDER_OPTIONS}
+            value={provider}
+            onChange={handleProviderChange}
+            placeholder="Select Provider"
+          />
+          {errors.provider && <span className="error-text">{errors.provider}</span>}
         </div>
 
         {/* Label field with live counter */}
@@ -207,21 +315,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
           {errors.label && <span className="error-text">{errors.label}</span>}
         </div>
 
-        {/* Provider dropdown */}
-        <div className="form-group">
-          <label className="form-label">Wallet Provider *</label>
-          <CustomSelect
-            options={PROVIDER_OPTIONS}
-            value={provider}
-            onChange={(val) => {
-              setProvider(val);
-              setErrors((prev) => ({ ...prev, provider: '' }));
-            }}
-            placeholder="Select Provider"
-          />
-          {errors.provider && <span className="error-text">{errors.provider}</span>}
-        </div>
-
         {/* Info box */}
         <div
           style={{
@@ -236,7 +329,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
         >
           <Info size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: 2 }} />
           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
-            After adding, you will need to verify ownership by signing a message with your wallet. This proves you control the address.
+            After adding, click "Verify Wallet" to sign a message with your wallet — Xentra handles it automatically.
           </span>
         </div>
 
@@ -248,11 +341,11 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !connected}
           >
             {isSubmitting ? (
               <span className="flex-row items-center gap-8">
-                <span className="spin" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
                 Adding...
               </span>
             ) : (

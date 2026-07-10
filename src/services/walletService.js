@@ -14,14 +14,15 @@ const walletService = {
     /**
      * Register a new wallet address.
      * @param {'freelancer'|'client'} walletType
-     * @param {{ address: string, label?: string }} data
+     * @param {{ address: string, label?: string, provider?: string }} data
      * @returns {Promise} — Created wallet object
      */
-    create: (walletType, { address, label = '' }) =>
+    create: (walletType, { address, label = '', provider = 'OTHER' }) =>
         api.post('/wallets/', {
             wallet_type: walletType,
             address: address.trim(),
             label: label.trim(),
+            provider,
         }),
 
     /**

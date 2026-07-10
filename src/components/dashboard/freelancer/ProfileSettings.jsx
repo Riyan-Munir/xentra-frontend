@@ -30,7 +30,7 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
         const res = await walletService.list('freelancer');
         const wallets = res.data?.results || res.data || [];
         if (!cancelled) {
-          setHasVerifiedWallet(wallets.some(w => w.is_verified && w.status !== 'DISABLED'));
+          setHasVerifiedWallet(wallets.some(w => w.is_verified && w.status !== 'disabled'));
         }
       } catch {
         if (!cancelled) setHasVerifiedWallet(false);

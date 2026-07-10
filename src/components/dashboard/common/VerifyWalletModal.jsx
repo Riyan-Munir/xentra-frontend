@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Shield, X, Copy, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Shield, X, AlertTriangle, ExternalLink, Plug } from 'lucide-react';
 import walletService from '../../../services/walletService';
+import { signMessage, connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
 
 // Provider-specific signing instructions with real documentation links
 const PROVIDER_INSTRUCTIONS = {
@@ -152,12 +153,11 @@ const PROVIDER_INSTRUCTIONS = {
 
 const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, addNotification }) => {
     const [challenge, setChallenge] = useState('');
-    const [challengeMessage, setChallengeMessage] = useState('');
-    const [signature, setSignature] = useState('');
-    const [step, setStep] = useState(1); // 1: loading/copy, 2: paste signature, 3: verifying
-    const [isVerifying, setIsVerifying] = useState(false);
-    const [copied, setCopied] = useState(false);
-    const [signatureError, setSignatureError] = useState('');
+    const [isSigning, setIsSigning] = useState(false);
+    const [signError, setSignError] = useState('');
+    const [connectedAddress, setConnectedAddress] = useState('');
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [provider, setProvider] = useState('');
 
     // Lock body scroll when modal is open
     useEffect(() => {
@@ -169,24 +169,29 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         };
     }, [isOpen]);
 
-    // Fetch challenge when modal opens
+    // Fetch challenge + check wallet connection when modal opens
     useEffect(() => {
         if (!isOpen || !wallet?.id) return;
 
-        const fetchChallenge = async () => {
-            setStep(1);
+        const init = async () => {
             setChallenge('');
-            setChallengeMessage('');
-            setSignature('');
-            setCopied(false);
-            setSignatureError('');
+            setSignError('');
+            setIsSigning(false);
+            setConnectedAddress('');
+            setIsConnecting(false);
 
+            // Check if wallet is already connected
+            const addr = await getConnectedAddress();
+            if (addr) {
+                setConnectedAddress(addr);
+                setProvider(detectProvider());
+            }
+
+            // Fetch challenge
             try {
                 const res = await walletService.getChallenge(walletType, wallet.id);
                 const token = res.data?.verification_token || '';
-                const msg = res.data?.message || '';
                 setChallenge(token);
-                setChallengeMessage(msg);
             } catch (err) {
                 const msg = err?.response?.data?.error || 'Failed to generate challenge';
                 addNotification?.(msg, 'error');
@@ -194,82 +199,78 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             }
         };
 
-        fetchChallenge();
+        init();
     }, [isOpen, wallet, walletType, addNotification, onClose]);
+
+    // Listen for account changes
+    useEffect(() => {
+        if (!isOpen) return;
+        const unsub = onAccountChange((addr) => {
+            if (addr) {
+                setConnectedAddress(addr);
+                setProvider(detectProvider());
+                setSignError('');
+            } else {
+                setConnectedAddress('');
+                setProvider('');
+            }
+        });
+        return unsub;
+    }, [isOpen]);
 
     // Reset when modal closes
     useEffect(() => {
         if (!isOpen) {
             setChallenge('');
-            setChallengeMessage('');
-            setSignature('');
-            setStep(1);
-            setIsVerifying(false);
-            setCopied(false);
-            setSignatureError('');
+            setIsSigning(false);
+            setSignError('');
+            setConnectedAddress('');
+            setIsConnecting(false);
+            setProvider('');
         }
     }, [isOpen]);
 
-    // Copy challenge to clipboard
-    const handleCopyChallenge = useCallback(async () => {
-        if (!challenge) return;
+    // Handle "Connect Wallet" button
+    const handleConnect = async () => {
+        if (isConnecting) return;
+        setIsConnecting(true);
+        setSignError('');
         try {
-            await navigator.clipboard.writeText(challenge);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch {
-            addNotification?.('Failed to copy to clipboard', 'error');
+            const { address, provider: prov } = await connectWallet();
+            setConnectedAddress(address);
+            setProvider(prov);
+        } catch (err) {
+            setSignError(err.message);
+        } finally {
+            setIsConnecting(false);
         }
-    }, [challenge, addNotification]);
-
-    // Validate signature format
-    const validateSignature = (sig) => {
-        if (!sig.trim()) return 'Signature is required';
-        if (!sig.startsWith('0x')) return 'Signature must start with 0x';
-        if (sig.length < 10) return 'Signature is too short';
-        if (!/^0x[0-9a-fA-F]+$/.test(sig.trim())) return 'Invalid hex characters in signature';
-        return '';
     };
 
-    // Handle signature input
-    const handleSignatureChange = (e) => {
-        const value = e.target.value;
-        setSignature(value);
-        const error = validateSignature(value);
-        setSignatureError(error);
-    };
+    // Handle "Sign & Verify" button — triggers in-app personal_sign
+    const handleSignAndVerify = async () => {
+        if (!challenge || !connectedAddress || isSigning) return;
 
-    // Submit verification
-    const handleVerify = async () => {
-        const error = validateSignature(signature);
-        if (error) {
-            setSignatureError(error);
-            return;
-        }
-        if (isVerifying) return;
+        setIsSigning(true);
+        setSignError('');
 
-        setIsVerifying(true);
-        setStep(3);
         try {
-            await walletService.verify(walletType, wallet.id, signature.trim());
+            // Build the message to sign (same format as before)
+            const message = `Xentra wallet verification\nnonce: ${challenge}`;
+
+            // Trigger wallet popup for signing
+            const signature = await signMessage(message, connectedAddress);
+
+            // Submit signature to backend
+            await walletService.verify(walletType, wallet.id, signature);
             addNotification?.('Wallet verified successfully!', 'success');
             onSuccess?.();
             onClose();
         } catch (err) {
-            const msg = err?.response?.data?.error || 'Verification failed. Please try again.';
-            setSignatureError(msg);
-            setStep(2);
+            const msg = err?.message || 'Verification failed. Please try again.';
+            setSignError(msg);
             addNotification?.(msg, 'error');
         } finally {
-            setIsVerifying(false);
-        }
-    };
-
-    // Handle Enter key on signature input
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter' && !isVerifying && step === 2) {
-            e.preventDefault();
-            handleVerify();
+            setIsSigning(false);
         }
     };
 
@@ -284,9 +285,13 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     const instructions = PROVIDER_INSTRUCTIONS[providerKey] || PROVIDER_INSTRUCTIONS.OTHER;
     const providerDisplayName = instructions.name || wallet.provider || 'your wallet';
 
+    const isConnected = !!connectedAddress;
+    const addressMatches = connectedAddress &&
+        connectedAddress.toLowerCase() === (wallet.address || '').toLowerCase();
+
     return createPortal(
         <div className="modal-overlay z-9999" onClick={onClose}>
-            <div className="modal-content glass" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
+            <div className="modal-content glass" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close-btn" onClick={onClose}>
                     <X size={20} />
                 </button>
@@ -316,163 +321,120 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                     </span>
                 </div>
 
-                {/* Step 1: Copy challenge */}
+                {/* Step 1: Connect Wallet */}
                 <div className="form-group">
                     <label className="form-label">
                         <span style={{ color: 'var(--primary)', marginRight: 6 }}>1</span>
-                        Copy this message
+                        Connect your wallet
                     </label>
-                    <div
-                        style={{
-                            position: 'relative',
-                            padding: '12px 14px',
-                            borderRadius: 8,
-                            background: 'rgba(0,0,0,0.3)',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                            wordBreak: 'break-all',
-                            lineHeight: 1.6,
-                            color: 'rgba(255,255,255,0.8)',
-                        }}
-                    >
-                        {challenge ? (
-                            <>
-                                <span style={{ opacity: 0.6 }}>Xentra wallet verification{'\n'}</span>
-                                <span>nonce: {challenge}</span>
-                            </>
-                        ) : (
-                            <span style={{ opacity: 0.4 }}>Loading challenge...</span>
-                        )}
-                        {challenge && (
-                            <button
-                                className="btn btn-secondary text-xs"
-                                style={{
-                                    position: 'absolute',
-                                    top: 8,
-                                    right: 8,
-                                    padding: '4px 8px',
-                                    fontSize: 11,
-                                }}
-                                onClick={handleCopyChallenge}
-                            >
-                                {copied ? (
-                                    <><CheckCircle size={12} /> Copied</>
-                                ) : (
-                                    <><Copy size={12} /> Copy</>
-                                )}
-                            </button>
-                        )}
-                    </div>
+                    {isConnected ? (
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '10px 14px',
+                                borderRadius: 8,
+                                background: addressMatches
+                                    ? 'rgba(34, 197, 94, 0.08)'
+                                    : 'rgba(251, 191, 36, 0.08)',
+                                border: addressMatches
+                                    ? '1px solid rgba(34, 197, 94, 0.2)'
+                                    : '1px solid rgba(251, 191, 36, 0.2)',
+                            }}
+                        >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div
+                                    className="text-xs font-semibold"
+                                    style={{ color: addressMatches ? 'var(--success)' : 'var(--warning)', marginBottom: 2 }}
+                                >
+                                    {addressMatches ? '✓ Connected' : '⚠ Connected (different address)'}
+                                </div>
+                                <div
+                                    className="text-xs"
+                                    style={{
+                                        fontFamily: 'monospace',
+                                        color: 'rgba(255,255,255,0.7)',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {connectedAddress}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            className="btn btn-secondary w-full"
+                            style={{
+                                padding: '12px 16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 8,
+                                fontSize: 13,
+                            }}
+                            onClick={handleConnect}
+                            disabled={isConnecting || !isWalletAvailable()}
+                        >
+                            {isConnecting ? (
+                                <>
+                                    <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                    Connecting...
+                                </>
+                            ) : (
+                                <>
+                                    <Plug size={16} />
+                                    {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
 
-                {/* Step 2: Provider-specific signing instructions */}
+                {/* Step 2: Sign & Verify */}
                 <div className="form-group">
                     <label className="form-label">
                         <span style={{ color: 'var(--primary)', marginRight: 6 }}>2</span>
-                        Sign with {providerDisplayName}
+                        Sign & Verify
                     </label>
-                    <div
+                    <button
+                        className="btn btn-primary w-full"
                         style={{
-                            padding: '12px 14px',
-                            borderRadius: 8,
-                            background: 'rgba(255,255,255,0.03)',
+                            padding: '12px 16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
                             fontSize: 13,
-                            lineHeight: 1.7,
-                            color: 'rgba(255,255,255,0.5)',
                         }}
+                        onClick={handleSignAndVerify}
+                        disabled={!isConnected || !addressMatches || isSigning || !challenge}
                     >
-                        {instructions.steps.map((text, i) => (
-                            <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                                <span style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0, minWidth: 14 }}>
-                                    {i + 1}.
-                                </span>
-                                <span>{text}</span>
-                            </div>
-                        ))}
-
-                        {/* Primary link */}
-                        {instructions.link && (
-                            <div style={{ marginTop: 10 }}>
-                                <a
-                                    href={instructions.link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                        color: 'var(--primary)',
-                                        textDecoration: 'none',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: 4,
-                                        fontWeight: 500,
-                                        fontSize: 12,
-                                    }}
-                                >
-                                    {instructions.link.text}
-                                    <ExternalLink size={11} style={{ opacity: 0.7 }} />
-                                </a>
-                            </div>
+                        {isSigning ? (
+                            <>
+                                <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                Waiting for wallet signature...
+                            </>
+                        ) : (
+                            <>
+                                <Shield size={16} />
+                                Sign & Verify
+                            </>
                         )}
-
-                        {/* Secondary link */}
-                        {instructions.linkSecondary && (
-                            <div style={{ marginTop: 4 }}>
-                                <a
-                                    href={instructions.linkSecondary.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                        color: 'var(--primary)',
-                                        textDecoration: 'none',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: 4,
-                                        fontWeight: 500,
-                                        fontSize: 12,
-                                        opacity: 0.7,
-                                    }}
-                                >
-                                    {instructions.linkSecondary.text}
-                                    <ExternalLink size={11} style={{ opacity: 0.7 }} />
-                                </a>
-                            </div>
-                        )}
-
-                        {/* Alt note */}
-                        {instructions.altNote && (
-                            <div
-                                style={{
-                                    marginTop: 8,
-                                    padding: '8px 10px',
-                                    borderRadius: 6,
-                                    background: 'rgba(255,255,255,0.04)',
-                                    fontSize: 11,
-                                    lineHeight: 1.5,
-                                    color: 'rgba(255,255,255,0.35)',
-                                }}
-                            >
-                                💡 {instructions.altNote}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Step 3: Paste signature */}
-                <div className="form-group">
-                    <label className="form-label">
-                        <span style={{ color: 'var(--primary)', marginRight: 6 }}>3</span>
-                        Paste signature
-                    </label>
-                    <input
-                        type="text"
-                        className={`form-input ${signatureError ? 'input-error' : ''}`}
-                        placeholder="0x..."
-                        value={signature}
-                        onChange={handleSignatureChange}
-                        autoComplete="off"
-                        spellCheck={false}
-                    />
-                    {signatureError && <span className="error-text">{signatureError}</span>}
+                    </button>
+                    {!isConnected && (
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'block' }}>
+                            Connect your wallet first to enable signing.
+                        </span>
+                    )}
+                    {isConnected && !addressMatches && (
+                        <span className="text-xs" style={{ color: 'var(--warning)', marginTop: 6, display: 'block' }}>
+                            ⚠ Connected address does not match the wallet you registered. Switch to the correct account in your wallet.
+                        </span>
+                    )}
+                    {signError && <span className="error-text" style={{ marginTop: 6, display: 'block' }}>{signError}</span>}
                 </div>
 
                 {/* Warning about expiry */}
@@ -493,24 +455,103 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                     </span>
                 </div>
 
-                {/* Actions */}
-                <div className="flex-row gap-12" style={{ justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button className="btn btn-secondary" onClick={onClose} disabled={isVerifying}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleVerify}
-                        disabled={isVerifying || !challenge || !signature.trim()}
+                {/* Provider-specific instructions (collapsible) */}
+                <details style={{ marginBottom: 8 }}>
+                    <summary
+                        style={{
+                            fontSize: 12,
+                            color: 'rgba(255,255,255,0.4)',
+                            cursor: 'pointer',
+                            padding: '6px 0',
+                            userSelect: 'none',
+                        }}
                     >
-                        {isVerifying ? (
-                            <span className="flex-row items-center gap-8">
-                                <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                                Verifying...
-                            </span>
-                        ) : (
-                            <><Shield size={14} /> Verify</>
+                        Need help signing with {providerDisplayName}?
+                    </summary>
+                    <div
+                        style={{
+                            padding: '10px 14px',
+                            borderRadius: 8,
+                            background: 'rgba(255,255,255,0.03)',
+                            fontSize: 12,
+                            lineHeight: 1.7,
+                            color: 'rgba(255,255,255,0.45)',
+                            marginTop: 6,
+                        }}
+                    >
+                        {instructions.steps.map((text, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                                <span style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0, minWidth: 14 }}>
+                                    {i + 1}.
+                                </span>
+                                <span>{text}</span>
+                            </div>
+                        ))}
+                        {instructions.link && (
+                            <div style={{ marginTop: 8 }}>
+                                <a
+                                    href={instructions.link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        color: 'var(--primary)',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        fontWeight: 500,
+                                        fontSize: 11,
+                                    }}
+                                >
+                                    {instructions.link.text}
+                                    <ExternalLink size={10} style={{ opacity: 0.7 }} />
+                                </a>
+                            </div>
                         )}
+                        {instructions.linkSecondary && (
+                            <div style={{ marginTop: 3 }}>
+                                <a
+                                    href={instructions.linkSecondary.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        color: 'var(--primary)',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        fontWeight: 500,
+                                        fontSize: 11,
+                                        opacity: 0.7,
+                                    }}
+                                >
+                                    {instructions.linkSecondary.text}
+                                    <ExternalLink size={10} style={{ opacity: 0.7 }} />
+                                </a>
+                            </div>
+                        )}
+                        {instructions.altNote && (
+                            <div
+                                style={{
+                                    marginTop: 6,
+                                    padding: '6px 8px',
+                                    borderRadius: 6,
+                                    background: 'rgba(255,255,255,0.04)',
+                                    fontSize: 11,
+                                    lineHeight: 1.5,
+                                    color: 'rgba(255,255,255,0.35)',
+                                }}
+                            >
+                                💡 {instructions.altNote}
+                            </div>
+                        )}
+                    </div>
+                </details>
+
+                {/* Actions */}
+                <div className="flex-row gap-12" style={{ justifyContent: 'flex-end', marginTop: 4 }}>
+                    <button className="btn btn-secondary" onClick={onClose} disabled={isSigning}>
+                        Cancel
                     </button>
                 </div>
             </div>

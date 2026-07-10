@@ -40,7 +40,7 @@ const Wallets = ({ currentRole, addNotification }) => {
 
     // Filter out disabled wallets (show only active ones)
     const activeWallets = useMemo(
-        () => wallets.filter((w) => w.status !== 'DISABLED'),
+        () => wallets.filter((w) => w.status !== 'disabled'),
         [wallets]
     );
 

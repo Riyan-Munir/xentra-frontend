@@ -29,7 +29,7 @@ const WalletCard = ({
       ? 'verified'
       : 'pending';
 
-  const isPending = wallet.status === 'PENDING_VERIFICATION' || !wallet.is_verified;
+  const isPending = wallet.status === 'pending_verification' || !wallet.is_verified;
 
   return (
     <div className="wallet-card-group" style={{ display: 'flex', flexDirection: 'column' }}>
