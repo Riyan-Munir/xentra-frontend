@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Wallet, X, Info } from 'lucide-react';
 import walletService from '../../../services/walletService';
+import CustomSelect from './CustomSelect';
 
 // Wallet provider options
 const PROVIDER_OPTIONS = [
@@ -24,7 +25,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
   const [provider, setProvider] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -46,14 +46,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       setIsSubmitting(false);
     }
   }, [isOpen]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!showProviderDropdown) return;
-    const handler = () => setShowProviderDropdown(false);
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
-  }, [showProviderDropdown]);
 
   // Validate address field
   const validateAddress = useCallback((value) => {
@@ -90,13 +82,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     }
     const error = validateLabel(value);
     setErrors((prev) => ({ ...prev, label: error }));
-  };
-
-  // Handle provider selection
-  const handleProviderSelect = (value) => {
-    setProvider(value);
-    setShowProviderDropdown(false);
-    setErrors((prev) => ({ ...prev, provider: '' }));
   };
 
   // Full form validation
@@ -145,8 +130,6 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
   };
 
   if (!isOpen) return null;
-
-  const selectedProvider = PROVIDER_OPTIONS.find((p) => p.value === provider);
 
   return createPortal(
     <div className="modal-overlay z-9999" onClick={onClose}>
@@ -225,64 +208,15 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
         {/* Provider dropdown */}
         <div className="form-group">
           <label className="form-label">Wallet Provider *</label>
-          <div style={{ position: 'relative' }}>
-            <button
-              className={`form-input text-left flex-between items-center ${errors.provider ? 'input-error' : ''}`}
-              style={{ cursor: 'pointer', width: '100%' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowProviderDropdown(!showProviderDropdown);
-              }}
-              type="button"
-            >
-              <span style={{ opacity: selectedProvider ? 1 : 0.4 }}>
-                {selectedProvider?.label || 'Select Provider'}
-              </span>
-              <span style={{ fontSize: 10, opacity: 0.5 }}>▼</span>
-            </button>
-            {showProviderDropdown && (
-              <div
-                className="glass"
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  zIndex: 100,
-                  marginTop: 4,
-                  borderRadius: 8,
-                  padding: '4px 0',
-                  maxHeight: 200,
-                  overflowY: 'auto',
-                }}
-              >
-                {PROVIDER_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    className="text-sm"
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      padding: '8px 14px',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'inherit',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      opacity: provider === opt.value ? 1 : 0.7,
-                      background: provider === opt.value ? 'rgba(99,102,241,0.15)' : 'transparent',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleProviderSelect(opt.value);
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <CustomSelect
+            options={PROVIDER_OPTIONS}
+            value={provider}
+            onChange={(val) => {
+              setProvider(val);
+              setErrors((prev) => ({ ...prev, provider: '' }));
+            }}
+            placeholder="Select Provider"
+          />
           {errors.provider && <span className="error-text">{errors.provider}</span>}
         </div>
 
