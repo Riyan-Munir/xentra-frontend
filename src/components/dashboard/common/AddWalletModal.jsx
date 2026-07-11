@@ -13,8 +13,13 @@ import {
   detectProvider,
   isWalletAvailable,
   startProviderDiscovery,
+  stopProviderDiscovery,
   getDiscoveredProviders,
   getProviderLabel,
+  onProvidersChanged,
+  switchToBSC,
+  ensureCorrectChain,
+  BSC_CHAIN_ID_DECIMAL,
 } from '../../../services/web3Wallet';
 import {
   initWalletConnect,
@@ -47,6 +52,11 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
   const [wcConnecting, setWcConnecting] = useState(false);
   const [wcConnected, setWcConnected] = useState(false);
 
+  // Chain validation state
+  const [wrongChain, setWrongChain] = useState(false);
+  const [chainMessage, setChainMessage] = useState('');
+  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -68,19 +78,30 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       setIsConnecting(false);
       setConnected(false);
       setShowWalletPicker(false);
+      setWrongChain(false);
+      setChainMessage('');
+      setIsSwitchingChain(false);
       // Reset WalletConnect state
       setWcUri(null);
       setShowWc(false);
       setWcConnecting(false);
       setWcConnected(false);
 
-      // Start EIP-6963 discovery and collect wallets after a short delay
+      // Start EIP-6963 discovery and subscribe to real-time updates
       startProviderDiscovery();
-      const timer = setTimeout(() => {
-        const wallets = getDiscoveredProviders();
+      const unsub = onProvidersChanged((wallets) => {
         setDiscoveredWallets(wallets);
-      }, 500);
-      return () => clearTimeout(timer);
+      });
+      // Also collect any wallets already discovered
+      const wallets = getDiscoveredProviders();
+      if (wallets.length > 0) {
+        setDiscoveredWallets(wallets);
+      }
+
+      return () => {
+        unsub();
+        stopProviderDiscovery();
+      };
     }
   }, [isOpen]);
 
@@ -97,13 +118,19 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     // Single wallet or fallback to window.ethereum
     setIsConnecting(true);
     setErrors((prev) => ({ ...prev, connect: '' }));
+    setWrongChain(false);
+    setChainMessage('');
 
     try {
       const targetProvider = discoveredWallets.length === 1 ? discoveredWallets[0].provider : undefined;
-      const { address: addr, provider: prov } = await connectWallet(targetProvider);
-      setAddress(addr);
-      setProvider(prov);
+      const result = await connectWallet(targetProvider);
+      setAddress(result.address);
+      setProvider(result.provider);
       setConnected(true);
+      if (result.wrongChain) {
+        setWrongChain(true);
+        setChainMessage(result.chainMessage || `Connected to wrong network. Please switch to BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`);
+      }
       setErrors((prev) => ({ ...prev, address: '', connect: '' }));
     } catch (err) {
       setErrors((prev) => ({ ...prev, connect: err.message || 'Failed to connect wallet' }));
@@ -117,12 +144,18 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
     setShowWalletPicker(false);
     setIsConnecting(true);
     setErrors((prev) => ({ ...prev, connect: '' }));
+    setWrongChain(false);
+    setChainMessage('');
 
     try {
-      const { address: addr, provider: prov } = await connectWallet(wallet.provider);
-      setAddress(addr);
-      setProvider(prov);
+      const result = await connectWallet(wallet.provider);
+      setAddress(result.address);
+      setProvider(result.provider);
       setConnected(true);
+      if (result.wrongChain) {
+        setWrongChain(true);
+        setChainMessage(result.chainMessage || `Connected to wrong network. Please switch to BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`);
+      }
       setErrors((prev) => ({ ...prev, address: '', connect: '' }));
     } catch (err) {
       setErrors((prev) => ({ ...prev, connect: err.message || 'Failed to connect wallet' }));
@@ -209,6 +242,27 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
       setAddress('');
       setProvider('');
       setConnected(false);
+    }
+  };
+
+  // Handle chain switch — called when user is connected to wrong network
+  const handleSwitchChain = async () => {
+    if (isSwitchingChain) return;
+
+    setIsSwitchingChain(true);
+    try {
+      const result = await ensureCorrectChain();
+      if (result.ok) {
+        setWrongChain(false);
+        setChainMessage('');
+        addNotification?.('Switched to BSC Mainnet successfully.', 'success');
+      } else {
+        addNotification?.(result.message || 'Failed to switch network. Please switch manually in your wallet.', 'error');
+      }
+    } catch (err) {
+      addNotification?.(err.message || 'Failed to switch network.', 'error');
+    } finally {
+      setIsSwitchingChain(false);
     }
   };
 
@@ -307,47 +361,117 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
         <div className="form-group">
           <label className="form-label">Wallet Address *</label>
           {connected ? (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 14px',
-                borderRadius: 8,
-                background: 'rgba(34, 197, 94, 0.08)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="text-xs font-semibold" style={{ color: 'var(--success)', marginBottom: 2 }}>
-                  ✓ Wallet Connected
-                </div>
+            wrongChain ? (
+              /* Connected but on wrong network — show warning with switch button */
+              <div>
                 <div
-                  className="text-xs"
                   style={{
-                    fontFamily: 'monospace',
-                    color: 'rgba(255,255,255,0.7)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    background: 'rgba(251, 191, 36, 0.08)',
+                    border: '1px solid rgba(251, 191, 36, 0.2)',
+                    marginBottom: 8,
                   }}
                 >
-                  {address}
-                  {provider === 'WALLETCONNECT' && (
-                    <span className="text-xs" style={{ color: 'rgba(99,102,241,0.6)', marginLeft: 8 }}>
-                      (Mobile)
-                    </span>
-                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="text-xs font-semibold" style={{ color: 'var(--warning)', marginBottom: 2 }}>
+                      ⚠ Wrong Network
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{
+                        fontFamily: 'monospace',
+                        color: 'rgba(255,255,255,0.7)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {address}
+                      {provider === 'WALLETCONNECT' && (
+                        <span className="text-xs" style={{ color: 'rgba(99,102,241,0.6)', marginLeft: 8 }}>
+                          (Mobile)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-secondary text-xs"
+                    style={{ padding: '4px 8px', fontSize: 11, flexShrink: 0 }}
+                    onClick={handleDisconnect}
+                  >
+                    Disconnect
+                  </button>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    background: 'rgba(251, 191, 36, 0.05)',
+                  }}
+                >
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.6)', flex: 1, lineHeight: 1.4 }}>
+                    {chainMessage || `Connected to wrong network. Switch to BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`}
+                  </span>
+                  <button
+                    className="btn btn-primary text-xs"
+                    style={{ padding: '6px 12px', fontSize: 11, flexShrink: 0, whiteSpace: 'nowrap' }}
+                    onClick={handleSwitchChain}
+                    disabled={isSwitchingChain}
+                  >
+                    {isSwitchingChain ? 'Switching...' : 'Switch to BSC'}
+                  </button>
                 </div>
               </div>
-              <button
-                className="btn btn-secondary text-xs"
-                style={{ padding: '4px 8px', fontSize: 11, flexShrink: 0 }}
-                onClick={handleDisconnect}
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                }}
               >
-                Disconnect
-              </button>
-            </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="text-xs font-semibold" style={{ color: 'var(--success)', marginBottom: 2 }}>
+                    ✓ Wallet Connected
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{
+                      fontFamily: 'monospace',
+                      color: 'rgba(255,255,255,0.7)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {address}
+                    {provider === 'WALLETCONNECT' && (
+                      <span className="text-xs" style={{ color: 'rgba(99,102,241,0.6)', marginLeft: 8 }}>
+                        (Mobile)
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-secondary text-xs"
+                  style={{ padding: '4px 8px', fontSize: 11, flexShrink: 0 }}
+                  onClick={handleDisconnect}
+                >
+                  Disconnect
+                </button>
+              </div>
+            )
           ) : showWalletPicker ? (
             /* Wallet picker — shown when multiple extensions detected */
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

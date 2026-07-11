@@ -3,7 +3,26 @@
  * Uses the raw window.ethereum provider API (no ethers.js / web3.js dependency).
  *
  * Supports EIP-6963 provider discovery for multiple wallet extensions.
+ * Includes chain ID validation, BSC chain switching, and chain change listeners.
  */
+
+// ── BSC Chain Configuration ────────────────────────────────────────────────
+/** BSC Mainnet chain ID in hex (56 in decimal) — protocol constant, never changes. */
+export const BSC_CHAIN_ID = '0x38';
+/** BSC Mainnet chain ID in decimal — for display. */
+export const BSC_CHAIN_ID_DECIMAL = 56;
+
+const BSC_CHAIN_CONFIG = {
+  chainId: BSC_CHAIN_ID,
+  chainName: 'BNB Smart Chain',
+  nativeCurrency: {
+    name: 'BNB',
+    symbol: 'BNB',
+    decimals: 18,
+  },
+  rpcUrls: ['https://bsc-dataseed.binance.org/'],
+  blockExplorerUrls: ['https://bscscan.com/'],
+};
 
 // ── Provider detection map ──────────────────────────────────────────────────
 const PROVIDER_DETECTORS = [
@@ -19,23 +38,63 @@ const PROVIDER_DETECTORS = [
 // ── EIP-6963 Provider Discovery ─────────────────────────────────────────────
 const discoveredProviders = new Map();
 let discoveryListenersAttached = false;
+let discoveryEventCleanup = null;
 
 /**
  * Attach EIP-6963 listeners and request provider announcements.
- * Call once when the user opens the wallet modal.
+ * Returns cleanup function for unmount.
  */
 export function startProviderDiscovery() {
-  if (discoveryListenersAttached) return;
+  if (discoveryListenersAttached) return () => { };
   discoveryListenersAttached = true;
+  discoveredProviders.clear();
 
-  window.addEventListener('eip6963:announceProvider', (event) => {
+  const handler = (event) => {
     const { info, provider } = event.detail;
     if (info?.uuid) {
       discoveredProviders.set(info.uuid, { info, provider });
     }
-  });
+  };
 
+  window.addEventListener('eip6963:announceProvider', handler);
   window.dispatchEvent(new CustomEvent('eip6963:requestProviders'));
+
+  discoveryEventCleanup = () => {
+    window.removeEventListener('eip6963:announceProvider', handler);
+    discoveryListenersAttached = false;
+    discoveryEventCleanup = null;
+  };
+
+  return discoveryEventCleanup;
+}
+
+/**
+ * Subscribe to future EIP-6963 provider announcements (for real-time updates).
+ * @param {(providers: Array) => void} callback - Called when new providers are discovered.
+ * @returns {() => void} Cleanup function.
+ */
+export function onProvidersChanged(callback) {
+  const handler = (event) => {
+    const { info, provider } = event.detail;
+    if (info?.uuid) {
+      discoveredProviders.set(info.uuid, { info, provider });
+      callback(getDiscoveredProviders());
+    }
+  };
+
+  window.addEventListener('eip6963:announceProvider', handler);
+  return () => {
+    window.removeEventListener('eip6963:announceProvider', handler);
+  };
+}
+
+/**
+ * Stop EIP-6963 discovery and clean up listeners.
+ */
+export function stopProviderDiscovery() {
+  if (discoveryEventCleanup) {
+    discoveryEventCleanup();
+  }
 }
 
 /**
@@ -61,7 +120,10 @@ export function getDiscoveredProviders() {
 export function isWalletAvailable() {
   if (typeof window === 'undefined') return false;
   if (discoveredProviders.size > 0) return true;
-  return !!window.ethereum;
+  if (!!window.ethereum) return true;
+  // Check legacy providers array (wallets that don't support EIP-6963)
+  if (window.ethereum?.providers?.length > 0) return true;
+  return false;
 }
 
 /**
@@ -73,13 +135,29 @@ export function detectProvider(targetProvider) {
   const eth = targetProvider || (typeof window !== 'undefined' && window.ethereum);
   if (!eth) return 'OTHER';
 
-  const provider = eth.providers?.[0] || eth;
+  // If the provider has a providers array (multi-wallet), try each
+  const providerCandidates = eth.providers?.length
+    ? eth.providers
+    : [eth];
 
-  for (const detector of PROVIDER_DETECTORS) {
-    try {
-      if (detector.check(provider)) return detector.key;
-    } catch {
-      // ignore detection errors
+  for (const provider of providerCandidates) {
+    for (const detector of PROVIDER_DETECTORS) {
+      try {
+        if (detector.check(provider)) return detector.key;
+      } catch {
+        // ignore detection errors
+      }
+    }
+  }
+
+  // If targetProvider was passed and has its own detection, check it directly
+  if (targetProvider && targetProvider !== eth) {
+    for (const detector of PROVIDER_DETECTORS) {
+      try {
+        if (detector.check(targetProvider)) return detector.key;
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -94,15 +172,109 @@ export function getProviderLabel(providerKey) {
   return detector?.label || providerKey;
 }
 
+// ── Chain ID / Network ──────────────────────────────────────────────────────
+
+/**
+ * Get the currently connected chain ID from the wallet.
+ * @param {object} [targetProvider] - Optional specific provider.
+ * @returns {Promise<string>} Chain ID as hex string (e.g. '0x38' for BSC).
+ */
+export async function getChainId(targetProvider) {
+  const eth = targetProvider || window.ethereum;
+  if (!eth) return null;
+
+  try {
+    const chainId = await eth.request({ method: 'eth_chainId' });
+    return chainId;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if the connected chain is BSC Mainnet (chain ID 56).
+ * @param {object} [targetProvider] - Optional specific provider.
+ * @returns {Promise<boolean>}
+ */
+export async function isBSCChain(targetProvider) {
+  const chainId = await getChainId(targetProvider);
+  if (!chainId) return false;
+  return chainId.toLowerCase() === BSC_CHAIN_ID;
+}
+
+/**
+ * Switch the wallet to BSC Mainnet.
+ * If the chain is not in the wallet, it will be added automatically.
+ * @param {object} [targetProvider] - Optional specific provider.
+ * @returns {Promise<{ switched: boolean, message?: string }>}
+ */
+export async function switchToBSC(targetProvider) {
+  const eth = targetProvider || window.ethereum;
+  if (!eth) return { switched: false, message: 'No wallet detected.' };
+
+  try {
+    await eth.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: BSC_CHAIN_ID }],
+    });
+    return { switched: true };
+  } catch (err) {
+    // 4902 = chain not added yet
+    if (err.code === 4902) {
+      try {
+        await eth.request({
+          method: 'wallet_addEthereumChain',
+          params: [BSC_CHAIN_CONFIG],
+        });
+        return { switched: true };
+      } catch (addErr) {
+        return {
+          switched: false,
+          message: addErr.code === 4001
+            ? 'BSC chain addition was rejected in your wallet.'
+            : `Failed to add BSC chain: ${addErr.message}`,
+        };
+      }
+    }
+
+    if (err.code === 4001) {
+      return { switched: false, message: 'BSC chain switch was rejected in your wallet.' };
+    }
+
+    return { switched: false, message: err.message || 'Failed to switch to BSC.' };
+  }
+}
+
+/**
+ * Ensure the wallet is connected to BSC Mainnet.
+ * Checks current chain and prompts switch if needed.
+ * @param {object} [targetProvider] - Optional specific provider.
+ * @returns {Promise<{ ok: boolean, message?: string }>}
+ */
+export async function ensureCorrectChain(targetProvider) {
+  const onBSC = await isBSCChain(targetProvider);
+  if (onBSC) return { ok: true };
+
+  const result = await switchToBSC(targetProvider);
+  if (!result.switched) {
+    return { ok: false, message: result.message || 'Please switch your wallet to BSC Mainnet.' };
+  }
+
+  // Wait for chain to actually switch (wallet takes a moment)
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  return { ok: true };
+}
+
 // ── Connection ──────────────────────────────────────────────────────────────
 
 /**
  * Connect to the user's browser wallet and return the connected address.
- * Prompts the wallet popup for permission.
+ * Prompts the wallet popup for permission. Validates that the chain is BSC.
  *
  * @param {object} [targetProvider] - Optional specific EIP-6963 provider to use.
- * @returns {Promise<{ address: string, provider: string }>}
- * @throws {Error} If no wallet installed, user rejects, or connection fails.
+ * @returns {Promise<{ address: string, provider: string, chainId: string }>}
+ * @throws {Error} If no wallet installed, user rejects, wrong chain, or connection fails.
  */
 export async function connectWallet(targetProvider) {
   const eth = targetProvider || window.ethereum;
@@ -122,7 +294,38 @@ export async function connectWallet(targetProvider) {
     const address = accounts[0];
     const provider = targetProvider ? detectProvider(targetProvider) : detectProvider();
 
-    return { address, provider };
+    // ── Validate chain is BSC ──────────────────────────────────────────
+    let chainId;
+    try {
+      chainId = await eth.request({ method: 'eth_chainId' });
+    } catch {
+      // Chain ID unavailable — non-fatal, but warn
+      chainId = null;
+    }
+
+    if (chainId && chainId.toLowerCase() !== BSC_CHAIN_ID) {
+      // Try to auto-switch to BSC
+      const switchResult = await ensureCorrectChain(eth);
+      if (!switchResult.ok) {
+        // If user rejected the switch, still return the address but flag the warning
+        // The caller (UI) will show the chain warning
+        return {
+          address,
+          provider,
+          chainId: chainId || null,
+          wrongChain: true,
+          chainMessage: switchResult.message || `Connected to wrong network. Switch to BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`,
+        };
+      }
+      // Re-fetch chain ID after switch
+      try {
+        chainId = await eth.request({ method: 'eth_chainId' });
+      } catch {
+        chainId = BSC_CHAIN_ID; // assume switch worked
+      }
+    }
+
+    return { address, provider, chainId: chainId || null, wrongChain: false };
   } catch (err) {
     if (err.code === 4001 || err.code === -32002) {
       throw new Error('Connection rejected. Please approve the wallet connection.');
@@ -236,7 +439,7 @@ export async function signMessage(message, address, customProvider) {
  */
 export function onAccountChange(callback, customProvider) {
   const eth = customProvider || (typeof window !== 'undefined' && window.ethereum);
-  if (!eth) return () => {};
+  if (!eth) return () => { };
 
   const handler = (accounts) => {
     callback(accounts?.[0] || null);
@@ -246,4 +449,54 @@ export function onAccountChange(callback, customProvider) {
   return () => {
     eth.removeListener('accountsChanged', handler);
   };
+}
+
+/**
+ * Subscribe to wallet chain/network changes.
+ * @param {(chainId: string) => void} callback - Called with new chain ID (hex string).
+ * @param {object} [customProvider] - Optional custom provider to subscribe to.
+ * @returns {Function} Unsubscribe function.
+ */
+export function onChainChange(callback, customProvider) {
+  const eth = customProvider || (typeof window !== 'undefined' && window.ethereum);
+  if (!eth) return () => { };
+
+  const handler = (chainId) => {
+    callback(chainId);
+  };
+
+  eth.on('chainChanged', handler);
+  return () => {
+    eth.removeListener('chainChanged', handler);
+  };
+}
+
+/**
+ * Subscribe to wallet disconnect events.
+ * @param {() => void} callback
+ * @param {object} [customProvider] - Optional custom provider to subscribe to.
+ * @returns {Function} Unsubscribe function.
+ */
+export function onDisconnect(callback, customProvider) {
+  const eth = customProvider || (typeof window !== 'undefined' && window.ethereum);
+  if (!eth) return () => { };
+
+  const handler = (error) => {
+    console.warn('Wallet disconnected:', error?.message || 'unknown reason');
+    callback();
+  };
+
+  eth.on('disconnect', handler);
+  return () => {
+    eth.removeListener('disconnect', handler);
+  };
+}
+
+/**
+ * Get the BSC explorer URL for an address.
+ * @param {string} address
+ * @returns {string}
+ */
+export function getBscScanUrl(address) {
+  return `https://bscscan.com/address/${address}`;
 }

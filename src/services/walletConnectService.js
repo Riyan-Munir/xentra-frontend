@@ -3,7 +3,9 @@
  *
  * Uses @walletconnect/ethereum-provider to create an EIP-1193 provider
  * that is API-compatible with window.ethereum. The resulting provider
- * can be passed to connectWallet() / signMessage() / etc. from web3Wallet.js.
+ * can be passed to connectWallet() / signMessage() etc. from web3Wallet.js.
+ *
+ * Supports persistent sessions across page refreshes via localStorage.
  *
  * Requires VITE_WALLETCONNECT_PROJECT_ID env var (get one at https://cloud.walletconnect.com).
  */
@@ -16,6 +18,7 @@ let wcUri = null;
 let wcConnected = false;
 
 const WC_CHAIN_ID = 56; // BSC Mainnet
+const WC_STORAGE_KEY = 'xentra_wc_session';
 
 // ── Initialization ───────────────────────────────────────────────────────────
 
@@ -41,8 +44,94 @@ export function isWCConnected() {
 }
 
 /**
+ * Try to restore a previous WalletConnect session from storage.
+ * @returns {Promise<boolean>} True if a session was restored and still valid.
+ */
+export async function tryRestoreWCSession() {
+  try {
+    const savedSession = localStorage.getItem(WC_STORAGE_KEY);
+    if (!savedSession) return false;
+
+    const { topic } = JSON.parse(savedSession);
+    if (!topic) return false;
+
+    // Initialise provider — it will try to restore the session automatically
+    const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+    if (!projectId) return false;
+
+    // Don't re-init if already done
+    if (wcProvider) {
+      // Check if the existing session is still alive
+      try {
+        const accounts = wcProvider.accounts;
+        if (accounts && accounts.length > 0) {
+          wcConnected = true;
+          return true;
+        }
+      } catch {
+        // Session expired, clean up
+        localStorage.removeItem(WC_STORAGE_KEY);
+        wcProvider = null;
+        return false;
+      }
+      return false;
+    }
+
+    wcProvider = await EthereumProvider.init({
+      projectId,
+      chains: [WC_CHAIN_ID],
+      showQrModal: false,
+      rpcMap: {
+        56: 'https://bsc-dataseed.binance.org/',
+      },
+    });
+
+    // Check if restored session is active
+    if (wcProvider.accounts && wcProvider.accounts.length > 0) {
+      wcConnected = true;
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.warn('Failed to restore WC session:', err.message);
+    localStorage.removeItem(WC_STORAGE_KEY);
+    return false;
+  }
+}
+
+/**
+/**
+ * Persist the current WalletConnect session to localStorage.
+ */
+function persistWCSession() {
+  try {
+    if (wcProvider?.session?.topic) {
+      localStorage.setItem(WC_STORAGE_KEY, JSON.stringify({
+        topic: wcProvider.session.topic,
+        expiry: wcProvider.session.expiry,
+      }));
+    }
+  } catch {
+    // Storage unavailable (private browsing, etc.)
+  }
+}
+
+/**
+ * Clear the persisted WalletConnect session from localStorage.
+ */
+function clearWCSession() {
+  try {
+    localStorage.removeItem(WC_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * Initialise the WalletConnect EthereumProvider.
  * Must be called before connect/disconnect.
+ * If a previous session exists, it will be restored.
  *
  * @param {object} [options]
  * @param {string}  [options.projectId]  — Override projectId (defaults to VITE_WALLETCONNECT_PROJECT_ID).
@@ -69,6 +158,11 @@ export async function initWalletConnect(options = {}) {
     },
   });
 
+  // If the provider restored a session, mark as connected
+  if (wcProvider.accounts && wcProvider.accounts.length > 0) {
+    wcConnected = true;
+  }
+
   return wcProvider;
 }
 
@@ -81,7 +175,7 @@ export async function initWalletConnect(options = {}) {
  * @returns {() => void} Cleanup function.
  */
 export function onWcUri(callback) {
-  if (!wcProvider) return () => {};
+  if (!wcProvider) return () => { };
 
   const handler = (uri) => {
     wcUri = uri;
@@ -112,6 +206,9 @@ export async function connectWalletConnect() {
   const address = accounts?.[0];
   if (!address) throw new Error('No accounts returned from WalletConnect');
 
+  // Persist the session so it survives page refreshes
+  persistWCSession();
+
   return {
     address,
     provider: wcProvider, // Pass this to signMessage etc.
@@ -132,6 +229,7 @@ export async function disconnectWalletConnect() {
   wcProvider = null;
   wcUri = null;
   wcConnected = false;
+  clearWCSession();
 }
 
 // ── Account change listener ──────────────────────────────────────────────────
@@ -143,7 +241,7 @@ export async function disconnectWalletConnect() {
  * @returns {() => void} Unsubscribe function.
  */
 export function onWCAccountChange(callback) {
-  if (!wcProvider) return () => {};
+  if (!wcProvider) return () => { };
 
   const handler = (accounts) => {
     callback(accounts?.[0] || null);
@@ -153,6 +251,26 @@ export function onWCAccountChange(callback) {
 
   return () => {
     wcProvider?.removeListener('accountsChanged', handler);
+  };
+}
+
+/**
+ * Listen for chain changes in the active WalletConnect session.
+ *
+ * @param {(chainId: string) => void} callback
+ * @returns {() => void} Unsubscribe function.
+ */
+export function onWCChainChange(callback) {
+  if (!wcProvider) return () => { };
+
+  const handler = (chainId) => {
+    callback(chainId);
+  };
+
+  wcProvider.on('chainChanged', handler);
+
+  return () => {
+    wcProvider?.removeListener('chainChanged', handler);
   };
 }
 
@@ -171,4 +289,13 @@ export function getWCProvider() {
 export function getWCAccounts() {
   if (!wcProvider || !Array.isArray(wcProvider.accounts)) return [];
   return wcProvider.accounts;
+}
+
+/**
+ * Get the chain ID of the active WalletConnect session.
+ * @returns {number|null}
+ */
+export function getWCChainId() {
+  if (!wcProvider) return null;
+  return wcProvider.chainId || null;
 }

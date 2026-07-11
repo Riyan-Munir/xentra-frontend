@@ -3,15 +3,29 @@ import { createPortal } from 'react-dom';
 import { Shield, X, AlertTriangle, ExternalLink, Plug, Smartphone } from 'lucide-react';
 import { QRCode } from 'qrcode.react';
 import walletService from '../../../services/walletService';
-import { signMessage, connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
 import {
-  initWalletConnect,
-  connectWalletConnect,
-  disconnectWalletConnect,
-  getWCUri,
-  onWcUri,
-  isWCConnected as getWcConnected,
-  getWCProvider,
+    signMessage,
+    connectWallet,
+    getConnectedAddress,
+    detectProvider,
+    isWalletAvailable,
+    onAccountChange,
+    onChainChange,
+    onDisconnect,
+    switchToBSC,
+    ensureCorrectChain,
+    BSC_CHAIN_ID_DECIMAL,
+} from '../../../services/web3Wallet';
+import {
+    initWalletConnect,
+    connectWalletConnect,
+    disconnectWalletConnect,
+    getWCUri,
+    onWcUri,
+    isWCConnected as getWcConnected,
+    getWCProvider,
+    tryRestoreWCSession,
+    onWCChainChange,
 } from '../../../services/walletConnectService';
 
 // Provider-specific signing instructions with real documentation links
@@ -175,6 +189,14 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     const [wcConnecting, setWcConnecting] = useState(false);
     const [wcProvider, setWcProvider] = useState(null);
 
+    // Chain validation state
+    const [wrongChain, setWrongChain] = useState(false);
+    const [chainMessage, setChainMessage] = useState('');
+    const [isSwitchingChain, setIsSwitchingChain] = useState(false);
+
+    // Disconnect flag — wallet disconnected while modal was open
+    const [walletDisconnected, setWalletDisconnected] = useState(false);
+
     // Whether this wallet was added via WalletConnect
     const isWalletConnectWallet = (wallet?.provider || '').toUpperCase() === 'WALLETCONNECT';
 
@@ -199,6 +221,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setConnectedAddress('');
             setIsConnecting(false);
             setProvider('');
+            setWrongChain(false);
+            setChainMessage('');
+            setWalletDisconnected(false);
             // Reset WC state
             setWcUri(null);
             setShowWcQr(false);
@@ -208,13 +233,24 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             // If this is a WalletConnect wallet, try to restore WC session
             if (isWalletConnectWallet) {
                 try {
-                    const prov = await initWalletConnect();
+                    const restored = await tryRestoreWCSession();
+                    if (!restored) {
+                        // No session to restore, initialise fresh
+                        await initWalletConnect();
+                    }
                     if (getWcConnected()) {
+                        const prov = getWCProvider();
                         setWcProvider(prov);
                         const accounts = prov?.accounts || [];
                         if (accounts.length > 0) {
                             setConnectedAddress(accounts[0]);
                             setProvider('WALLETCONNECT');
+                        }
+                        // Check WalletConnect chain
+                        const chainId = prov?.chainId;
+                        if (chainId && chainId !== 56) {
+                            setWrongChain(true);
+                            setChainMessage(`WalletConnect is on the wrong network (Chain ID: ${chainId}). Switch to BSC Mainnet in your mobile wallet.`);
                         }
                     }
                 } catch (err) {
@@ -226,6 +262,17 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                 if (addr) {
                     setConnectedAddress(addr);
                     setProvider(detectProvider());
+                    // Check if on BSC chain
+                    try {
+                        const { default: { getChainId } } = await import('../../../services/web3Wallet');
+                        const chainId = await getChainId();
+                        if (chainId && chainId !== '0x38') {
+                            setWrongChain(true);
+                            setChainMessage(`Wallet is on the wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                        }
+                    } catch {
+                        // ignore chain check errors on init
+                    }
                 }
             }
 
@@ -252,6 +299,19 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                 setConnectedAddress(addr);
                 setProvider(detectProvider());
                 setSignError('');
+                setWalletDisconnected(false);
+                // Re-check chain on account change
+                import('../../../services/web3Wallet').then(({ getChainId }) => {
+                    getChainId().then((chainId) => {
+                        if (chainId && chainId !== '0x38') {
+                            setWrongChain(true);
+                            setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                        } else {
+                            setWrongChain(false);
+                            setChainMessage('');
+                        }
+                    }).catch(() => { });
+                }).catch(() => { });
             } else {
                 setConnectedAddress('');
                 setProvider('');
@@ -259,6 +319,66 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         });
         return unsub;
     }, [isOpen, isWalletConnectWallet]);
+
+    // Listen for chain changes (browser extension)
+    useEffect(() => {
+        if (!isOpen || isWalletConnectWallet) return;
+        const unsub = onChainChange((chainId) => {
+            if (chainId === '0x38') {
+                setWrongChain(false);
+                setChainMessage('');
+                addNotification?.('Switched to BSC Mainnet.', 'success');
+            } else {
+                setWrongChain(true);
+                setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+            }
+        });
+        return unsub;
+    }, [isOpen, isWalletConnectWallet, addNotification]);
+
+    // Listen for wallet disconnect events (browser extension)
+    useEffect(() => {
+        if (!isOpen || isWalletConnectWallet) return;
+        const unsub = onDisconnect(() => {
+            setConnectedAddress('');
+            setProvider('');
+            setWalletDisconnected(true);
+            setWrongChain(false);
+            setChainMessage('');
+            addNotification?.('Wallet disconnected. Reconnect to verify.', 'info');
+        });
+        return unsub;
+    }, [isOpen, isWalletConnectWallet, addNotification]);
+
+    // Listen for WalletConnect chain changes
+    useEffect(() => {
+        if (!isOpen || !isWalletConnectWallet || !wcProvider) return;
+        const unsub = onWCChainChange((chainId) => {
+            if (chainId === 56) {
+                setWrongChain(false);
+                setChainMessage('');
+            } else {
+                setWrongChain(true);
+                setChainMessage(`WalletConnect switched to wrong network (Chain ID: ${chainId}). Switch to BSC in your mobile wallet.`);
+            }
+        });
+        return unsub;
+    }, [isOpen, isWalletConnectWallet, wcProvider]);
+
+    // Listen for WalletConnect account changes
+    useEffect(() => {
+        if (!isOpen || !isWalletConnectWallet || !wcProvider) return;
+        const unsub = onWCAccountChange((addr) => {
+            if (addr) {
+                setConnectedAddress(addr);
+                setWalletDisconnected(false);
+                setSignError('');
+            } else {
+                setConnectedAddress('');
+            }
+        });
+        return unsub;
+    }, [isOpen, isWalletConnectWallet, wcProvider]);
 
     // Reset when modal closes — also disconnect WC session if this was a WC wallet
     useEffect(() => {
@@ -275,7 +395,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setWcProvider(null);
             // Disconnect WC session if we initiated one for this verification
             if (wcProvider) {
-                disconnectWalletConnect().catch(() => {});
+                disconnectWalletConnect().catch(() => { });
             }
         }
     }, [isOpen]);
@@ -286,10 +406,17 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
 
         setIsConnecting(true);
         setSignError('');
+        setWrongChain(false);
+        setChainMessage('');
+        setWalletDisconnected(false);
         try {
-            const { address, provider: prov } = await connectWallet();
-            setConnectedAddress(address);
-            setProvider(prov);
+            const result = await connectWallet();
+            setConnectedAddress(result.address);
+            setProvider(result.provider);
+            if (result.wrongChain) {
+                setWrongChain(true);
+                setChainMessage(result.chainMessage || `Connected to wrong network. Switch to BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`);
+            }
         } catch (err) {
             setSignError(err.message);
         } finally {
@@ -306,6 +433,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         setWcConnecting(true);
         setShowWcQr(true);
         setSignError('');
+        setWrongChain(false);
+        setChainMessage('');
+        setWalletDisconnected(false);
 
         try {
             const prov = await initWalletConnect();
@@ -321,6 +451,13 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setWcProvider(getWCProvider());
             setShowWcQr(false);
             setWcUri(null);
+
+            // Check WC chain after connection
+            const wcProv = getWCProvider();
+            if (wcProv?.chainId && wcProv.chainId !== 56) {
+                setWrongChain(true);
+                setChainMessage(`WalletConnect connected to wrong network (Chain ID: ${wcProv.chainId}). Switch to BSC Mainnet in your mobile wallet.`);
+            }
         } catch (err) {
             setSignError(err.message || 'Failed to connect via WalletConnect');
             setShowWcQr(false);
@@ -331,9 +468,30 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         }
     };
 
+    // Handle "Switch to BSC" button
+    const handleSwitchChain = async () => {
+        if (isSwitchingChain) return;
+
+        setIsSwitchingChain(true);
+        try {
+            const result = await ensureCorrectChain();
+            if (result.ok) {
+                setWrongChain(false);
+                setChainMessage('');
+            } else {
+                addNotification?.(result.message || 'Failed to switch network. Switch manually in your wallet.', 'error');
+            }
+        } catch (err) {
+            addNotification?.(err.message || 'Failed to switch network.', 'error');
+        } finally {
+            setIsSwitchingChain(false);
+        }
+    };
+
     // Handle "Sign & Verify" button — triggers in-app personal_sign
     const handleSignAndVerify = async () => {
         if (!challenge || !connectedAddress || isSigning) return;
+        if (!isWalletConnectWallet && wrongChain) return; // Block signing on wrong network (extension only)
 
         setIsSigning(true);
         setSignError('');
@@ -465,7 +623,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                                     setWcUri(null);
                                     setIsConnecting(false);
                                     setWcConnecting(false);
-                                    disconnectWalletConnect().catch(() => {});
+                                    disconnectWalletConnect().catch(() => { });
                                 }}
                                 disabled={isConnecting}
                             >
@@ -593,7 +751,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             fontSize: 13,
                         }}
                         onClick={handleSignAndVerify}
-                        disabled={!isConnected || !addressMatches || isSigning || !challenge || showWcQr}
+                        disabled={!isConnected || !addressMatches || isSigning || !challenge || showWcQr || (!isWalletConnectWallet && wrongChain)}
                     >
                         {isSigning ? (
                             <>
@@ -607,15 +765,66 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             </>
                         )}
                     </button>
-                    {!isConnected && (
+                    {!isConnected && !walletDisconnected && (
                         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'block' }}>
                             Connect your wallet first to enable signing.
+                        </span>
+                    )}
+                    {walletDisconnected && (
+                        <span className="text-xs" style={{ color: 'var(--warning)', marginTop: 6, display: 'block' }}>
+                            ⚠ Your wallet disconnected. Click "Connect Wallet" to reconnect.
                         </span>
                     )}
                     {isConnected && !addressMatches && (
                         <span className="text-xs" style={{ color: 'var(--warning)', marginTop: 6, display: 'block' }}>
                             ⚠ Connected address does not match the wallet you registered. Switch to the correct account in your wallet.
                         </span>
+                    )}
+                    {wrongChain && !isWalletConnectWallet && (
+                        <div style={{ marginTop: 8 }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '8px 12px',
+                                    borderRadius: 8,
+                                    background: 'rgba(251, 191, 36, 0.08)',
+                                    border: '1px solid rgba(251, 191, 36, 0.15)',
+                                }}
+                            >
+                                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.6)', flex: 1, lineHeight: 1.4 }}>
+                                    ⚠ {chainMessage || `Wallet is on wrong network. Must be on BSC Mainnet (Chain ID: ${BSC_CHAIN_ID_DECIMAL}).`}
+                                </span>
+                                <button
+                                    className="btn btn-primary text-xs"
+                                    style={{ padding: '6px 12px', fontSize: 11, flexShrink: 0, whiteSpace: 'nowrap' }}
+                                    onClick={handleSwitchChain}
+                                    disabled={isSwitchingChain}
+                                >
+                                    {isSwitchingChain ? 'Switching...' : 'Switch to BSC'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {wrongChain && isWalletConnectWallet && (
+                        <div style={{ marginTop: 8 }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '8px 12px',
+                                    borderRadius: 8,
+                                    background: 'rgba(251, 191, 36, 0.08)',
+                                    border: '1px solid rgba(251, 191, 36, 0.15)',
+                                }}
+                            >
+                                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
+                                    ⚠ {chainMessage || 'WalletConnect is on wrong network. Switch to BSC Mainnet in your mobile wallet.'}
+                                </span>
+                            </div>
+                        </div>
                     )}
                     {signError && <span className="error-text" style={{ marginTop: 6, display: 'block' }}>{signError}</span>}
                 </div>
