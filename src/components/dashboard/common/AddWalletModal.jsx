@@ -5,7 +5,7 @@ import { Wallet, X, Info, Plug, ChevronDown, Smartphone, QrCode } from 'lucide-r
 // ── Revocation Warning ───────────────────────────────────────────
 const REVOCATION_WARNING =
   'Your wallet does not support permission revocation. It may auto-reconnect next time.';
-import { QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import walletService from '../../../services/walletService';
 import {
   connectWallet,
@@ -526,7 +526,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
                 }}
               >
                 {wcUri ? (
-                  <QRCode value={wcUri} size={200} level="M" />
+                  <QRCodeSVG value={wcUri} size={200} level="M" />
                 ) : (
                   <div
                     style={{

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Shield, X, AlertTriangle, ExternalLink, Plug, Smartphone } from 'lucide-react';
-import { QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import walletService from '../../../services/walletService';
 import {
     signMessage,
@@ -587,7 +587,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                                 }}
                             >
                                 {wcUri ? (
-                                    <QRCode value={wcUri} size={200} level="M" />
+                                    <QRCodeSVG value={wcUri} size={200} level="M" />
                                 ) : (
                                     <div
                                         style={{
