@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Shield, X, AlertTriangle, ExternalLink, Plug } from 'lucide-react';
+import { Shield, X, AlertTriangle, ExternalLink, Plug, Smartphone } from 'lucide-react';
+import { QRCode } from 'qrcode.react';
 import walletService from '../../../services/walletService';
 import { signMessage, connectWallet, getConnectedAddress, detectProvider, isWalletAvailable, onAccountChange } from '../../../services/web3Wallet';
+import {
+  initWalletConnect,
+  connectWalletConnect,
+  disconnectWalletConnect,
+  getWCUri,
+  onWcUri,
+  isWCConnected as getWcConnected,
+  getWCProvider,
+} from '../../../services/walletConnectService';
 
 // Provider-specific signing instructions with real documentation links
 const PROVIDER_INSTRUCTIONS = {
@@ -159,6 +169,15 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     const [isConnecting, setIsConnecting] = useState(false);
     const [provider, setProvider] = useState('');
 
+    // WalletConnect state
+    const [wcUri, setWcUri] = useState(null);
+    const [showWcQr, setShowWcQr] = useState(false);
+    const [wcConnecting, setWcConnecting] = useState(false);
+    const [wcProvider, setWcProvider] = useState(null);
+
+    // Whether this wallet was added via WalletConnect
+    const isWalletConnectWallet = (wallet?.provider || '').toUpperCase() === 'WALLETCONNECT';
+
     // Lock body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -179,12 +198,35 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setIsSigning(false);
             setConnectedAddress('');
             setIsConnecting(false);
+            setProvider('');
+            // Reset WC state
+            setWcUri(null);
+            setShowWcQr(false);
+            setWcConnecting(false);
+            setWcProvider(null);
 
-            // Check if wallet is already connected
-            const addr = await getConnectedAddress();
-            if (addr) {
-                setConnectedAddress(addr);
-                setProvider(detectProvider());
+            // If this is a WalletConnect wallet, try to restore WC session
+            if (isWalletConnectWallet) {
+                try {
+                    const prov = await initWalletConnect();
+                    if (getWcConnected()) {
+                        setWcProvider(prov);
+                        const accounts = prov?.accounts || [];
+                        if (accounts.length > 0) {
+                            setConnectedAddress(accounts[0]);
+                            setProvider('WALLETCONNECT');
+                        }
+                    }
+                } catch (err) {
+                    console.warn('WalletConnect init in verify:', err.message);
+                }
+            } else {
+                // Check if wallet is already connected via extension
+                const addr = await getConnectedAddress();
+                if (addr) {
+                    setConnectedAddress(addr);
+                    setProvider(detectProvider());
+                }
             }
 
             // Fetch challenge
@@ -202,9 +244,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         init();
     }, [isOpen, wallet, walletType, addNotification, onClose]);
 
-    // Listen for account changes
+    // Listen for account changes (browser extension)
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen || isWalletConnectWallet) return;
         const unsub = onAccountChange((addr) => {
             if (addr) {
                 setConnectedAddress(addr);
@@ -216,9 +258,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             }
         });
         return unsub;
-    }, [isOpen]);
+    }, [isOpen, isWalletConnectWallet]);
 
-    // Reset when modal closes
+    // Reset when modal closes — also disconnect WC session if this was a WC wallet
     useEffect(() => {
         if (!isOpen) {
             setChallenge('');
@@ -227,12 +269,21 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setConnectedAddress('');
             setIsConnecting(false);
             setProvider('');
+            setWcUri(null);
+            setShowWcQr(false);
+            setWcConnecting(false);
+            setWcProvider(null);
+            // Disconnect WC session if we initiated one for this verification
+            if (wcProvider) {
+                disconnectWalletConnect().catch(() => {});
+            }
         }
     }, [isOpen]);
 
-    // Handle "Connect Wallet" button
+    // Handle "Connect Wallet" — browser extension flow
     const handleConnect = async () => {
         if (isConnecting) return;
+
         setIsConnecting(true);
         setSignError('');
         try {
@@ -246,6 +297,40 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         }
     };
 
+    // Handle "Connect Mobile" — WalletConnect QR flow (used for both native WC wallets
+    // and as a fallback when no browser extension is detected)
+    const handleConnectMobile = async () => {
+        if (isConnecting || wcConnecting) return;
+
+        setIsConnecting(true);
+        setWcConnecting(true);
+        setShowWcQr(true);
+        setSignError('');
+
+        try {
+            const prov = await initWalletConnect();
+            const unsub = onWcUri((uri) => {
+                setWcUri(uri);
+            });
+
+            const { address, provider: _prov } = await connectWalletConnect();
+            unsub();
+
+            setConnectedAddress(address);
+            setProvider('WALLETCONNECT');
+            setWcProvider(getWCProvider());
+            setShowWcQr(false);
+            setWcUri(null);
+        } catch (err) {
+            setSignError(err.message || 'Failed to connect via WalletConnect');
+            setShowWcQr(false);
+            setWcUri(null);
+        } finally {
+            setIsConnecting(false);
+            setWcConnecting(false);
+        }
+    };
+
     // Handle "Sign & Verify" button — triggers in-app personal_sign
     const handleSignAndVerify = async () => {
         if (!challenge || !connectedAddress || isSigning) return;
@@ -254,10 +339,12 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         setSignError('');
 
         try {
-            // Wrap the challenge with a text prefix so MetaMask treats it as
-            // UTF-8 text (not hex bytes). Backend verifies the same wrapping.
             const message = `Xentra verify:${challenge}`;
-            const signature = await signMessage(message, connectedAddress);
+
+            // For WalletConnect wallets, pass the WC provider to signMessage
+            const customProvider = isWalletConnectWallet ? getWCProvider() : undefined;
+
+            const signature = await signMessage(message, connectedAddress, customProvider);
 
             // Submit signature to backend
             await walletService.verify(walletType, wallet.id, signature);
@@ -326,7 +413,66 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                         <span style={{ color: 'var(--primary)', marginRight: 6 }}>1</span>
                         Connect your wallet
                     </label>
-                    {isConnected ? (
+
+                    {showWcQr && !isConnected ? (
+                        /* WalletConnect QR display */
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '8px 0' }}>
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                Scan with your mobile wallet app
+                            </span>
+                            <div
+                                style={{
+                                    padding: 16,
+                                    borderRadius: 12,
+                                    background: 'white',
+                                    display: 'inline-flex',
+                                }}
+                            >
+                                {wcUri ? (
+                                    <QRCode value={wcUri} size={200} level="M" />
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: 200,
+                                            height: 200,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                width: 24,
+                                                height: 24,
+                                                border: '3px solid rgba(0,0,0,0.1)',
+                                                borderTopColor: 'var(--primary)',
+                                                borderRadius: '50%',
+                                                animation: 'spin 0.6s linear infinite',
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.4 }}>
+                                Open your wallet app, tap "Connect" or "Scan", and scan this QR code.
+                            </span>
+                            <button
+                                className="btn btn-secondary text-xs"
+                                style={{ padding: '6px 10px', fontSize: 11 }}
+                                onClick={() => {
+                                    setShowWcQr(false);
+                                    setWcUri(null);
+                                    setIsConnecting(false);
+                                    setWcConnecting(false);
+                                    disconnectWalletConnect().catch(() => {});
+                                }}
+                                disabled={isConnecting}
+                            >
+                                ← Cancel
+                            </button>
+                        </div>
+                    ) : isConnected ? (
                         <div
                             style={{
                                 display: 'flex',
@@ -348,6 +494,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                                     style={{ color: addressMatches ? 'var(--success)' : 'var(--warning)', marginBottom: 2 }}
                                 >
                                     {addressMatches ? '✓ Connected' : '⚠ Connected (different address)'}
+                                    {provider === 'WALLETCONNECT' && (
+                                        <span className="text-xs" style={{ color: 'rgba(99,102,241,0.6)', marginLeft: 6 }}>(Mobile)</span>
+                                    )}
                                 </div>
                                 <div
                                     className="text-xs"
@@ -364,31 +513,66 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             </div>
                         </div>
                     ) : (
-                        <button
-                            className="btn btn-secondary w-full"
-                            style={{
-                                padding: '12px 16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: 8,
-                                fontSize: 13,
-                            }}
-                            onClick={handleConnect}
-                            disabled={isConnecting || !isWalletAvailable()}
-                        >
-                            {isConnecting ? (
-                                <>
-                                    <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                                    Connecting...
-                                </>
-                            ) : (
-                                <>
-                                    <Plug size={16} />
-                                    {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
-                                </>
+                        <>
+                            {/* Browser Extension Connect (only for non-WC wallets) */}
+                            {!isWalletConnectWallet && (
+                                <button
+                                    className="btn btn-secondary w-full"
+                                    style={{
+                                        padding: '12px 16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 8,
+                                        fontSize: 13,
+                                    }}
+                                    onClick={handleConnect}
+                                    disabled={isConnecting || !isWalletAvailable()}
+                                >
+                                    {isConnecting ? (
+                                        <>
+                                            <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                            Connecting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Plug size={16} />
+                                            {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                                        </>
+                                    )}
+                                </button>
                             )}
-                        </button>
+
+                            {/* Mobile Wallet (QR) — for WC-native wallets OR as fallback when no extension detected */}
+                            {(isWalletConnectWallet || !isWalletAvailable()) && (
+                                <button
+                                    className="btn btn-secondary w-full"
+                                    style={{
+                                        padding: '12px 16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 8,
+                                        fontSize: 13,
+                                        marginTop: !isWalletConnectWallet ? 6 : 0,
+                                    }}
+                                    onClick={handleConnectMobile}
+                                    disabled={isConnecting || wcConnecting}
+                                >
+                                    {isConnecting || wcConnecting ? (
+                                        <>
+                                            <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                            Connecting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Smartphone size={16} />
+                                            {isWalletConnectWallet ? 'Connect via Mobile (QR)' : 'Mobile Wallet (QR)'}
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
 
@@ -409,7 +593,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             fontSize: 13,
                         }}
                         onClick={handleSignAndVerify}
-                        disabled={!isConnected || !addressMatches || isSigning || !challenge}
+                        disabled={!isConnected || !addressMatches || isSigning || !challenge || showWcQr}
                     >
                         {isSigning ? (
                             <>

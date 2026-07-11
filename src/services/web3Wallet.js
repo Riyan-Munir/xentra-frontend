@@ -194,13 +194,17 @@ export async function disconnectWallet(targetProvider) {
 
 /**
  * Sign a message using EIP-191 personal_sign.
+ *
  * @param {string} message - The message to sign (plaintext, not hex-encoded).
  * @param {string} address - The signer's Ethereum address.
+ * @param {object} [customProvider] - Optional custom provider (e.g. WalletConnect provider).
  * @returns {Promise<string>} The hex signature (0x...).
  */
-export async function signMessage(message, address) {
-  if (!window.ethereum) {
-    throw new Error('No wallet extension detected.');
+export async function signMessage(message, address, customProvider) {
+  const eth = customProvider || window.ethereum;
+
+  if (!eth) {
+    throw new Error('No wallet detected.');
   }
 
   if (!address) {
@@ -208,7 +212,7 @@ export async function signMessage(message, address) {
   }
 
   try {
-    const signature = await window.ethereum.request({
+    const signature = await eth.request({
       method: 'personal_sign',
       params: [message, address],
     });
@@ -227,17 +231,19 @@ export async function signMessage(message, address) {
 /**
  * Subscribe to wallet account changes.
  * @param {(address: string|null) => void} callback
+ * @param {object} [customProvider] - Optional custom provider to subscribe to.
  * @returns {Function} Unsubscribe function.
  */
-export function onAccountChange(callback) {
-  if (!window.ethereum) return () => {};
+export function onAccountChange(callback, customProvider) {
+  const eth = customProvider || (typeof window !== 'undefined' && window.ethereum);
+  if (!eth) return () => {};
 
   const handler = (accounts) => {
     callback(accounts?.[0] || null);
   };
 
-  window.ethereum.on('accountsChanged', handler);
+  eth.on('accountsChanged', handler);
   return () => {
-    window.ethereum.removeListener('accountsChanged', handler);
+    eth.removeListener('accountsChanged', handler);
   };
 }
