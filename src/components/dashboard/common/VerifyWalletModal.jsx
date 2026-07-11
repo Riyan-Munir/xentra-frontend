@@ -9,6 +9,7 @@ import {
     getConnectedAddress,
     detectProvider,
     isWalletAvailable,
+    getChainId,
     onAccountChange,
     onChainChange,
     onDisconnect,
@@ -264,7 +265,6 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                     setProvider(detectProvider());
                     // Check if on BSC chain
                     try {
-                        const { default: { getChainId } } = await import('../../../services/web3Wallet');
                         const chainId = await getChainId();
                         if (chainId && chainId !== '0x38') {
                             setWrongChain(true);
@@ -301,16 +301,14 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                 setSignError('');
                 setWalletDisconnected(false);
                 // Re-check chain on account change
-                import('../../../services/web3Wallet').then(({ getChainId }) => {
-                    getChainId().then((chainId) => {
-                        if (chainId && chainId !== '0x38') {
-                            setWrongChain(true);
-                            setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
-                        } else {
-                            setWrongChain(false);
-                            setChainMessage('');
-                        }
-                    }).catch(() => { });
+                getChainId().then((chainId) => {
+                    if (chainId && chainId !== '0x38') {
+                        setWrongChain(true);
+                        setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                    } else {
+                        setWrongChain(false);
+                        setChainMessage('');
+                    }
                 }).catch(() => { });
             } else {
                 setConnectedAddress('');
