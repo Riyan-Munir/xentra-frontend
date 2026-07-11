@@ -561,9 +561,9 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
                   setShowWc(false);
                   setWcUri(null);
                   setWcConnecting(false);
+                  setIsConnecting(false);
                   disconnectWalletConnect().catch(() => { });
                 }}
-                disabled={wcConnecting}
               >
                 ← Cancel
               </button>

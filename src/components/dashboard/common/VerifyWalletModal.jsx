@@ -623,7 +623,6 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                                     setWcConnecting(false);
                                     disconnectWalletConnect().catch(() => { });
                                 }}
-                                disabled={isConnecting}
                             >
                                 ← Cancel
                             </button>
