@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Wallet, X, Info, Plug, ChevronDown, Smartphone, QrCode } from 'lucide-react';
+
+// ── Revocation Warning ───────────────────────────────────────────
+const REVOCATION_WARNING =
+  'Your wallet does not support permission revocation. It may auto-reconnect next time.';
 import { QRCode } from 'qrcode.react';
 import walletService from '../../../services/walletService';
 import {
@@ -192,15 +196,8 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
 
       if (stillConnected) {
         // The wallet extension doesn't support wallet_revokePermissions (EIP-3326).
-        // Clear local state but warn the user that the extension may auto-reconnect.
-        if (addNotification) {
-          addNotification(
-            'Your wallet extension does not support permission revocation. ' +
-            'When you reconnect, it may auto-approve without a popup. ' +
-            'To fully disconnect, revoke Xentra\'s access from the extension settings.',
-            'warning'
-          );
-        }
+        // Clear local state but inform the user that the extension may auto-reconnect.
+        addNotification?.(REVOCATION_WARNING, 'info');
       }
 
       setAddress('');
@@ -440,7 +437,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
                   setShowWc(false);
                   setWcUri(null);
                   setWcConnecting(false);
-                  disconnectWalletConnect().catch(() => {});
+                  disconnectWalletConnect().catch(() => { });
                 }}
                 disabled={wcConnecting}
               >

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import { AlertCircle, CheckCircle, Clock, LogOut, ShieldAlert, Menu } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Info, LogOut, ShieldAlert, Menu } from 'lucide-react';
 import { profileService } from '../services/profileService';
 import { guildService } from '../services/guildService';
 import { checkPendingHacking, dismissHacking, captchaVerify, fetchCaptchaChallenge } from '../services/api';
@@ -616,6 +616,8 @@ const Toast = React.memo(({ message, type = 'error', forceVanish, onRemove }) =>
     <div className={`toast-card ${type} ${isVanishing ? 'vanishing' : ''}`}>
       {type === 'success' ? (
         <CheckCircle className="toast-icon" size={18} />
+      ) : type === 'info' ? (
+        <Info className="toast-icon" size={18} />
       ) : (
         <AlertCircle className="toast-icon" size={18} />
       )}
