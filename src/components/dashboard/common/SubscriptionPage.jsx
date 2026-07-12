@@ -422,7 +422,7 @@ const SubscriptionPage = ({ profile, currentRole, addNotification }) => {
           premiumService.getActiveSubscription(),
         ]);
         if (cancelled) return;
-        setPlans(Array.isArray(plansData) ? plansData : plansData?.results || []);
+        setPlans(Array.isArray(plansData) ? plansData : plansData?.plans || []);
         setActiveSub(subData || null);
       } catch (err) {
         if (!cancelled) addNotification('Failed to load subscription plans', 'error');
