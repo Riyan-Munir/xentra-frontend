@@ -4993,8 +4993,15 @@ input[type="radio"]:focus {
 }
 
 @keyframes popupFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card-expand-popup .popup-item {
@@ -5005,7 +5012,7 @@ input[type="radio"]:focus {
   padding: 4px 0;
 }
 
-.card-expand-popup .popup-item + .popup-item {
+.card-expand-popup .popup-item+.popup-item {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -5137,5 +5144,342 @@ input[type="radio"]:focus {
     justify-content: flex-end;
     right: 10px;
     top: 10px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SUBSCRIPTION SECTION — Plan Cards, Comparison Table, Payment
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card Grid: 2 on top row, third centered below ─────────── */
+.subscription-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.subscription-card-grid>* {
+  flex: 1 1 320px;
+  max-width: 380px;
+}
+
+/* ── Individual Plan Card ──────────────────────────────────── */
+.subscription-plan-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.subscription-plan-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
+}
+
+.subscription-plan-card.premium-highlight {
+  background: linear-gradient(145deg, rgba(12, 12, 12, 0.97), rgba(22, 22, 22, 0.93), rgba(18, 18, 18, 0.95));
+  border-color: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
+}
+
+.subscription-plan-card.premium-highlight:hover {
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 12px 40px rgba(255, 215, 0, 0.1);
+}
+
+.subscription-plan-card.current-plan {
+  border-color: rgba(255, 215, 0, 0.5) !important;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.08);
+  transform: none !important;
+}
+
+.subscription-plan-card-inner {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.subscription-plan-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.subscription-plan-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.subscription-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.subscription-plan-amount {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.subscription-plan-period {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.subscription-plan-save-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  margin-bottom: 8px;
+}
+
+.subscription-plan-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.subscription-plan-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.subscription-plan-benefit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.subscription-plan-btn {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.subscription-plan-btn.subscribe-btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.subscription-plan-btn.subscribe-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.subscription-plan-btn.premium-subscribe {
+  background: linear-gradient(135deg, #ffd700, #ffae00);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.25);
+}
+
+.subscription-plan-btn.premium-subscribe:hover {
+  filter: brightness(1.15);
+  transform: scale(1.02);
+}
+
+.subscription-plan-btn.current-label {
+  background: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  cursor: default;
+}
+
+.subscription-plan-btn.disabled-label {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  cursor: default;
+}
+
+/* ── Current Plan Diagonal Tag Badge ───────────────────────── */
+.current-plan-tag {
+  position: absolute;
+  top: 18px;
+  right: -32px;
+  background: linear-gradient(135deg, #ffd700, #ffae00);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 40px;
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+/* ── Feature Comparison Table ──────────────────────────────── */
+.subscription-comparison-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.subscription-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.subscription-comparison-table th,
+.subscription-comparison-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.subscription-comparison-table thead th {
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+
+.comparison-feature-header {
+  width: 45%;
+}
+
+.comparison-tier-header {
+  width: 27.5%;
+  text-align: center !important;
+}
+
+.comparison-tier-current {
+  color: var(--primary) !important;
+}
+
+.comparison-feature-cell {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.comparison-value-cell {
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+.comparison-premium-cell {
+  background: rgba(255, 215, 0, 0.03);
+}
+
+/* ── Payment Step ──────────────────────────────────────────── */
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* ── Subscription Page Skeleton ────────────────────────────── */
+.skel-w-90pct {
+  width: 90%;
+}
+
+.skel-w-100pct {
+  width: 100%;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .subscription-card-grid {
+    gap: 20px;
+  }
+
+  .subscription-card-grid>* {
+    flex: 1 1 300px;
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .subscription-card-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .subscription-card-grid>* {
+    flex: none;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .subscription-plan-card-inner {
+    padding: 20px 18px;
+  }
+
+  .subscription-plan-amount {
+    font-size: 26px;
+  }
+
+  .subscription-comparison-table th,
+  .subscription-comparison-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .current-plan-tag {
+    top: 14px;
+    right: -34px;
+    font-size: 9px;
+    padding: 3px 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .subscription-plan-card-inner {
+    padding: 16px 14px;
+  }
+
+  .subscription-plan-amount {
+    font-size: 22px;
+  }
+
+  .subscription-plan-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .subscription-plan-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .subscription-comparison-table th,
+  .subscription-comparison-table td {
+    padding: 8px 8px;
+    font-size: 12px;
   }
 }

@@ -26,6 +26,7 @@ const AdminConfigure = lazy(() => import('../components/dashboard/server_admin/C
 
 const ChatRooms = lazy(() => import('../components/dashboard/common/ChatRoom'));
 const Wallets = lazy(() => import('../components/dashboard/common/Wallets'));
+const SubscriptionPage = lazy(() => import('../components/dashboard/common/SubscriptionPage'));
 
 /* ============================================================
    Section-Specific Constant Skeletons
@@ -572,6 +573,48 @@ const walletsSkeleton = () => (
   </div>
 );
 
+const subscriptionSkeleton = () => (
+  <div className="fade-in flex-col gap-20">
+    <div className="flex-between items-center flex-shrink-0">
+      <div className="flex-col gap-4">
+        <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />
+        <div className="skeleton-line skel-w-200 skel-h-14 skel-r-4" />
+      </div>
+      <div className="skeleton-line skel-w-120 skel-h-36 skel-r-8" />
+    </div>
+    <div className="subscription-card-grid">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="subscription-plan-card" style={{ pointerEvents: 'none', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, overflow: 'hidden' }}>
+          <div style={{ padding: '28px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div className="skeleton-line" style={{ width: 56, height: 56, borderRadius: 16, marginBottom: 16 }} />
+            <div className="skeleton-line skel-w-80 skel-h-20 skel-r-4" style={{ marginBottom: 8 }} />
+            <div className="skeleton-line skel-w-120 skel-h-32 skel-r-4" style={{ marginBottom: 8 }} />
+            <div className="skeleton-line skel-w-160 skel-h-12 skel-r-4" style={{ marginBottom: 20 }} />
+            <div className="flex-col gap-8" style={{ marginBottom: 20 }}>
+              {[1, 2, 3, 4].map(j => (
+                <div key={j} className="skeleton-line skel-w-90pct skel-h-12 skel-r-4" />
+              ))}
+            </div>
+            <div className="skeleton-line skel-w-100pct skel-h-40 skel-r-8" />
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="card" style={{ minHeight: 200, maxHeight: 'none' }}>
+      <div className="skeleton-line skel-w-160 skel-h-18 skel-r-4" style={{ marginBottom: 16 }} />
+      <div className="flex-col gap-12">
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} className="flex-row items-center gap-16">
+            <div className="skeleton-line skel-w-35pct skel-h-16 skel-r-4" />
+            <div className="skeleton-line skel-w-20pct skel-h-16 skel-r-4" />
+            <div className="skeleton-line skel-w-20pct skel-h-16 skel-r-4" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 const getSectionSkeleton = (section, role) => {
   if (section === 'overview') {
     return role === 'server_admin' ? adminOverviewSkeleton() : overviewSkeleton();
@@ -586,6 +629,7 @@ const getSectionSkeleton = (section, role) => {
   if (section === 'wallets') return walletsSkeleton();
   if (section === 'configure') return configureSkeleton();
   if (section === 'chatrooms') return chatroomsSkeleton();
+  if (section === 'subscription') return subscriptionSkeleton();
   return overviewSkeleton();
 };
 
@@ -1045,6 +1089,7 @@ const Dashboard = () => {
         case 'jobs': return <ClientJobs {...commonProps} />;
         case 'wallets': return <Wallets currentRole={currentRole} addNotification={addNotification} />;
         case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
+        case 'subscription': return <SubscriptionPage profile={profile} currentRole={currentRole} addNotification={addNotification} />;
         default: return <ClientOverview {...profileProps} />;
       }
     } else if (currentRole === 'freelancer') {
@@ -1055,6 +1100,7 @@ const Dashboard = () => {
         case 'applications': return <FreelancerApplications {...commonProps} onNavigate={setActiveSection} />;
         case 'wallets': return <Wallets currentRole={currentRole} addNotification={addNotification} />;
         case 'chatrooms': return <ChatRooms profile={profile} currentRole={currentRole} />;
+        case 'subscription': return <SubscriptionPage profile={profile} currentRole={currentRole} addNotification={addNotification} />;
         default: return <FreelancerOverview {...profileProps} />;
       }
     } else if (currentRole === 'server_admin') {
@@ -1062,6 +1108,7 @@ const Dashboard = () => {
         case 'overview': return <AdminOverview {...profileProps} servers={servers} onConfigure={handleGoToConfigure} onRefreshServers={() => fetchServers(true)} isRefreshing={isRefreshing} isServersLoading={isServersLoading} />;
         case 'settings': return <AdminSettings {...commonProps} onUpdate={handleUpdateProfile} />;
         case 'configure': return <AdminConfigure servers={servers} selectedGuildId={selectedGuildId} setHasUnsavedChanges={setHasUnsavedChanges} triggerTremble={triggerTremble} addNotification={addNotification} isSubmitting={isSaving} />;
+        case 'subscription': return <SubscriptionPage profile={profile} currentRole={currentRole} addNotification={addNotification} />;
         default: return <AdminOverview {...profileProps} servers={servers} onConfigure={handleGoToConfigure} isRefreshing={isRefreshing} isServersLoading={isServersLoading} />;
       }
     }
