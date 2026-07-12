@@ -574,7 +574,7 @@ const walletsSkeleton = () => (
 );
 
 const subscriptionSkeleton = () => (
-  <div className="fade-in flex-col gap-20">
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar">
     <div className="flex-between items-center flex-shrink-0">
       <div className="flex-col gap-4">
         <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />

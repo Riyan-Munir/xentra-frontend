@@ -524,7 +524,7 @@ const SubscriptionPage = ({ profile, currentRole, addNotification }) => {
   const freePlan = plans.find(p => p.tier === 'free') || { tier: 'free', billing_interval: null, price: '0.00' };
 
   return (
-    <div className="fade-in flex-col gap-20">
+    <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar">
       {/* ── Header ────────────────────────────────────────────── */}
       <div className="flex-between items-center flex-shrink-0">
         <div className="flex-col gap-4">
@@ -736,7 +736,7 @@ const SubscriptionPage = ({ profile, currentRole, addNotification }) => {
    SKELETON LOADING STATE
    ═══════════════════════════════════════════════════════════════ */
 const SubscriptionPageSkeleton = () => (
-  <div className="fade-in flex-col gap-20">
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar">
     {/* Header skeleton */}
     <div className="flex-between items-center flex-shrink-0">
       <div className="flex-col gap-4">
