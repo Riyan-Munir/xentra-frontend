@@ -570,61 +570,64 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
             </div>
           ) : (
             <>
-              {/* Connect Browser Extension Wallet */}
-              <button
-                className="btn btn-secondary w-full"
-                style={{
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                }}
-                onClick={handleConnectWallet}
-                disabled={isConnecting || !isWalletAvailable()}
-              >
-                {isConnecting ? (
-                  <>
-                    <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                    Connecting...
-                  </>
-                ) : (
-                  <>
-                    <Plug size={16} />
-                    {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
-                    {discoveredWallets.length > 1 && <ChevronDown size={14} />}
-                  </>
-                )}
-              </button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {/* Connect Browser Extension Wallet */}
+                <button
+                  className="btn btn-secondary"
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    fontSize: 12,
+                  }}
+                  onClick={handleConnectWallet}
+                  disabled={isConnecting || !isWalletAvailable()}
+                >
+                  {isConnecting ? (
+                    <>
+                      <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Plug size={14} />
+                      {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                      {discoveredWallets.length > 1 && <ChevronDown size={12} />}
+                    </>
+                  )}
+                </button>
 
-              {/* Connect via Mobile Wallet (WalletConnect) */}
-              <button
-                className="btn btn-secondary w-full"
-                style={{
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginTop: 6,
-                }}
-                onClick={handleConnectMobile}
-                disabled={wcConnecting}
-              >
-                {wcConnecting ? (
-                  <>
-                    <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                    Connecting...
-                  </>
-                ) : (
-                  <>
-                    <Smartphone size={16} />
-                    Mobile Wallet (QR)
-                  </>
-                )}
-              </button>
+                {/* Connect via Mobile Wallet (WalletConnect) */}
+                <button
+                  className="btn btn-secondary"
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    fontSize: 12,
+                  }}
+                  onClick={handleConnectMobile}
+                  disabled={wcConnecting}
+                >
+                  {wcConnecting ? (
+                    <>
+                      <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone size={14} />
+                      QR
+                    </>
+                  )}
+                </button>
+              </div>
 
               {!isWalletAvailable() && (
                 <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -632,7 +635,7 @@ const AddWalletModal = ({ isOpen, onClose, walletType, onSuccess, addNotificatio
                     Install MetaMask, Trust Wallet, or another EVM wallet extension to connect.
                   </span>
                   <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)', display: 'block', fontStyle: 'italic' }}>
-                    On mobile? Tap "Mobile Wallet (QR)" above to connect via WalletConnect, or open this page inside your wallet's in-app browser.
+                    On mobile? Tap the QR button above to connect via WalletConnect, or open this page inside your wallet's in-app browser.
                   </span>
                 </div>
               )}

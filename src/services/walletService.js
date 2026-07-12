@@ -42,14 +42,20 @@ const walletService = {
      * @param {'freelancer'|'client'} walletType
      * @param {string} walletId
      * @param {string} signature — hex-encoded signature
+     * @param {number} [chainId] — Chain ID the wallet is on (56 for BSC). Server-validated for cross-chain protection.
      * @returns {Promise} — Updated wallet object
      */
-    verify: (walletType, walletId, signature) =>
-        api.post('/wallets/verify/', {
+    verify: (walletType, walletId, signature, chainId) => {
+        const payload = {
             wallet_type: walletType,
             wallet_id: walletId,
             signature: signature.trim(),
-        }),
+        };
+        if (chainId !== undefined && chainId !== null) {
+            payload.chain_id = chainId;
+        }
+        return api.post('/wallets/verify/', payload);
+    },
 
     /**
      * Set a verified wallet as the user's default.

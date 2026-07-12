@@ -191,6 +191,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     const [wcProvider, setWcProvider] = useState(null);
 
     // Chain validation state
+    const [chainId, setChainId] = useState(null);              // wallet's current chain ID (decimal, e.g. 56 for BSC)
     const [wrongChain, setWrongChain] = useState(false);
     const [chainMessage, setChainMessage] = useState('');
     const [isSwitchingChain, setIsSwitchingChain] = useState(false);
@@ -222,6 +223,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setConnectedAddress('');
             setIsConnecting(false);
             setProvider('');
+            setChainId(null);
             setWrongChain(false);
             setChainMessage('');
             setWalletDisconnected(false);
@@ -248,10 +250,11 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                             setProvider('WALLETCONNECT');
                         }
                         // Check WalletConnect chain
-                        const chainId = prov?.chainId;
-                        if (chainId && chainId !== 56) {
+                        const wcChainId = prov?.chainId || null;
+                        setChainId(wcChainId);
+                        if (wcChainId && wcChainId !== 56) {
                             setWrongChain(true);
-                            setChainMessage(`WalletConnect is on the wrong network (Chain ID: ${chainId}). Switch to BSC Mainnet in your mobile wallet.`);
+                            setChainMessage(`WalletConnect is on the wrong network (Chain ID: ${wcChainId}). Switch to BSC Mainnet in your mobile wallet.`);
                         }
                     }
                 } catch (err) {
@@ -265,10 +268,12 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                     setProvider(detectProvider());
                     // Check if on BSC chain
                     try {
-                        const chainId = await getChainId();
-                        if (chainId && chainId !== '0x38') {
+                        const rawChainId = await getChainId();   // hex string, e.g. '0x38'
+                        const parsed = rawChainId ? parseInt(rawChainId, 16) : null;
+                        setChainId(parsed);
+                        if (parsed && parsed !== 56) {
                             setWrongChain(true);
-                            setChainMessage(`Wallet is on the wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                            setChainMessage(`Wallet is on the wrong network (Chain ID: ${parsed}). Switch to BSC Mainnet.`);
                         }
                     } catch {
                         // ignore chain check errors on init
@@ -301,10 +306,12 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                 setSignError('');
                 setWalletDisconnected(false);
                 // Re-check chain on account change
-                getChainId().then((chainId) => {
-                    if (chainId && chainId !== '0x38') {
+                getChainId().then((rawChainId) => {
+                    const parsed = rawChainId ? parseInt(rawChainId, 16) : null;
+                    setChainId(parsed);
+                    if (parsed && parsed !== 56) {
                         setWrongChain(true);
-                        setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                        setChainMessage(`Wallet switched to wrong network (Chain ID: ${parsed}). Switch to BSC Mainnet.`);
                     } else {
                         setWrongChain(false);
                         setChainMessage('');
@@ -313,6 +320,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             } else {
                 setConnectedAddress('');
                 setProvider('');
+                setChainId(null);
             }
         });
         return unsub;
@@ -321,14 +329,16 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     // Listen for chain changes (browser extension)
     useEffect(() => {
         if (!isOpen || isWalletConnectWallet) return;
-        const unsub = onChainChange((chainId) => {
-            if (chainId === '0x38') {
+        const unsub = onChainChange((rawChainId) => {
+            const parsed = rawChainId ? parseInt(rawChainId, 16) : null;
+            setChainId(parsed);
+            if (parsed === 56) {
                 setWrongChain(false);
                 setChainMessage('');
                 addNotification?.('Switched to BSC Mainnet.', 'success');
             } else {
                 setWrongChain(true);
-                setChainMessage(`Wallet switched to wrong network (Chain ID: ${parseInt(chainId, 16)}). Switch to BSC Mainnet.`);
+                setChainMessage(`Wallet switched to wrong network (Chain ID: ${parsed}). Switch to BSC Mainnet.`);
             }
         });
         return unsub;
@@ -352,6 +362,7 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
     useEffect(() => {
         if (!isOpen || !isWalletConnectWallet || !wcProvider) return;
         const unsub = onWCChainChange((chainId) => {
+            setChainId(chainId);
             if (chainId === 56) {
                 setWrongChain(false);
                 setChainMessage('');
@@ -387,6 +398,11 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setConnectedAddress('');
             setIsConnecting(false);
             setProvider('');
+            setChainId(null);
+            setWrongChain(false);
+            setChainMessage('');
+            setIsSwitchingChain(false);
+            setWalletDisconnected(false);
             setWcUri(null);
             setShowWcQr(false);
             setWcConnecting(false);
@@ -502,8 +518,8 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
 
             const signature = await signMessage(message, connectedAddress, customProvider);
 
-            // Submit signature to backend
-            await walletService.verify(walletType, wallet.id, signature);
+            // Submit signature + chain ID to backend (cross-chain protection)
+            await walletService.verify(walletType, wallet.id, signature, chainId);
             addNotification?.('Wallet verified successfully!', 'success');
             onSuccess?.();
             onClose();
@@ -669,64 +685,67 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                         </div>
                     ) : (
                         <>
-                            {/* Browser Extension Connect (only for non-WC wallets) */}
-                            {!isWalletConnectWallet && (
-                                <button
-                                    className="btn btn-secondary w-full"
-                                    style={{
-                                        padding: '12px 16px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: 8,
-                                        fontSize: 13,
-                                    }}
-                                    onClick={handleConnect}
-                                    disabled={isConnecting || !isWalletAvailable()}
-                                >
-                                    {isConnecting ? (
-                                        <>
-                                            <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                                            Connecting...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Plug size={16} />
-                                            {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
-                                        </>
-                                    )}
-                                </button>
-                            )}
+                            <div style={{ display: 'flex', gap: 6 }}>
+                                {/* Browser Extension Connect (only for non-WC wallets) */}
+                                {!isWalletConnectWallet && (
+                                    <button
+                                        className="btn btn-secondary"
+                                        style={{
+                                            flex: 1,
+                                            padding: '8px 10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 6,
+                                            fontSize: 12,
+                                        }}
+                                        onClick={handleConnect}
+                                        disabled={isConnecting || !isWalletAvailable()}
+                                    >
+                                        {isConnecting ? (
+                                            <>
+                                                <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                                Connecting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Plug size={14} />
+                                                {isWalletAvailable() ? 'Connect Wallet' : 'No Wallet Detected'}
+                                            </>
+                                        )}
+                                    </button>
+                                )}
 
-                            {/* Mobile Wallet (QR) — for WC-native wallets OR as fallback when no extension detected */}
-                            {(isWalletConnectWallet || !isWalletAvailable()) && (
-                                <button
-                                    className="btn btn-secondary w-full"
-                                    style={{
-                                        padding: '12px 16px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: 8,
-                                        fontSize: 13,
-                                        marginTop: !isWalletConnectWallet ? 6 : 0,
-                                    }}
-                                    onClick={handleConnectMobile}
-                                    disabled={isConnecting || wcConnecting}
-                                >
-                                    {isConnecting || wcConnecting ? (
-                                        <>
-                                            <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                                            Connecting...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Smartphone size={16} />
-                                            {isWalletConnectWallet ? 'Connect via Mobile (QR)' : 'Mobile Wallet (QR)'}
-                                        </>
-                                    )}
-                                </button>
-                            )}
+                                {/* Mobile Wallet (QR) — for WC-native wallets OR as fallback when no extension detected */}
+                                {(isWalletConnectWallet || !isWalletAvailable()) && (
+                                    <button
+                                        className="btn btn-secondary"
+                                        style={{
+                                            flex: 1,
+                                            padding: '8px 10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 6,
+                                            fontSize: 12,
+                                        }}
+                                        onClick={handleConnectMobile}
+                                        disabled={isConnecting || wcConnecting}
+                                    >
+                                        {isConnecting || wcConnecting ? (
+                                            <>
+                                                <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                                Connecting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Smartphone size={14} />
+                                                QR
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
                         </>
                     )}
                 </div>
