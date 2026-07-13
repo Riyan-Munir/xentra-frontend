@@ -538,7 +538,7 @@ const premiumSkeleton = () => (
       {/* Cards grid skeleton */}
       <div className="premium-cards-grid" style={{ marginBottom: 20 }}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="premium-card skeleton glass" style={{ minHeight: 320 }}>
+          <div key={i} className="premium-skeleton-card" style={{ minHeight: 0 }}>
             <div className="skeleton-line" style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 12 }} />
             <div className="skeleton-line" style={{ width: '40%', height: 20, marginBottom: 8 }} />
             <div className="skeleton-line" style={{ width: '25%', height: 14, marginBottom: 12 }} />

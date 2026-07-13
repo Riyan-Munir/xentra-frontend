@@ -99,7 +99,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending }
     const cardBenefits = isFreelancer ? FREELANCER_CARD_BENEFITS : CLIENT_CARD_BENEFITS;
 
     return (
-        <div className={`premium-card glass ${isCurrent ? 'premium-card-active' : ''} ${isFree ? 'premium-card-free' : ''}`}>
+        <div className={`premium-card ${isFree ? 'premium-card-free' : 'glass'} ${isCurrent ? 'premium-card-active' : ''}`}>
             {/* Current tag */}
             {isCurrent && (
                 <div className="premium-current-tag">
@@ -278,14 +278,11 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const daysLeft = daysUntil(expiryDate);
 
     return (
-        <div className="premium-section">
+        <div className="premium-section fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar">
             {/* Header */}
-            <div className="premium-header flex-between">
+            <div className="premium-header flex-between flex-shrink-0">
                 <div className="flex-col gap-4">
-                    <div className="flex-row items-center gap-8">
-                        <Crown size={20} className="primary-text" />
-                        <h2 className="text-lg text-white font-semibold">Subscription</h2>
-                    </div>
+                    <h2 className="text-2xl font-bold">Subscription</h2>
                     {isPremium && expiryDate && (
                         <p className="text-xs text-dim">
                             {daysLeft !== null
@@ -327,7 +324,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
             {loading ? (
                 <div className="premium-cards-grid">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="premium-card skeleton glass">
+                        <div key={i} className="premium-skeleton-card">
                             <div className="skeleton-line" style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 12 }} />
                             <div className="skeleton-line" style={{ width: '40%', height: 20, marginBottom: 8 }} />
                             <div className="skeleton-line" style={{ width: '30%', height: 32, marginBottom: 16 }} />
@@ -499,6 +496,13 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
         }
     }, [selectedUser, selectedProfile, addNotification]);
 
+    const handleBackToSearch = useCallback(() => {
+        setStep('search');
+        setSelectedUser(null);
+        setSelectedProfile(null);
+        setSelectedPlan(null);
+    }, []);
+
     const handleReset = useCallback(() => {
         setStep('search');
         setSearchQuery('');
@@ -635,7 +639,7 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                     {selectedProfile.role === 'freelancer' ? 'Freelancer' : 'Client'} — {selectedProfile.display_id}
                                 </p>
                             </div>
-                            <button className="text-xs text-dim" onClick={handleReset}>Change</button>
+                            <button className="btn btn-secondary text-xs" onClick={handleBackToSearch}>Change</button>
                         </div>
 
                         <p className="text-sm text-dim mb-12">Select a subscription plan to gift:</p>
@@ -669,7 +673,9 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                     )}
                                     <span className="text-xs text-dim">/month</span>
                                     {creating && selectedPlan?.id === monthlyPlan.id && (
-                                        <Loader2 size={16} className="primary-text animate-spin mt-8" />
+                                        <div className="premium-gift-plan-spinner">
+                                            <Loader2 size={16} className="primary-text animate-spin" />
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -701,7 +707,9 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                     )}
                                     <span className="text-xs text-dim">/year</span>
                                     {creating && selectedPlan?.id === yearlyPlan.id && (
-                                        <Loader2 size={16} className="primary-text animate-spin mt-8" />
+                                        <div className="premium-gift-plan-spinner">
+                                            <Loader2 size={16} className="primary-text animate-spin" />
+                                        </div>
                                     )}
                                 </div>
                             )}
