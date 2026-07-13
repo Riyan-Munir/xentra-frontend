@@ -817,6 +817,10 @@ input[type="radio"]:focus {
 }
 
 /* Animations */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -5137,5 +5141,539 @@ input[type="radio"]:focus {
     justify-content: flex-end;
     right: 10px;
     top: 10px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Premium Subscription Section
+   ════════════════════════════════════════════════════════════════════ */
+
+.premium-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.premium-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Active Subscription Banner ─────────────────────────────────── */
+.premium-active-banner {
+  border-radius: 12px;
+}
+
+/* ── Pricing Cards Grid ─────────────────────────────────────────── */
+.premium-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+
+.premium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 16px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.premium-card:hover {
+  transform: translateY(-2px);
+}
+
+.premium-card-active {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.premium-card-free {
+  opacity: 0.85;
+}
+
+.premium-card-free:hover {
+  transform: none;
+}
+
+/* ── Current Tag (Diagonal) ─────────────────────────────────────── */
+.premium-current-tag {
+  position: absolute;
+  top: 18px;
+  right: -32px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  padding: 4px 40px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* ── Card Header ────────────────────────────────────────────────── */
+.premium-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.premium-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-card-icon.free {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.premium-card-icon.pro {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: var(--primary);
+}
+
+.premium-card-tier {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.premium-card-interval {
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Card Price ─────────────────────────────────────────────────── */
+.premium-card-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.premium-card-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.premium-card-price {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.premium-card-price-original {
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  color: var(--text-dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--error);
+  text-decoration-thickness: 1.5px;
+}
+
+.premium-card-price-period {
+  font-size: clamp(0.7rem, 1.4vw, 0.8rem);
+  color: var(--text-dim);
+  margin-left: 2px;
+}
+
+.premium-card-price-discounted {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.premium-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* ── Card Benefits ──────────────────────────────────────────────── */
+.premium-card-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.premium-card-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* ── Card Action ────────────────────────────────────────────────── */
+.premium-card-action {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.premium-btn-subscribe,
+.premium-btn-extend {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+}
+
+.premium-card-current-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+/* ── Benefits Comparison Chart ──────────────────────────────────── */
+.premium-chart-container {
+  border-radius: 16px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.premium-chart-header {
+  margin-bottom: 16px;
+}
+
+.premium-chart-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.premium-chart-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px;
+  align-items: center;
+  gap: 0;
+}
+
+.premium-chart-row-header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.premium-chart-row-header .premium-chart-cell {
+  font-weight: 600;
+  font-size: clamp(0.7rem, 1.3vw, 0.75rem);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.premium-chart-row-even {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.premium-chart-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.premium-chart-cell:last-child {
+  border-bottom: none;
+}
+
+.premium-chart-cell-benefit {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.premium-chart-cell-pro {
+  background: rgba(99, 102, 241, 0.03);
+}
+
+/* ── Gift Button ────────────────────────────────────────────────── */
+.premium-gift-btn {
+  padding: 8px 16px;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* ── Gift Modal ─────────────────────────────────────────────────── */
+.premium-gift-modal {
+  max-width: 520px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.premium-gift-step {
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-gift-search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.premium-gift-search-input-wrapper {
+  padding: 8px 12px !important;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.premium-gift-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+}
+
+.premium-gift-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.premium-gift-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.premium-gift-user-card {
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-gift-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.premium-gift-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.premium-gift-profile-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  text-align: left;
+  width: 100%;
+}
+
+.premium-gift-profile-btn:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.premium-gift-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.premium-gift-role-badge.freelancer {
+  background: rgba(236, 72, 153, 0.15);
+  color: var(--secondary);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+.premium-gift-role-badge.client {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.premium-gift-already-pro {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.premium-gift-plans {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.premium-gift-plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.premium-gift-plan-card:hover {
+  border-color: var(--primary);
+}
+
+.premium-gift-plan-active {
+  border-color: var(--primary) !important;
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.premium-gift-plan-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.premium-gift-plan-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.premium-gift-success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* ── Premium Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .premium-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .premium-cards-grid .premium-card:last-child {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    justify-self: center;
+  }
+
+  .premium-chart-row {
+    grid-template-columns: 1fr 80px 80px;
+  }
+
+  .premium-gift-plans {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-cards-grid .premium-card:last-child {
+    max-width: 100%;
+  }
+
+  .premium-card {
+    padding: 20px;
+  }
+
+  .premium-chart-row {
+    grid-template-columns: 1fr 70px 70px;
+  }
+
+  .premium-chart-cell {
+    padding: 8px 10px;
+  }
+
+  .premium-gift-modal {
+    max-width: 100%;
+    width: 95vw;
+    padding: 16px;
+  }
+
+  .premium-gift-plans {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .premium-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .premium-gift-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .premium-chart-row {
+    grid-template-columns: 1fr 60px 60px;
+  }
+
+  .premium-chart-cell {
+    padding: 6px 8px;
+  }
+
+  .premium-current-tag {
+    font-size: 0.55rem;
+    padding: 3px 32px;
+    top: 14px;
+    right: -36px;
   }
 }

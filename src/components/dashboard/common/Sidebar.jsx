@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { LayoutDashboard, User, LogOut, Settings, Briefcase, FileText, MessageCircle, Wallet } from 'lucide-react';
+import { LayoutDashboard, User, LogOut, Settings, Briefcase, FileText, MessageCircle, Wallet, Crown } from 'lucide-react';
 
 const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobileOpen, onMobileClose, profile }) => {
   const isPremium = profile?.premium_tier === 'premium';
@@ -17,6 +17,9 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobi
       { id: 'applications', label: 'Applications', icon: FileText },
       { id: 'wallets', label: 'Wallets', icon: Wallet },
       { id: 'chatrooms', label: 'Chat Rooms', icon: MessageCircle, premium: true },
+    ] : []),
+    ...(currentRole !== 'server_admin' ? [
+      { id: 'premium', label: 'Subscription', icon: Crown },
     ] : []),
     ...(currentRole === 'server_admin' ? [{ id: 'configure', label: 'Configure Bot', icon: Settings }] : []),
   ];
