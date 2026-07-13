@@ -215,7 +215,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 premiumService.getPlans(),
                 premiumService.getActive(),
             ]);
-            setPlans(plansRes.data || []);
+            setPlans(plansRes.data?.plans || []);
             setActiveSub(activeRes.data || {});
         } catch (err) {
             addNotification?.('Failed to load subscription plans.', 'error');
