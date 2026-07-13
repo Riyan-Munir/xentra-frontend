@@ -325,15 +325,15 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 <div className="premium-cards-grid">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="premium-skeleton-card">
-                            <div className="skeleton-line" style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 12 }} />
-                            <div className="skeleton-line" style={{ width: '40%', height: 20, marginBottom: 8 }} />
-                            <div className="skeleton-line" style={{ width: '30%', height: 32, marginBottom: 16 }} />
-                            <div className="skeleton-text-block" style={{ gap: 8, marginBottom: 16 }}>
-                                {[1, 2, 3, 4, 5].map((j) => (
-                                    <div key={j} className="skeleton-line" style={{ width: `${60 + j * 5}%`, height: 14 }} />
+                            <div className="skeleton-line" style={{ width: 40, height: 40, borderRadius: 10, marginBottom: 8 }} />
+                            <div className="skeleton-line" style={{ width: '35%', height: 16, marginBottom: 6 }} />
+                            <div className="skeleton-line" style={{ width: '40%', height: 22, marginBottom: 10 }} />
+                            <div className="skeleton-text-block" style={{ gap: 6, marginBottom: 12 }}>
+                                {[1, 2, 3, 4].map((j) => (
+                                    <div key={j} className="skeleton-line" style={{ width: `${60 + j * 5}%`, height: 10 }} />
                                 ))}
                             </div>
-                            <div className="skeleton-line" style={{ width: '100%', height: 40, borderRadius: 8 }} />
+                            <div className="skeleton-line" style={{ width: '100%', height: 32, borderRadius: 8 }} />
                         </div>
                     ))}
                 </div>

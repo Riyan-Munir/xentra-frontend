@@ -1045,8 +1045,8 @@ input[type="radio"]:focus {
   }
 }
 
-/* Premium Golden Theme — Production Enhanced */
-.premium-card {
+/* Premium Golden Theme — Production Enhanced (Pro cards only) */
+.premium-card:not(.premium-card-free) {
   background: linear-gradient(145deg, rgba(12, 12, 12, 0.97), rgba(22, 22, 22, 0.93), rgba(18, 18, 18, 0.95)) !important;
   border: 1.5px solid rgba(255, 215, 0, 0.45) !important;
   box-shadow:
@@ -1059,7 +1059,7 @@ input[type="radio"]:focus {
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-.premium-card:hover {
+.premium-card:not(.premium-card-free):hover {
   border-color: rgba(255, 215, 0, 0.6) !important;
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.65),
@@ -1068,14 +1068,14 @@ input[type="radio"]:focus {
 }
 
 /* Reconcile inner containers to prevent "double box" look in premium mode */
-.premium-card .scrollable-content-card {
+.premium-card:not(.premium-card-free) .scrollable-content-card {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
-/* Multi-layer shine sweep */
-.premium-card::before {
+/* Multi-layer shine sweep — Pro cards only */
+.premium-card:not(.premium-card-free)::before {
   content: '';
   position: absolute;
   top: -100%;
@@ -1093,8 +1093,8 @@ input[type="radio"]:focus {
   pointer-events: none;
 }
 
-/* Edge glow accent on top-left corner */
-.premium-card::after {
+/* Edge glow accent on top-left corner — Pro cards only */
+.premium-card:not(.premium-card-free)::after {
   content: '';
   position: absolute;
   top: -2px;
@@ -5198,11 +5198,16 @@ input[type="radio"]:focus {
 }
 
 .premium-card-free {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
   opacity: 0.85;
 }
 
 .premium-card-free:hover {
   transform: none;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
 }
 
 /* ── Skeleton Card (no premium effects) ────────────────────────── */
@@ -5210,9 +5215,9 @@ input[type="radio"]:focus {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px;
+  padding: 20px;
   border-radius: 16px;
-  min-height: 240px;
+  min-height: 160px;
   min-width: 0;
   border: 1px solid var(--border);
   background: var(--bg-card);

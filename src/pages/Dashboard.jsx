@@ -525,44 +525,41 @@ const chatroomsSkeleton = () => (
 
 /** Returns the correct constant skeleton for the given section and role */
 const premiumSkeleton = () => (
-  <div className="skeleton-section-scroll">
-    <div className="skeleton-card" style={{ padding: 20 }}>
-      {/* Header skeleton */}
-      <div className="flex-between mb-16">
-        <div className="flex-row items-center gap-8">
-          <div className="skeleton-line" style={{ width: 20, height: 20, borderRadius: 6 }} />
-          <div className="skeleton-line" style={{ width: 100, height: 18, borderRadius: 4 }} />
+  <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar skeleton-section-scroll">
+
+    {/* Header — matches other section skeletons (no icon, single title line + button) */}
+    <div className="flex-between flex-shrink-0">
+      <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />
+      <div className="skeleton-line skel-w-90 skel-h-28 skel-r-8" />
+    </div>
+
+    {/* Cards grid skeleton — shorter than real cards, no premium styles */}
+    <div className="premium-cards-grid">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="premium-skeleton-card">
+          <div className="skeleton-line" style={{ width: 40, height: 40, borderRadius: 10, marginBottom: 8 }} />
+          <div className="skeleton-line" style={{ width: '35%', height: 16, marginBottom: 6 }} />
+          <div className="skeleton-line" style={{ width: '40%', height: 22, marginBottom: 10 }} />
+          <div className="skeleton-text-block" style={{ gap: 6, marginBottom: 12 }}>
+            {[1, 2, 3, 4].map((j) => (
+              <div key={j} className="skeleton-line" style={{ width: `${60 + j * 5}%`, height: 10 }} />
+            ))}
+          </div>
+          <div className="skeleton-line" style={{ width: '100%', height: 32, borderRadius: 8 }} />
         </div>
-        <div className="skeleton-line" style={{ width: 90, height: 34, borderRadius: 8 }} />
-      </div>
-      {/* Cards grid skeleton */}
-      <div className="premium-cards-grid" style={{ marginBottom: 20 }}>
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="premium-skeleton-card" style={{ minHeight: 0 }}>
-            <div className="skeleton-line" style={{ width: 48, height: 48, borderRadius: 12, marginBottom: 12 }} />
-            <div className="skeleton-line" style={{ width: '40%', height: 20, marginBottom: 8 }} />
-            <div className="skeleton-line" style={{ width: '25%', height: 14, marginBottom: 12 }} />
-            <div className="skeleton-line" style={{ width: '50%', height: 28, marginBottom: 16 }} />
-            <div className="skeleton-text-block" style={{ gap: 8, marginBottom: 16 }}>
-              {[1, 2, 3, 4, 5].map((j) => (
-                <div key={j} className="skeleton-line" style={{ width: `${55 + j * 5}%`, height: 12 }} />
-              ))}
-            </div>
-            <div className="skeleton-line" style={{ width: '100%', height: 38, borderRadius: 8 }} />
-          </div>
-        ))}
-      </div>
-      {/* Chart skeleton */}
-      <div className="skeleton-card" style={{ padding: 16 }}>
-        <div className="skeleton-line" style={{ width: 140, height: 16, marginBottom: 16 }} />
-        {[1, 2, 3, 4, 5, 6].map((j) => (
-          <div key={j} className="flex-between mb-8">
-            <div className="skeleton-line" style={{ width: '50%', height: 14 }} />
-            <div className="skeleton-line" style={{ width: 24, height: 14, borderRadius: 4 }} />
-            <div className="skeleton-line" style={{ width: 24, height: 14, borderRadius: 4 }} />
-          </div>
-        ))}
-      </div>
+      ))}
+    </div>
+
+    {/* Chart skeleton */}
+    <div className="skeleton-card" style={{ padding: 16 }}>
+      <div className="skeleton-line skel-w-160 skel-h-16 mb-16" />
+      {[1, 2, 3, 4, 5, 6].map((j) => (
+        <div key={j} className="flex-between mb-8">
+          <div className="skeleton-line" style={{ width: '50%', height: 14 }} />
+          <div className="skeleton-line" style={{ width: 24, height: 14, borderRadius: 4 }} />
+          <div className="skeleton-line" style={{ width: 24, height: 14, borderRadius: 4 }} />
+        </div>
+      ))}
     </div>
   </div>
 );
