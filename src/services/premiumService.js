@@ -23,38 +23,6 @@ const premiumService = {
     }),
 
     /**
-     * List user's premium payments with pagination.
-     */
-    getPayments: (params = {}) => api.get('/premium/payments/', { params }),
-
-    /**
-     * Get a specific payment detail.
-     */
-    getPayment: (paymentId) => api.get(`/premium/payments/${paymentId}/`),
-
-    /**
-     * Submit a tx_hash for blockchain verification.
-     */
-    verifyPayment: (paymentId, txHash) => api.post(`/premium/payments/${paymentId}/verify/`, {
-        tx_hash: txHash,
-    }),
-
-    /**
-     * Cancel a pending payment.
-     */
-    cancelPayment: (paymentId) => api.delete(`/premium/payments/${paymentId}/cancel/`),
-
-    /**
-     * Get sent gifts history.
-     */
-    getGiftsSent: () => api.get('/premium/gifts/sent/'),
-
-    /**
-     * Get received gifts history.
-     */
-    getGiftsReceived: () => api.get('/premium/gifts/received/'),
-
-    /**
      * Search for a user by Discord username (for gifting).
      */
     searchGiftUser: (username) => api.get('/premium/gifts/search/', {
