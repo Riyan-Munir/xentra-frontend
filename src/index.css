@@ -5186,6 +5186,8 @@ input[type="radio"]:focus {
   transition: transform 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
   min-width: 0;
+  min-height: 420px;
+  max-height: 480px;
 }
 
 .premium-card:hover {
@@ -5217,7 +5219,8 @@ input[type="radio"]:focus {
   gap: 16px;
   padding: 20px;
   border-radius: 16px;
-  min-height: 160px;
+  min-height: 380px;
+  max-height: 420px;
   min-width: 0;
   border: 1px solid var(--border);
   background: var(--bg-card);
@@ -5342,6 +5345,8 @@ input[type="radio"]:focus {
   flex-direction: column;
   gap: 8px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -5384,6 +5389,10 @@ input[type="radio"]:focus {
   border-radius: 16px;
   padding: 20px;
   overflow: hidden;
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 320px;
+  max-height: 380px;
 }
 
 .premium-chart-header {
@@ -5396,7 +5405,9 @@ input[type="radio"]:focus {
   gap: 0;
   border: 1px solid var(--border);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-y: auto;
+  width: 100%;
+  max-height: 100%;
 }
 
 .premium-chart-row {
@@ -5431,7 +5442,9 @@ input[type="radio"]:focus {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.premium-chart-cell:last-child {
+/* Last row: remove bottom border from all cells so the table doesn't have
+   a double border with the container's border-radius clipping. */
+.premium-chart-row:last-child .premium-chart-cell {
   border-bottom: none;
 }
 
@@ -5650,6 +5663,21 @@ input[type="radio"]:focus {
     justify-self: center;
   }
 
+  .premium-card {
+    min-height: 380px;
+    max-height: 440px;
+  }
+
+  .premium-skeleton-card {
+    min-height: 350px;
+    max-height: 400px;
+  }
+
+  .premium-chart-container {
+    min-height: 300px;
+    max-height: 360px;
+  }
+
   .premium-chart-row {
     grid-template-columns: 1fr 80px 80px;
   }
@@ -5670,6 +5698,18 @@ input[type="radio"]:focus {
 
   .premium-card {
     padding: 20px;
+    min-height: 340px;
+    max-height: 400px;
+  }
+
+  .premium-skeleton-card {
+    min-height: 310px;
+    max-height: 360px;
+  }
+
+  .premium-chart-container {
+    min-height: 280px;
+    max-height: 340px;
   }
 
   .premium-chart-row {
@@ -5700,6 +5740,21 @@ input[type="radio"]:focus {
   .premium-gift-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .premium-card {
+    min-height: 300px;
+    max-height: 360px;
+  }
+
+  .premium-skeleton-card {
+    min-height: 280px;
+    max-height: 330px;
+  }
+
+  .premium-chart-container {
+    min-height: 260px;
+    max-height: 320px;
   }
 
   .premium-chart-row {

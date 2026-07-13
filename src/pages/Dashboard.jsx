@@ -550,8 +550,8 @@ const premiumSkeleton = () => (
       ))}
     </div>
 
-    {/* Chart skeleton */}
-    <div className="skeleton-card" style={{ padding: 16 }}>
+    {/* Chart skeleton — matches premium-chart-container fixed height */}
+    <div className="skeleton-card" style={{ minHeight: 320, maxHeight: 380, padding: 16 }}>
       <div className="skeleton-line skel-w-160 skel-h-16 mb-16" />
       {[1, 2, 3, 4, 5, 6].map((j) => (
         <div key={j} className="flex-between mb-8">
