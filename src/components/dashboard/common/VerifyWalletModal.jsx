@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Shield, X, AlertTriangle, ExternalLink, Plug, Smartphone } from 'lucide-react';
+import { Shield, X, AlertTriangle, ExternalLink, Plug, Smartphone, Info } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import walletService from '../../../services/walletService';
 import {
@@ -353,10 +353,9 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
             setWalletDisconnected(true);
             setWrongChain(false);
             setChainMessage('');
-            addNotification?.('Wallet disconnected. Reconnect to verify.', 'info');
         });
         return unsub;
-    }, [isOpen, isWalletConnectWallet, addNotification]);
+    }, [isOpen, isWalletConnectWallet]);
 
     // Listen for WalletConnect chain changes
     useEffect(() => {
@@ -558,6 +557,14 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
                     <Shield size={22} />
                     Verify Wallet Ownership
                 </h3>
+
+                {/* Always-visible info box */}
+                <div className="glass flex-row items-center gap-12 p-12 bg-primary-5 border-primary-light flex-shrink-0">
+                    <Info size={16} className="primary-text flex-shrink-0" />
+                    <p className="text-sm text-dim lh-1">
+                        Connect your wallet and sign the challenge message to prove ownership. Make sure you are on BSC Mainnet.
+                    </p>
+                </div>
 
                 {/* Wallet address display */}
                 <div
