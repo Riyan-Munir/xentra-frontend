@@ -5557,6 +5557,7 @@ input[type="radio"]:focus {
   padding: 8px 16px;
   gap: 6px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── Gift Modal ─────────────────────────────────────────────────── */
@@ -5823,13 +5824,14 @@ input[type="radio"]:focus {
 
 @media (max-width: 480px) {
   .premium-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .premium-gift-btn {
-    width: 100%;
-    justify-content: center;
+    flex-shrink: 0;
   }
 
   .premium-card {

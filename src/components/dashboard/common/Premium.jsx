@@ -134,10 +134,12 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                             <span className="premium-card-price-original">{formatPrice(plan.price)}</span>
                             <span className="premium-discount-badge">-{plan.discount_percent}%</span>
                         </div>
-                        <span className="premium-card-price">{formatPrice(plan.discounted_price)}</span>
-                        <span className="premium-card-price-period">
-                            /{plan.billing_interval === 'yearly' ? 'year' : 'month'}
-                        </span>
+                        <div className="premium-card-price-row">
+                            <span className="premium-card-price">{formatPrice(plan.discounted_price)}</span>
+                            <span className="premium-card-price-period">
+                                /{plan.billing_interval === 'yearly' ? 'year' : 'month'}
+                            </span>
+                        </div>
                     </div>
                 ) : (
                     <div className="premium-card-price-row">
