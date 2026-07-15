@@ -325,15 +325,16 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 <div className="premium-cards-grid">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="premium-skeleton-card">
-                            <div className="skeleton-line" style={{ width: 40, height: 40, borderRadius: 10, marginBottom: 8 }} />
-                            <div className="skeleton-line" style={{ width: '35%', height: 16, marginBottom: 6 }} />
-                            <div className="skeleton-line" style={{ width: '40%', height: 22, marginBottom: 10 }} />
-                            <div className="skeleton-text-block" style={{ gap: 6, marginBottom: 12 }}>
-                                {[1, 2, 3, 4].map((j) => (
-                                    <div key={j} className="skeleton-line" style={{ width: `${60 + j * 5}%`, height: 10 }} />
-                                ))}
+                            <div className="skeleton-line skel-w-40-icon mb-8" />
+                            <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
+                            <div className="skeleton-line skel-w-40pct skel-h-22 mb-10" />
+                            <div className="skeleton-text-block mb-12 gap-6">
+                                <div className="skeleton-line skel-w-65pct skel-h-10" />
+                                <div className="skeleton-line skel-w-70pct skel-h-10" />
+                                <div className="skeleton-line skel-w-75pct skel-h-10" />
+                                <div className="skeleton-line skel-w-80pct skel-h-10" />
                             </div>
-                            <div className="skeleton-line" style={{ width: '100%', height: 32, borderRadius: 8 }} />
+                            <div className="skeleton-line skel-w-full skel-h-32 skel-r-8" />
                         </div>
                     ))}
                 </div>

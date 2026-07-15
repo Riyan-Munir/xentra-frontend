@@ -3496,6 +3496,18 @@ input[type="radio"]:focus {
   height: 14px;
 }
 
+.skel-h-10 {
+  height: 10px;
+}
+
+.skel-h-22 {
+  height: 22px;
+}
+
+.skel-h-40 {
+  height: 40px;
+}
+
 .skel-h-12 {
   height: 12px;
 }
@@ -3508,16 +3520,28 @@ input[type="radio"]:focus {
   width: 60%;
 }
 
+.skel-w-65pct {
+  width: 65%;
+}
+
 .skel-w-70pct {
   width: 70%;
 }
 
-.skel-w-45pct {
-  width: 45%;
+.skel-w-75pct {
+  width: 75%;
 }
 
-.skel-w-90pct {
-  width: 90%;
+.skel-w-80pct {
+  width: 80%;
+}
+
+.skel-w-50pct {
+  width: 50%;
+}
+
+.skel-w-45pct {
+  width: 45%;
 }
 
 .skel-w-40pct {
@@ -3528,12 +3552,30 @@ input[type="radio"]:focus {
   width: 35%;
 }
 
+.skel-w-90pct {
+  width: 90%;
+}
+
+.skel-w-24 {
+  width: 24px;
+}
+
 .skel-w-full {
   width: 100%;
 }
 
+.skel-w-40-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
 .skel-w-160 {
   width: 160px;
+}
+
+.skel-w-90 {
+  width: 90px;
 }
 
 .skel-w-140 {
@@ -3566,6 +3608,14 @@ input[type="radio"]:focus {
 
 .skel-w-40 {
   width: 40px;
+}
+
+.skel-w-35pct {
+  width: 35%;
+}
+
+.skel-w-40pct {
+  width: 40%;
 }
 
 .skel-r-8 {
@@ -4997,8 +5047,15 @@ input[type="radio"]:focus {
 }
 
 @keyframes popupFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card-expand-popup .popup-item {
@@ -5009,7 +5066,7 @@ input[type="radio"]:focus {
   padding: 4px 0;
 }
 
-.card-expand-popup .popup-item + .popup-item {
+.card-expand-popup .popup-item+.popup-item {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -5347,9 +5404,15 @@ input[type="radio"]:focus {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.premium-card-benefits::-webkit-scrollbar {
+  display: none !important;
 }
 
 .premium-card-benefit-item {
@@ -5386,6 +5449,8 @@ input[type="radio"]:focus {
 
 /* ── Benefits Comparison Chart ──────────────────────────────────── */
 .premium-chart-container {
+  display: flex;
+  flex-direction: column;
   border-radius: 16px;
   padding: 20px;
   overflow: hidden;
@@ -5405,9 +5470,15 @@ input[type="radio"]:focus {
   gap: 0;
   border: 1px solid var(--border);
   border-radius: 12px;
+  flex: 1;
   overflow-y: auto;
   width: 100%;
-  max-height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.premium-chart-table::-webkit-scrollbar {
+  display: none;
 }
 
 .premium-chart-row {
@@ -5457,6 +5528,19 @@ input[type="radio"]:focus {
   background: rgba(99, 102, 241, 0.03);
 }
 
+/* ── Chart Skeleton (matches premium-chart-container dimensions, zero inline styles) ─── */
+.premium-chart-skeleton {
+  min-height: 320px;
+  max-height: 380px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* ── Gift Button ────────────────────────────────────────────────── */
 .premium-gift-btn {
   padding: 8px 16px;
@@ -5485,6 +5569,7 @@ input[type="radio"]:focus {
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
