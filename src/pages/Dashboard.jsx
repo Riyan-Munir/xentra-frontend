@@ -533,19 +533,20 @@ const premiumSkeleton = () => (
       <div className="skeleton-line skel-w-90 skel-h-28 skel-r-8" />
     </div>
 
-    {/* Cards grid skeleton — shorter than real cards, no premium styles */}
+    {/* Cards grid skeleton — matches real card layout: icon, tier, price, 4 benefits, view-all, button */}
     <div className="premium-cards-grid">
       {[1, 2, 3].map((i) => (
         <div key={i} className="premium-skeleton-card">
           <div className="skeleton-line skel-w-40-icon mb-8" />
           <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
           <div className="skeleton-line skel-w-40pct skel-h-22 mb-10" />
-          <div className="skeleton-text-block mb-12 gap-6">
+          <div className="skeleton-text-block mb-8 gap-6">
             <div className="skeleton-line skel-w-65pct skel-h-10" />
             <div className="skeleton-line skel-w-70pct skel-h-10" />
             <div className="skeleton-line skel-w-75pct skel-h-10" />
             <div className="skeleton-line skel-w-80pct skel-h-10" />
           </div>
+          <div className="skeleton-line skel-w-50pct skel-h-10 mb-8" />
           <div className="skeleton-line skel-w-full skel-h-32 skel-r-8" />
         </div>
       ))}

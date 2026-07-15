@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import {
     Crown,
     Gift,
@@ -20,6 +20,7 @@ import {
     Lock,
     Search,
     ChevronRight,
+    ChevronDown,
     AlertCircle,
     CheckCircle,
     Loader2,
@@ -48,22 +49,17 @@ const CLIENT_BENEFITS = [
     { label: 'Custom premium display ID', free: false, pro: true, icon: UserCheck },
 ];
 
-/* ── Card benefit lists (shorter, for cards) ─────────────────────── */
+/* ── Card benefit lists (top 4 most powerful, for cards) ────────── */
 const FREELANCER_CARD_BENEFITS = [
     '6 applications / week',
-    '6 portfolio items',
-    '12 skill tags',
-    '12 technologies / project',
     'Chat rooms access',
-    'Custom premium ID',
     'Enhanced job visibility',
+    'Custom premium ID',
 ];
 
 const CLIENT_CARD_BENEFITS = [
     '6 jobs / week',
     'Featured listings',
-    'Confidential listings',
-    'Strict eligibility control',
     'Chat rooms access',
     'Custom premium ID',
 ];
@@ -93,7 +89,7 @@ const BenefitCell = ({ value }) => {
 };
 
 /* ── Pricing Card ────────────────────────────────────────────────── */
-const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending }) => {
+const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, onViewAllBenefits }) => {
     const isFree = !plan || plan.tier === 'free';
     const hasDiscount = !isFree && plan?.discount_percent > 0 && plan?.discounted_price;
     const cardBenefits = isFreelancer ? FREELANCER_CARD_BENEFITS : CLIENT_CARD_BENEFITS;
@@ -163,6 +159,14 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending }
                 ))}
             </ul>
 
+            {/* View All Benefits link */}
+            {onViewAllBenefits && (
+                <button className="premium-card-view-all" onClick={onViewAllBenefits}>
+                    <span>View All Benefits</span>
+                    <ChevronDown size={14} />
+                </button>
+            )}
+
             {/* Action */}
             <div className="premium-card-action">
                 {isFree ? (
@@ -203,6 +207,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const [loading, setLoading] = useState(true);
     const [showGiftModal, setShowGiftModal] = useState(false);
     const [extending, setExtending] = useState(false);
+    const chartRef = useRef(null);
 
     const isFreelancer = currentRole === 'freelancer';
     const benefits = isFreelancer ? FREELANCER_BENEFITS : CLIENT_BENEFITS;
@@ -277,6 +282,11 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const expiryDate = activeSub?.expires_at;
     const daysLeft = daysUntil(expiryDate);
 
+    /* Scroll to benefits chart */
+    const scrollToChart = useCallback(() => {
+        chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, []);
+
     return (
         <div className="premium-section fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar">
             {/* Header */}
@@ -328,12 +338,13 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                             <div className="skeleton-line skel-w-40-icon mb-8" />
                             <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
                             <div className="skeleton-line skel-w-40pct skel-h-22 mb-10" />
-                            <div className="skeleton-text-block mb-12 gap-6">
+                            <div className="skeleton-text-block mb-8 gap-6">
                                 <div className="skeleton-line skel-w-65pct skel-h-10" />
                                 <div className="skeleton-line skel-w-70pct skel-h-10" />
                                 <div className="skeleton-line skel-w-75pct skel-h-10" />
                                 <div className="skeleton-line skel-w-80pct skel-h-10" />
                             </div>
+                            <div className="skeleton-line skel-w-50pct skel-h-10 mb-8" />
                             <div className="skeleton-line skel-w-full skel-h-32 skel-r-8" />
                         </div>
                     ))}
@@ -346,6 +357,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         isFreelancer={isFreelancer}
                         onSelect={handleSelectPlan}
                         extending={extending}
+                        onViewAllBenefits={scrollToChart}
                     />
                     <PricingCard
                         plan={monthlyPlan}
@@ -353,6 +365,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         isFreelancer={isFreelancer}
                         onSelect={handleSelectPlan}
                         extending={extending}
+                        onViewAllBenefits={scrollToChart}
                     />
                     <PricingCard
                         plan={yearlyPlan}
@@ -360,13 +373,14 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         isFreelancer={isFreelancer}
                         onSelect={handleSelectPlan}
                         extending={extending}
+                        onViewAllBenefits={scrollToChart}
                     />
                 </div>
             )}
 
             {/* Benefits Comparison Chart */}
             {!loading && (
-                <div className="premium-chart-container glass">
+                <div id="premium-benefits-chart" ref={chartRef} className="premium-chart-container glass">
                     <div className="premium-chart-header">
                         <h3 className="text-0\875rem text-white font-semibold">
                             Benefits Comparison
