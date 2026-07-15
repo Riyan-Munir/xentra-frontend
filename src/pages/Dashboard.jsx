@@ -10,7 +10,7 @@ import RoleSwitcher from '../components/dashboard/common/RoleSwitcher';
 import Skeleton from '../components/common/Skeleton';
 import CaptchaChallenge from '../components/dashboard/common/CaptchaChallenge';
 
-// Lazy-loaded section components, each is a separate chunk loaded on demand
+// Lazy-loaded section component, each is a separate chunk loaded on demand
 const ClientOverview = lazy(() => import('../components/dashboard/client/Overview'));
 const ClientSettings = lazy(() => import('../components/dashboard/client/ProfileSettings'));
 const ClientJobs = lazy(() => import('../components/dashboard/client/Jobs'));
