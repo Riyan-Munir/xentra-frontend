@@ -20,15 +20,18 @@ import {
     Lock,
     Search,
     ChevronRight,
-    ChevronDown,
     AlertCircle,
     CheckCircle,
     Loader2,
     ExternalLink,
+    ChevronDown,
+    Trash2,
+    DollarSign,
+    Repeat,
 } from 'lucide-react';
 import premiumService from '../../../services/premiumService';
 
-/* ── Benefit definitions per role ────────────────────────────────── */
+/* ── Benefit definitions per role (for comparison chart) ─────────── */
 const FREELANCER_BENEFITS = [
     { label: 'Applications / week', free: '3', pro: '6', icon: Briefcase },
     { label: 'Portfolio items', free: '3', pro: '6', icon: FolderOpen },
@@ -49,24 +52,45 @@ const CLIENT_BENEFITS = [
     { label: 'Custom premium display ID', free: false, pro: true, icon: UserCheck },
 ];
 
-/* ── Card benefit lists (top 4 most powerful, for cards) ────────── */
-const FREELANCER_CARD_BENEFITS = [
+/* ── Card benefit lists — Free tier (top 4, for free card) ───────── */
+const FREELANCER_FREE_CARD_BENEFITS = [
+    '3 applications / week',
+    '3 portfolio items',
+    '6 skill tags',
+    'Basic search visibility',
+];
+
+const CLIENT_FREE_CARD_BENEFITS = [
+    '3 job postings / week',
+    'Standard listings',
+    'Basic eligibility control',
+    'Standard search visibility',
+];
+
+/* ── Card benefit lists — Pro tier (top 4, for pro card) ─────────── */
+const FREELANCER_PRO_CARD_BENEFITS = [
     '6 applications / week',
     'Chat rooms access',
     'Enhanced job visibility',
     'Custom premium ID',
 ];
 
-const CLIENT_CARD_BENEFITS = [
-    '6 jobs / week',
+const CLIENT_PRO_CARD_BENEFITS = [
+    '6 job postings / week',
     'Featured listings',
     'Chat rooms access',
     'Custom premium ID',
 ];
 
+/* ── Tier string mapping for plan filtering ──────────────────────── */
+const TIER_MAP = {
+    freelancer: 'freelancer_premium',
+    client: 'client_premium',
+};
+
 /* ── Helper: format price ────────────────────────────────────────── */
 const formatPrice = (price) => {
-    if (!price && price !== 0) return '—';
+    if (price === null || price === undefined) return '—';
     return `$${Number(price).toFixed(2)}`;
 };
 
@@ -89,10 +113,13 @@ const BenefitCell = ({ value }) => {
 };
 
 /* ── Pricing Card ────────────────────────────────────────────────── */
-const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, onViewAllBenefits }) => {
+const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, onViewAllBenefits, hasTimeLeft }) => {
     const isFree = !plan || plan.tier === 'free';
+    const effectivePrice = plan?.effective_price ?? plan?.price ?? 0;
     const hasDiscount = !isFree && plan?.discount_percent > 0 && plan?.discounted_price;
-    const cardBenefits = isFreelancer ? FREELANCER_CARD_BENEFITS : CLIENT_CARD_BENEFITS;
+    const cardBenefits = isFree
+        ? (isFreelancer ? FREELANCER_FREE_CARD_BENEFITS : CLIENT_FREE_CARD_BENEFITS)
+        : (isFreelancer ? FREELANCER_PRO_CARD_BENEFITS : CLIENT_PRO_CARD_BENEFITS);
 
     return (
         <div className={`premium-card ${isFree ? 'premium-card-free' : 'glass'} ${isCurrent ? 'premium-card-active' : ''}`}>
@@ -135,7 +162,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                             <span className="premium-discount-badge">-{plan.discount_percent}%</span>
                         </div>
                         <div className="premium-card-price-row">
-                            <span className="premium-card-price">{formatPrice(plan.discounted_price)}</span>
+                            <span className="premium-card-price">{formatPrice(effectivePrice)}</span>
                             <span className="premium-card-price-period">
                                 /{plan.billing_interval === 'yearly' ? 'year' : 'month'}
                             </span>
@@ -143,7 +170,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                     </div>
                 ) : (
                     <div className="premium-card-price-row">
-                        <span className="premium-card-price">{formatPrice(plan?.price)}</span>
+                        <span className="premium-card-price">{formatPrice(effectivePrice)}</span>
                         <span className="premium-card-price-period">
                             /{plan?.billing_interval === 'yearly' ? 'year' : 'month'}
                         </span>
@@ -176,7 +203,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                         <CheckCircle size={16} className="primary-text" />
                         <span className="text-sm primary-text">Free Forever</span>
                     </div>
-                ) : isCurrent ? (
+                ) : isCurrent || hasTimeLeft ? (
                     <button
                         className="btn btn-secondary premium-btn-extend"
                         onClick={() => onSelect(plan, true)}
@@ -192,7 +219,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                         disabled={extending}
                     >
                         <Crown size={16} />
-                        Subscribe
+                        {extending ? 'Switching…' : 'Subscribe'}
                         <ArrowRight size={14} />
                     </button>
                 )}
@@ -201,6 +228,54 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
     );
 });
 PricingCard.displayName = 'PricingCard';
+
+/* ── Pending Payment Banner ──────────────────────────────────────── */
+const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => {
+    if (!payment) return null;
+
+    const isGift = payment.payment_type === 'gift';
+    const createdAt = payment.created_at
+        ? new Date(payment.created_at).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'short', day: 'numeric',
+        })
+        : '';
+
+    return (
+        <div className="glass flex-row items-center gap-12 p-12 bg-warning-5 border-warning-light premium-pending-banner">
+            <AlertCircle size={16} className="warning-text flex-shrink-0" />
+            <div className="flex-col gap-2 flex-1 min-w-0">
+                <p className="text-sm text-white font-medium">
+                    {isGift ? 'Gift payment initiated' : 'Payment initiated'} —{' '}
+                    <span className="text-dim">{payment.payment_id}</span>
+                </p>
+                <p className="text-xs text-dim">
+                    {formatPrice(payment.amount)} USDT{createdAt ? ` · ${createdAt}` : ''}
+                    {isGift && payment.payment_id && ' · Gift'}
+                </p>
+            </div>
+            <div className="flex-row items-center gap-8 flex-shrink-0">
+                <button
+                    className="btn btn-secondary text-xs"
+                    onClick={() => onPay(payment)}
+                    disabled={cancelling}
+                    title="Pay now (dummy — no payment page yet)"
+                >
+                    <DollarSign size={14} />
+                    Pay
+                </button>
+                <button
+                    className="btn btn-secondary text-xs"
+                    onClick={() => onCancel(payment)}
+                    disabled={cancelling}
+                >
+                    {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                    Cancel
+                </button>
+            </div>
+        </div>
+    );
+});
+PendingPaymentBanner.displayName = 'PendingPaymentBanner';
 
 /* ── Main Premium Component ──────────────────────────────────────── */
 const Premium = ({ profile, currentRole, addNotification }) => {
@@ -211,6 +286,14 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const [extending, setExtending] = useState(false);
     const chartRef = useRef(null);
 
+    /* ── Pending payment state (Fix 3) ───────────────────────────── */
+    const [pendingPayment, setPendingPayment] = useState(null);
+    const [pendingGiftPayment, setPendingGiftPayment] = useState(null);
+    const [cancellingId, setCancellingId] = useState(null);
+
+    /* ── Interval switch state (Switch Button feature) ───────────── */
+    const [preferredInterval, setPreferredInterval] = useState(null);
+
     const isFreelancer = currentRole === 'freelancer';
     const benefits = isFreelancer ? FREELANCER_BENEFITS : CLIENT_BENEFITS;
 
@@ -218,12 +301,24 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const [plansRes, activeRes] = await Promise.all([
+            const [plansRes, activeRes, paymentsRes] = await Promise.all([
                 premiumService.getPlans(),
                 premiumService.getActive(),
+                premiumService.getPayments({ page_size: 50 }),
             ]);
             setPlans(plansRes.data?.plans || []);
             setActiveSub(activeRes.data || {});
+
+            /* Find pending payments for this role profile */
+            const allPayments = paymentsRes.data?.results || [];
+            const pending = allPayments.find(
+                (p) => p.status === 'pending' && p.payment_type === 'subscription'
+            );
+            const pendingGift = allPayments.find(
+                (p) => p.status === 'pending' && p.payment_type === 'gift'
+            );
+            setPendingPayment(pending || null);
+            setPendingGiftPayment(pendingGift || null);
         } catch (err) {
             addNotification?.('Failed to load subscription plans.', 'error');
         } finally {
@@ -239,19 +334,39 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const isPremium = activeSub?.has_active_premium || false;
     const activeInterval = activeSub?.billing_interval || null;
 
-    /* Split plans into free + pro */
+    /* Split plans into free + pro — filter by tier matching current role */
     const freePlan = { tier: 'free', price: 0 };
+    const activeTier = isFreelancer ? TIER_MAP.freelancer : TIER_MAP.client;
     const monthlyPlan = plans.find(
-        (p) => p.billing_interval === 'monthly' && p.is_active
+        (p) => p.billing_interval === 'monthly' && p.tier === activeTier && p.is_active
     );
     const yearlyPlan = plans.find(
-        (p) => p.billing_interval === 'yearly' && p.is_active
+        (p) => p.billing_interval === 'yearly' && p.tier === activeTier && p.is_active
     );
 
-    /* Check if current plan matches */
-    const isMonthlyCurrent = isPremium && activeInterval === 'monthly';
-    const isYearlyCurrent = isPremium && activeInterval === 'yearly';
+    /* Check if current plan matches — uses preferredInterval override when user has both plans */
+    const displayInterval = preferredInterval ?? activeInterval;
+    const isMonthlyCurrent = isPremium && displayInterval === 'monthly';
+    const isYearlyCurrent = isPremium && displayInterval === 'yearly';
     const isFreeCurrent = !isPremium;
+
+    /* Show switch button only when user has time on both monthly AND yearly intervals */
+    const availableIntervals = activeSub?.available_intervals || [];
+    const hasBothIntervals = availableIntervals.includes('monthly') && availableIntervals.includes('yearly');
+
+    /* Per-card hasTimeLeft: show "Extend" even on non-current card if user has activated time for that interval */
+    const monthlyHasTime = availableIntervals.includes('monthly');
+    const yearlyHasTime = availableIntervals.includes('yearly');
+
+    /* Toggle between monthly/yearly display — stays within pro plans only */
+    const handleToggleInterval = useCallback(() => {
+        setPreferredInterval((prev) => {
+            if (prev === 'monthly') return 'yearly';
+            if (prev === 'yearly') return 'monthly';
+            // First toggle: switch away from the backend's activeInterval
+            return activeInterval === 'monthly' ? 'yearly' : 'monthly';
+        });
+    }, [activeInterval]);
 
     /* Handle subscribe / extend */
     const handleSelectPlan = useCallback(async (plan, isExtend) => {
@@ -271,13 +386,35 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     : 'Payment initiated. Complete payment to activate premium.',
                 'success'
             );
-            /* TODO: Navigate to payment page when implemented */
+            /* Refresh to show pending payment */
+            fetchData();
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create payment.';
             addNotification?.(msg, 'error');
         } finally {
             setExtending(false);
         }
+    }, [addNotification, fetchData]);
+
+    /* ── Cancel pending payment (Fix 3) ───────────────────────────── */
+    const handleCancelPayment = useCallback(async (payment) => {
+        if (!payment?.payment_id) return;
+        setCancellingId(payment.payment_id);
+        try {
+            await premiumService.cancelPayment(payment.payment_id);
+            addNotification?.('Payment cancelled.', 'success');
+            fetchData();
+        } catch (err) {
+            const msg = err?.response?.data?.error || 'Failed to cancel payment.';
+            addNotification?.(msg, 'error');
+        } finally {
+            setCancellingId(null);
+        }
+    }, [addNotification, fetchData]);
+
+    /* ── Pay pending payment (dummy for now) (Fix 3) ──────────────── */
+    const handlePayPayment = useCallback(async (payment) => {
+        addNotification?.('Payment page coming soon. (Dummy action)', 'info');
     }, [addNotification]);
 
     /* Expiry info */
@@ -305,13 +442,28 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         </p>
                     )}
                 </div>
-                <button
-                    className="btn btn-secondary premium-gift-btn"
-                    onClick={() => setShowGiftModal(true)}
-                >
-                    <Gift size={16} />
-                    <span className="text-sm">Gift Pro</span>
-                </button>
+                <div className="flex-row items-center gap-8 flex-shrink-0">
+                    {/* Switch button — only when user has both monthly + yearly time */}
+                    {isPremium && hasBothIntervals && (
+                        <button
+                            className="btn btn-secondary premium-switch-btn"
+                            onClick={handleToggleInterval}
+                            title={`Switch to ${displayInterval === 'monthly' ? 'Yearly' : 'Monthly'} plan`}
+                        >
+                            <Repeat size={14} />
+                            <span className="text-xs">
+                                {displayInterval === 'monthly' ? 'Switch to Yearly' : 'Switch to Monthly'}
+                            </span>
+                        </button>
+                    )}
+                    <button
+                        className="btn btn-secondary premium-gift-btn"
+                        onClick={() => setShowGiftModal(true)}
+                    >
+                        <Gift size={16} />
+                        <span className="text-sm">Gift Pro</span>
+                    </button>
+                </div>
             </div>
 
             {/* Active subscription banner */}
@@ -320,7 +472,8 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     <Sparkles size={16} className="primary-text flex-shrink-0" />
                     <div className="flex-col gap-2 flex-1">
                         <p className="text-sm text-white font-medium">
-                            You have an active Pro {activeInterval === 'yearly' ? 'Yearly' : 'Monthly'} subscription
+                            You have an active Pro {displayInterval === 'yearly' ? 'Yearly' : 'Monthly'} subscription
+                            {preferredInterval && ` (${activeInterval} plan paused)`}
                         </p>
                         <p className="text-xs text-dim">
                             Expires: {new Date(expiryDate).toLocaleDateString('en-US', {
@@ -332,22 +485,40 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 </div>
             )}
 
+            {/* Pending payment banners (Fix 3) — show regardless of premium status */}
+            {pendingPayment && (
+                <PendingPaymentBanner
+                    payment={pendingPayment}
+                    onCancel={handleCancelPayment}
+                    onPay={handlePayPayment}
+                    cancelling={cancellingId === pendingPayment.payment_id}
+                />
+            )}
+            {pendingGiftPayment && (
+                <PendingPaymentBanner
+                    payment={pendingGiftPayment}
+                    onCancel={handleCancelPayment}
+                    onPay={handlePayPayment}
+                    cancelling={cancellingId === pendingGiftPayment.payment_id}
+                />
+            )}
+
             {/* Pricing Cards */}
             {loading ? (
                 <div className="premium-cards-grid">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="premium-skeleton-card">
-                            <div className="skeleton-line skel-w-40-icon mb-8" />
+                            <div className="skeleton-line skel-w-40-icon skel-h-40 skel-r-12 mb-8" />
                             <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
-                            <div className="skeleton-line skel-w-40pct skel-h-22 mb-10" />
+                            <div className="skeleton-line skel-w-40pct skel-h-24 mb-10" />
                             <div className="skeleton-text-block mb-8 gap-6">
-                                <div className="skeleton-line skel-w-65pct skel-h-10" />
-                                <div className="skeleton-line skel-w-70pct skel-h-10" />
-                                <div className="skeleton-line skel-w-75pct skel-h-10" />
-                                <div className="skeleton-line skel-w-80pct skel-h-10" />
+                                <div className="skeleton-line skel-w-65pct skel-h-12" />
+                                <div className="skeleton-line skel-w-70pct skel-h-12" />
+                                <div className="skeleton-line skel-w-75pct skel-h-12" />
+                                <div className="skeleton-line skel-w-80pct skel-h-12" />
                             </div>
-                            <div className="skeleton-line skel-w-50pct skel-h-10 mb-8" />
-                            <div className="skeleton-line skel-w-full skel-h-32 skel-r-8" />
+                            <div className="skeleton-line skel-w-50pct skel-h-12 mb-8" />
+                            <div className="skeleton-line skel-w-full skel-h-36 skel-r-8" />
                         </div>
                     ))}
                 </div>
@@ -360,6 +531,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         onSelect={handleSelectPlan}
                         extending={extending}
                         onViewAllBenefits={scrollToChart}
+                        hasTimeLeft={false}
                     />
                     <PricingCard
                         plan={monthlyPlan}
@@ -368,6 +540,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         onSelect={handleSelectPlan}
                         extending={extending}
                         onViewAllBenefits={scrollToChart}
+                        hasTimeLeft={monthlyHasTime}
                     />
                     <PricingCard
                         plan={yearlyPlan}
@@ -376,6 +549,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         onSelect={handleSelectPlan}
                         extending={extending}
                         onViewAllBenefits={scrollToChart}
+                        hasTimeLeft={yearlyHasTime}
                     />
                 </div>
             )}
@@ -427,7 +601,10 @@ const Premium = ({ profile, currentRole, addNotification }) => {
             {showGiftModal && (
                 <PremiumGiftModal
                     isOpen={showGiftModal}
-                    onClose={() => setShowGiftModal(false)}
+                    onClose={() => {
+                        setShowGiftModal(false);
+                        fetchData(); /* Refresh to pick up gift pending payment */
+                    }}
                     plans={plans}
                     addNotification={addNotification}
                     isFreelancer={isFreelancer}
@@ -532,8 +709,19 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
 
     if (!isOpen) return null;
 
-    const monthlyPlan = plans.find((p) => p.billing_interval === 'monthly' && p.is_active);
-    const yearlyPlan = plans.find((p) => p.billing_interval === 'yearly' && p.is_active);
+    /* Filter gift plans by the selected profile's role tier */
+    const giftTier = selectedProfile?.role === 'freelancer' ? TIER_MAP.freelancer
+        : selectedProfile?.role === 'client' ? TIER_MAP.client
+            : null;
+    const monthlyPlan = giftTier
+        ? plans.find((p) => p.billing_interval === 'monthly' && p.tier === giftTier && p.is_active)
+        : plans.find((p) => p.billing_interval === 'monthly' && p.is_active);
+    const yearlyPlan = giftTier
+        ? plans.find((p) => p.billing_interval === 'yearly' && p.tier === giftTier && p.is_active)
+        : plans.find((p) => p.billing_interval === 'yearly' && p.is_active);
+
+    const giftMonthlyEffective = monthlyPlan?.effective_price ?? monthlyPlan?.price ?? 0;
+    const giftYearlyEffective = yearlyPlan?.effective_price ?? yearlyPlan?.price ?? 0;
 
     return (
         <div className="modal-overlay z-9999" onClick={onClose}>
@@ -599,12 +787,18 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                                     src={user.discord_avatar}
                                                     alt={user.discord_username}
                                                     className="premium-gift-avatar"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
                                                 />
-                                            ) : (
-                                                <div className="premium-gift-avatar premium-gift-avatar-placeholder">
-                                                    <span>{user.discord_username?.charAt(0)?.toUpperCase()}</span>
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            <div
+                                                className="premium-gift-avatar premium-gift-avatar-placeholder"
+                                                style={{ display: user.discord_avatar ? 'none' : 'flex' }}
+                                            >
+                                                <span>{user.discord_username?.charAt(0)?.toUpperCase()}</span>
+                                            </div>
                                             <div className="flex-col gap-2">
                                                 <span className="text-sm text-white font-medium">
                                                     {user.discord_username}
@@ -680,17 +874,18 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                                 <span className="premium-discount-badge text-xs">-{monthlyPlan.discount_percent}%</span>
                                             </div>
                                             <span className="text-lg text-white font-bold">
-                                                {formatPrice(monthlyPlan.discounted_price)}
+                                                {formatPrice(giftMonthlyEffective)}
                                             </span>
                                         </div>
                                     ) : (
                                         <span className="text-lg text-white font-bold">
-                                            {formatPrice(monthlyPlan.price)}
+                                            {formatPrice(giftMonthlyEffective)}
                                         </span>
                                     )}
                                     <span className="text-xs text-dim">/month</span>
+                                    {/* Spinner in top-right corner (Fix 5) */}
                                     {creating && selectedPlan?.id === monthlyPlan.id && (
-                                        <div className="premium-gift-plan-spinner">
+                                        <div className="premium-gift-plan-spinner-corner">
                                             <Loader2 size={16} className="primary-text animate-spin" />
                                         </div>
                                     )}
@@ -714,17 +909,18 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                                                 <span className="premium-discount-badge text-xs">-{yearlyPlan.discount_percent}%</span>
                                             </div>
                                             <span className="text-lg text-white font-bold">
-                                                {formatPrice(yearlyPlan.discounted_price)}
+                                                {formatPrice(giftYearlyEffective)}
                                             </span>
                                         </div>
                                     ) : (
                                         <span className="text-lg text-white font-bold">
-                                            {formatPrice(yearlyPlan.price)}
+                                            {formatPrice(giftYearlyEffective)}
                                         </span>
                                     )}
                                     <span className="text-xs text-dim">/year</span>
+                                    {/* Spinner in top-right corner (Fix 5) */}
                                     {creating && selectedPlan?.id === yearlyPlan.id && (
-                                        <div className="premium-gift-plan-spinner">
+                                        <div className="premium-gift-plan-spinner-corner">
                                             <Loader2 size={16} className="primary-text animate-spin" />
                                         </div>
                                     )}

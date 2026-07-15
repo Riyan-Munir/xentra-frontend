@@ -1753,6 +1753,10 @@ input[type="radio"]:focus {
   align-items: flex-start;
 }
 
+.gap-2 {
+  gap: 2px;
+}
+
 .gap-4 {
   gap: 4px;
 }
@@ -2547,6 +2551,10 @@ input[type="radio"]:focus {
 
 .minh-0 {
   min-height: 0;
+}
+
+.min-w-0 {
+  min-width: 0;
 }
 
 .cursor-default {
@@ -3508,6 +3516,10 @@ input[type="radio"]:focus {
   height: 40px;
 }
 
+.skel-h-36 {
+  height: 36px;
+}
+
 .skel-h-12 {
   height: 12px;
 }
@@ -3620,6 +3632,10 @@ input[type="radio"]:focus {
 
 .skel-r-8 {
   border-radius: 8px;
+}
+
+.skel-r-12 {
+  border-radius: 12px;
 }
 
 .skel-r-6 {
@@ -5225,6 +5241,30 @@ input[type="radio"]:focus {
   border-radius: 12px;
 }
 
+/* ── Pending Payment Banner ────────────────────────────────────── */
+.premium-pending-banner {
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .premium-pending-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .premium-pending-banner .flex-row.items-center.gap-8 {
+    justify-content: flex-end;
+  }
+}
+
+/* ── Striketrough price in gift modal ──────────────────────────── */
+.premium-price-strikethrough {
+  text-decoration: line-through;
+  text-decoration-color: var(--error);
+  text-decoration-thickness: 1.5px;
+}
+
 /* ── Pricing Cards Grid ─────────────────────────────────────────── */
 .premium-cards-grid {
   display: grid;
@@ -5243,6 +5283,8 @@ input[type="radio"]:focus {
   transition: transform 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   min-height: 380px;
 }
 
@@ -5277,6 +5319,8 @@ input[type="radio"]:focus {
   border-radius: 16px;
   min-height: 340px;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   border: 1px solid var(--border);
   background: var(--bg-card);
 }
@@ -5536,6 +5580,10 @@ input[type="radio"]:focus {
   gap: 8px;
 }
 
+.premium-chart-cell-tier {
+  gap: 6px;
+}
+
 .premium-chart-cell-pro {
   background: rgba(99, 102, 241, 0.03);
 }
@@ -5550,6 +5598,15 @@ input[type="radio"]:focus {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* ── Switch Button ──────────────────────────────────────────────── */
+.premium-switch-btn {
+  padding: 8px 12px;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.75rem;
 }
 
 /* ── Gift Button ────────────────────────────────────────────────── */
@@ -5733,7 +5790,17 @@ input[type="radio"]:focus {
   gap: 4px;
 }
 
-/* ── Gift Plan Card Loading Spinner ───────────────────────────── */
+/* ── Gift Plan Card Loading Spinner (top-right corner) ────────── */
+.premium-gift-plan-spinner-corner {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Old spinner – kept for safety but not used by new code */
 .premium-gift-plan-spinner {
   display: flex;
   align-items: center;
@@ -5832,6 +5899,14 @@ input[type="radio"]:focus {
 
   .premium-gift-btn {
     flex-shrink: 0;
+  }
+
+  .premium-switch-btn span {
+    display: none;
+  }
+
+  .premium-switch-btn {
+    padding: 8px;
   }
 
   .premium-card {
