@@ -527,36 +527,36 @@ const chatroomsSkeleton = () => (
 const premiumSkeleton = () => (
   <div className="fade-in flex-col gap-20 flex-1 minh-0 overflow-y-auto hide-scrollbar skeleton-section-scroll">
 
-    {/* Header — matches other section skeletons (no icon, single title line + button) */}
+    {/* Header */}
     <div className="flex-between flex-shrink-0">
       <div className="skeleton-line skel-w-140 skel-h-28 skel-r-4" />
       <div className="skeleton-line skel-w-90 skel-h-28 skel-r-8" />
     </div>
 
-    {/* Cards grid skeleton — matches real card layout: icon, tier, price, 4 benefits, view-all, button */}
+    {/* 2 skeleton cards — Free + Pro — matches real card layout */}
     <div className="premium-cards-grid">
-      {[1, 2, 3].map((i) => (
+      {[1, 2].map((i) => (
         <div key={i} className="premium-skeleton-card">
-          <div className="skeleton-line skel-w-40-icon mb-8" />
+          <div className="skeleton-line skel-w-40-icon skel-h-40 skel-r-12 mb-8" />
           <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
-          <div className="skeleton-line skel-w-40pct skel-h-22 mb-10" />
+          <div className="skeleton-line skel-w-40pct skel-h-24 mb-10" />
           <div className="skeleton-text-block mb-8 gap-6">
-            <div className="skeleton-line skel-w-65pct skel-h-10" />
-            <div className="skeleton-line skel-w-70pct skel-h-10" />
-            <div className="skeleton-line skel-w-75pct skel-h-10" />
-            <div className="skeleton-line skel-w-80pct skel-h-10" />
+            <div className="skeleton-line skel-w-65pct skel-h-12" />
+            <div className="skeleton-line skel-w-70pct skel-h-12" />
+            <div className="skeleton-line skel-w-75pct skel-h-12" />
+            <div className="skeleton-line skel-w-80pct skel-h-12" />
           </div>
-          <div className="skeleton-line skel-w-50pct skel-h-10 mb-8" />
-          <div className="skeleton-line skel-w-full skel-h-32 skel-r-8" />
+          <div className="skeleton-line skel-w-50pct skel-h-12 mb-8" />
+          <div className="skeleton-line skel-w-full skel-h-36 skel-r-8" />
         </div>
       ))}
     </div>
 
     {/* Chart skeleton — matches premium-chart-container fixed height */}
     <div className="premium-chart-skeleton">
-      <div className="skeleton-line skel-w-160 skel-h-16 mb-8 flex-shrink-0" />
+      <div className="skeleton-line skel-w-160 skel-h-16 mb-12 flex-shrink-0" />
       {[1, 2, 3, 4, 5, 6].map((j) => (
-        <div key={j} className="flex-between flex-shrink-0">
+        <div key={j} className="flex-between flex-shrink-0" style={{ padding: '4px 0' }}>
           <div className="skeleton-line skel-w-50pct skel-h-14" />
           <div className="skeleton-line skel-w-24 skel-h-14 skel-r-4" />
           <div className="skeleton-line skel-w-24 skel-h-14 skel-r-4" />
@@ -1070,6 +1070,7 @@ const Dashboard = () => {
       triggerTremble,
       addNotification,
       fetchProfile,
+      setIsSectionLoading,
       isSubmitting: isSaving,
       isProfileLoading
     };
