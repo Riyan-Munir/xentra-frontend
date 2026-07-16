@@ -1070,7 +1070,6 @@ const Dashboard = () => {
       triggerTremble,
       addNotification,
       fetchProfile,
-      setIsSectionLoading,
       isSubmitting: isSaving,
       isProfileLoading
     };

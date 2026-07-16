@@ -293,9 +293,10 @@ const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => 
 PendingPaymentBanner.displayName = 'PendingPaymentBanner';
 
 /* ── Main Premium Component ──────────────────────────────────────── */
-const Premium = ({ profile, currentRole, addNotification, setIsSectionLoading }) => {
+const Premium = ({ profile, currentRole, addNotification }) => {
     const [plans, setPlans] = useState([]);
     const [activeSub, setActiveSub] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [showGiftModal, setShowGiftModal] = useState(false);
     const [extending, setExtending] = useState(false);
     const chartRef = useRef(null);
@@ -314,7 +315,7 @@ const Premium = ({ profile, currentRole, addNotification, setIsSectionLoading })
     /* Fetch plans + active subscription */
     const fetchData = useCallback(async () => {
         try {
-            setIsSectionLoading?.(true);
+            setLoading(true);
             const [plansRes, activeRes] = await Promise.all([
                 premiumService.getPlans(),
                 premiumService.getActive(),
@@ -328,9 +329,9 @@ const Premium = ({ profile, currentRole, addNotification, setIsSectionLoading })
                 addNotification?.('Failed to load subscription plans.', 'error');
             }
         } finally {
-            setIsSectionLoading?.(false);
+            setLoading(false);
         }
-    }, [addNotification, setIsSectionLoading]);
+    }, [addNotification]);
 
     /* Fetch pending payments separately (called only when needed to avoid rate limits) */
     const fetchPendingPayments = useCallback(async () => {
@@ -499,71 +500,93 @@ const Premium = ({ profile, currentRole, addNotification, setIsSectionLoading })
             )}
 
             {/* Pricing Cards — Free + Pro (with interval toggle inside Pro card) */}
-            <div className="premium-cards-grid">
-                <PricingCard
-                    plan={freePlan}
-                    isCurrent={!isPremium}
-                    isFreelancer={isFreelancer}
-                    onSelect={handleSelectPlan}
-                    extending={extending}
-                    onViewAllBenefits={scrollToChart}
-                    hasTimeLeft={false}
-                />
-                <PricingCard
-                    plan={activeProPlan}
-                    isCurrent={isPremium}
-                    isFreelancer={isFreelancer}
-                    onSelect={handleSelectPlan}
-                    extending={extending}
-                    onViewAllBenefits={scrollToChart}
-                    hasTimeLeft={proHasTime}
-                    monthlyPlan={monthlyPlan}
-                    yearlyPlan={yearlyPlan}
-                    selectedInterval={selectedInterval}
-                    onIntervalChange={setSelectedInterval}
-                />
-            </div>
+            {loading ? (
+                <div className="premium-cards-grid">
+                    {[1, 2].map((i) => (
+                        <div key={i} className="premium-skeleton-card">
+                            <div className="skeleton-line skel-w-40-icon skel-h-40 skel-r-12 mb-8" />
+                            <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
+                            <div className="skeleton-line skel-w-40pct skel-h-24 mb-10" />
+                            <div className="skeleton-text-block mb-8 gap-6">
+                                <div className="skeleton-line skel-w-65pct skel-h-12" />
+                                <div className="skeleton-line skel-w-70pct skel-h-12" />
+                                <div className="skeleton-line skel-w-75pct skel-h-12" />
+                                <div className="skeleton-line skel-w-80pct skel-h-12" />
+                            </div>
+                            <div className="skeleton-line skel-w-50pct skel-h-12 mb-8" />
+                            <div className="skeleton-line skel-w-full skel-h-36 skel-r-8" />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="premium-cards-grid">
+                    <PricingCard
+                        plan={freePlan}
+                        isCurrent={!isPremium}
+                        isFreelancer={isFreelancer}
+                        onSelect={handleSelectPlan}
+                        extending={extending}
+                        onViewAllBenefits={scrollToChart}
+                        hasTimeLeft={false}
+                    />
+                    <PricingCard
+                        plan={activeProPlan}
+                        isCurrent={isPremium}
+                        isFreelancer={isFreelancer}
+                        onSelect={handleSelectPlan}
+                        extending={extending}
+                        onViewAllBenefits={scrollToChart}
+                        hasTimeLeft={proHasTime}
+                        monthlyPlan={monthlyPlan}
+                        yearlyPlan={yearlyPlan}
+                        selectedInterval={selectedInterval}
+                        onIntervalChange={setSelectedInterval}
+                    />
+                </div>
+            )}
 
             {/* Benefits Comparison Chart */}
-            <div id="premium-benefits-chart" ref={chartRef} className="premium-chart-container glass">
-                <div className="premium-chart-header">
-                    <h3 className="text-0\875rem text-white font-semibold">
-                        Benefits Comparison
-                    </h3>
-                </div>
-                <div className="premium-chart-table">
-                    {/* Header row */}
-                    <div className="premium-chart-row premium-chart-row-header">
-                        <div className="premium-chart-cell premium-chart-cell-benefit">Benefit</div>
-                        <div className="premium-chart-cell premium-chart-cell-tier">Free</div>
-                        <div className="premium-chart-cell premium-chart-cell-tier premium-chart-cell-pro">
-                            <Crown size={12} className="primary-text" />
-                            Pro
-                        </div>
+            {!loading && (
+                <div id="premium-benefits-chart" ref={chartRef} className="premium-chart-container glass">
+                    <div className="premium-chart-header">
+                        <h3 className="text-0\875rem text-white font-semibold">
+                            Benefits Comparison
+                        </h3>
                     </div>
-                    {/* Benefit rows */}
-                    {benefits.map((b, i) => {
-                        const Icon = b.icon;
-                        return (
-                            <div
-                                key={i}
-                                className={`premium-chart-row ${i % 2 === 0 ? 'premium-chart-row-even' : ''}`}
-                            >
-                                <div className="premium-chart-cell premium-chart-cell-benefit">
-                                    <Icon size={14} className="text-dim flex-shrink-0" />
-                                    <span className="text-sm">{b.label}</span>
-                                </div>
-                                <div className="premium-chart-cell premium-chart-cell-tier">
-                                    <BenefitCell value={b.free} />
-                                </div>
-                                <div className="premium-chart-cell premium-chart-cell-tier premium-chart-cell-pro">
-                                    <BenefitCell value={b.pro} />
-                                </div>
+                    <div className="premium-chart-table">
+                        {/* Header row */}
+                        <div className="premium-chart-row premium-chart-row-header">
+                            <div className="premium-chart-cell premium-chart-cell-benefit">Benefit</div>
+                            <div className="premium-chart-cell premium-chart-cell-tier">Free</div>
+                            <div className="premium-chart-cell premium-chart-cell-tier premium-chart-cell-pro">
+                                <Crown size={12} className="primary-text" />
+                                Pro
                             </div>
-                        );
-                    })}
+                        </div>
+                        {/* Benefit rows */}
+                        {benefits.map((b, i) => {
+                            const Icon = b.icon;
+                            return (
+                                <div
+                                    key={i}
+                                    className={`premium-chart-row ${i % 2 === 0 ? 'premium-chart-row-even' : ''}`}
+                                >
+                                    <div className="premium-chart-cell premium-chart-cell-benefit">
+                                        <Icon size={14} className="text-dim flex-shrink-0" />
+                                        <span className="text-sm">{b.label}</span>
+                                    </div>
+                                    <div className="premium-chart-cell premium-chart-cell-tier">
+                                        <BenefitCell value={b.free} />
+                                    </div>
+                                    <div className="premium-chart-cell premium-chart-cell-tier premium-chart-cell-pro">
+                                        <BenefitCell value={b.pro} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Gift Modal */}
             {showGiftModal && (
