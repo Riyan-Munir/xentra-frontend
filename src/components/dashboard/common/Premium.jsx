@@ -27,7 +27,6 @@ import {
     ChevronDown,
     Trash2,
     DollarSign,
-    Repeat,
 } from 'lucide-react';
 import premiumService from '../../../services/premiumService';
 
@@ -113,7 +112,7 @@ const BenefitCell = ({ value }) => {
 };
 
 /* ── Pricing Card ────────────────────────────────────────────────── */
-const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, onViewAllBenefits, hasTimeLeft }) => {
+const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, onViewAllBenefits, hasTimeLeft, monthlyPlan, yearlyPlan, selectedInterval, onIntervalChange }) => {
     const isFree = !plan || plan.tier === 'free';
     const effectivePrice = plan?.effective_price ?? plan?.price ?? 0;
     const hasDiscount = !isFree && plan?.discount_percent > 0 && plan?.discounted_price;
@@ -121,10 +120,13 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
         ? (isFreelancer ? FREELANCER_FREE_CARD_BENEFITS : CLIENT_FREE_CARD_BENEFITS)
         : (isFreelancer ? FREELANCER_PRO_CARD_BENEFITS : CLIENT_PRO_CARD_BENEFITS);
 
+    /* Determine if the Pro card has an active subscription (across any interval) */
+    const isProActive = isCurrent || hasTimeLeft;
+
     return (
-        <div className={`premium-card ${isFree ? 'premium-card-free' : 'glass'} ${isCurrent ? 'premium-card-active' : ''}`}>
+        <div className={`premium-card ${isFree ? 'premium-card-free' : 'glass'} ${isProActive ? 'premium-card-active' : ''}`}>
             {/* Current tag */}
-            {isCurrent && (
+            {isProActive && (
                 <div className="premium-current-tag">
                     <span>Current</span>
                 </div>
@@ -144,11 +146,6 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                 <h3 className="premium-card-tier">
                     {isFree ? 'Free' : 'Pro'}
                 </h3>
-                {!isFree && plan?.billing_interval && (
-                    <span className="premium-card-interval">
-                        {plan.billing_interval === 'yearly' ? 'Yearly' : 'Monthly'}
-                    </span>
-                )}
             </div>
 
             {/* Price */}
@@ -178,6 +175,24 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                 )}
             </div>
 
+            {/* Interval toggle — Pro card only */}
+            {!isFree && monthlyPlan && yearlyPlan && (
+                <div className="premium-card-interval-toggle">
+                    <button
+                        className={`premium-interval-btn ${selectedInterval === 'monthly' ? 'premium-interval-active' : ''}`}
+                        onClick={() => onIntervalChange?.('monthly')}
+                    >
+                        Monthly
+                    </button>
+                    <button
+                        className={`premium-interval-btn ${selectedInterval === 'yearly' ? 'premium-interval-active' : ''}`}
+                        onClick={() => onIntervalChange?.('yearly')}
+                    >
+                        Yearly
+                    </button>
+                </div>
+            )}
+
             {/* Benefits */}
             <ul className="premium-card-benefits">
                 {cardBenefits.map((b, i) => (
@@ -203,7 +218,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                         <CheckCircle size={16} className="primary-text" />
                         <span className="text-sm primary-text">Free Forever</span>
                     </div>
-                ) : isCurrent || hasTimeLeft ? (
+                ) : isProActive ? (
                     <button
                         className="btn btn-secondary premium-btn-extend"
                         onClick={() => onSelect(plan, true)}
@@ -219,7 +234,7 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                         disabled={extending}
                     >
                         <Crown size={16} />
-                        {extending ? 'Switching…' : 'Subscribe'}
+                        {extending ? 'Subscribing…' : 'Subscribe'}
                         <ArrowRight size={14} />
                     </button>
                 )}
@@ -291,8 +306,8 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const [pendingGiftPayment, setPendingGiftPayment] = useState(null);
     const [cancellingId, setCancellingId] = useState(null);
 
-    /* ── Interval switch state (Switch Button feature) ───────────── */
-    const [preferredInterval, setPreferredInterval] = useState(null);
+    /* ── Interval selector state — single Pro card with toggle ────── */
+    const [selectedInterval, setSelectedInterval] = useState('monthly');
 
     const isFreelancer = currentRole === 'freelancer';
     const benefits = isFreelancer ? FREELANCER_BENEFITS : CLIENT_BENEFITS;
@@ -301,15 +316,27 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const [plansRes, activeRes, paymentsRes] = await Promise.all([
+            const [plansRes, activeRes] = await Promise.all([
                 premiumService.getPlans(),
                 premiumService.getActive(),
-                premiumService.getPayments({ page_size: 50 }),
             ]);
             setPlans(plansRes.data?.plans || []);
             setActiveSub(activeRes.data || {});
+        } catch (err) {
+            if (err?.response?.status === 429) {
+                addNotification?.('Too many requests. Please wait a moment and try again.', 'error');
+            } else {
+                addNotification?.('Failed to load subscription plans.', 'error');
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [addNotification]);
 
-            /* Find pending payments for this role profile */
+    /* Fetch pending payments separately (called only when needed to avoid rate limits) */
+    const fetchPendingPayments = useCallback(async () => {
+        try {
+            const paymentsRes = await premiumService.getPayments({ page_size: 20 });
             const allPayments = paymentsRes.data?.results || [];
             const pending = allPayments.find(
                 (p) => p.status === 'pending' && p.payment_type === 'subscription'
@@ -320,15 +347,17 @@ const Premium = ({ profile, currentRole, addNotification }) => {
             setPendingPayment(pending || null);
             setPendingGiftPayment(pendingGift || null);
         } catch (err) {
-            addNotification?.('Failed to load subscription plans.', 'error');
-        } finally {
-            setLoading(false);
+            if (err?.response?.status === 429) {
+                addNotification?.('Too many requests. Please wait a moment and try again.', 'error');
+            }
+            /* Silently ignore other errors for pending payment fetch */
         }
     }, [addNotification]);
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+        fetchPendingPayments();
+    }, [fetchData, fetchPendingPayments]);
 
     /* Determine which plan the user is on */
     const isPremium = activeSub?.has_active_premium || false;
@@ -344,29 +373,10 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         (p) => p.billing_interval === 'yearly' && p.tier === activeTier && p.is_active
     );
 
-    /* Check if current plan matches — uses preferredInterval override when user has both plans */
-    const displayInterval = preferredInterval ?? activeInterval;
-    const isMonthlyCurrent = isPremium && displayInterval === 'monthly';
-    const isYearlyCurrent = isPremium && displayInterval === 'yearly';
-    const isFreeCurrent = !isPremium;
-
-    /* Show switch button only when user has time on both monthly AND yearly intervals */
+    /* The currently-displayed plan changes based on the interval toggle */
+    const activeProPlan = selectedInterval === 'monthly' ? monthlyPlan : yearlyPlan;
     const availableIntervals = activeSub?.available_intervals || [];
-    const hasBothIntervals = availableIntervals.includes('monthly') && availableIntervals.includes('yearly');
-
-    /* Per-card hasTimeLeft: show "Extend" even on non-current card if user has activated time for that interval */
-    const monthlyHasTime = availableIntervals.includes('monthly');
-    const yearlyHasTime = availableIntervals.includes('yearly');
-
-    /* Toggle between monthly/yearly display — stays within pro plans only */
-    const handleToggleInterval = useCallback(() => {
-        setPreferredInterval((prev) => {
-            if (prev === 'monthly') return 'yearly';
-            if (prev === 'yearly') return 'monthly';
-            // First toggle: switch away from the backend's activeInterval
-            return activeInterval === 'monthly' ? 'yearly' : 'monthly';
-        });
-    }, [activeInterval]);
+    const proHasTime = availableIntervals.length > 0;
 
     /* Handle subscribe / extend */
     const handleSelectPlan = useCallback(async (plan, isExtend) => {
@@ -386,15 +396,15 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     : 'Payment initiated. Complete payment to activate premium.',
                 'success'
             );
-            /* Refresh to show pending payment */
-            fetchData();
+            /* Refresh pending payments to show the newly created payment */
+            fetchPendingPayments();
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create payment.';
             addNotification?.(msg, 'error');
         } finally {
             setExtending(false);
         }
-    }, [addNotification, fetchData]);
+    }, [addNotification, fetchPendingPayments]);
 
     /* ── Cancel pending payment (Fix 3) ───────────────────────────── */
     const handleCancelPayment = useCallback(async (payment) => {
@@ -403,14 +413,14 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         try {
             await premiumService.cancelPayment(payment.payment_id);
             addNotification?.('Payment cancelled.', 'success');
-            fetchData();
+            fetchPendingPayments();
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to cancel payment.';
             addNotification?.(msg, 'error');
         } finally {
             setCancellingId(null);
         }
-    }, [addNotification, fetchData]);
+    }, [addNotification, fetchPendingPayments]);
 
     /* ── Pay pending payment (dummy for now) (Fix 3) ──────────────── */
     const handlePayPayment = useCallback(async (payment) => {
@@ -443,19 +453,6 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     )}
                 </div>
                 <div className="flex-row items-center gap-8 flex-shrink-0">
-                    {/* Switch button — only when user has both monthly + yearly time */}
-                    {isPremium && hasBothIntervals && (
-                        <button
-                            className="btn btn-secondary premium-switch-btn"
-                            onClick={handleToggleInterval}
-                            title={`Switch to ${displayInterval === 'monthly' ? 'Yearly' : 'Monthly'} plan`}
-                        >
-                            <Repeat size={14} />
-                            <span className="text-xs">
-                                {displayInterval === 'monthly' ? 'Switch to Yearly' : 'Switch to Monthly'}
-                            </span>
-                        </button>
-                    )}
                     <button
                         className="btn btn-secondary premium-gift-btn"
                         onClick={() => setShowGiftModal(true)}
@@ -472,8 +469,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     <Sparkles size={16} className="primary-text flex-shrink-0" />
                     <div className="flex-col gap-2 flex-1">
                         <p className="text-sm text-white font-medium">
-                            You have an active Pro {displayInterval === 'yearly' ? 'Yearly' : 'Monthly'} subscription
-                            {preferredInterval && ` (${activeInterval} plan paused)`}
+                            You have an active Pro subscription
                         </p>
                         <p className="text-xs text-dim">
                             Expires: {new Date(expiryDate).toLocaleDateString('en-US', {
@@ -503,10 +499,10 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 />
             )}
 
-            {/* Pricing Cards */}
+            {/* Pricing Cards — Free + Pro (with interval toggle inside Pro card) */}
             {loading ? (
                 <div className="premium-cards-grid">
-                    {[1, 2, 3].map((i) => (
+                    {[1, 2].map((i) => (
                         <div key={i} className="premium-skeleton-card">
                             <div className="skeleton-line skel-w-40-icon skel-h-40 skel-r-12 mb-8" />
                             <div className="skeleton-line skel-w-35pct skel-h-16 mb-6" />
@@ -526,7 +522,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 <div className="premium-cards-grid">
                     <PricingCard
                         plan={freePlan}
-                        isCurrent={isFreeCurrent}
+                        isCurrent={!isPremium}
                         isFreelancer={isFreelancer}
                         onSelect={handleSelectPlan}
                         extending={extending}
@@ -534,22 +530,17 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                         hasTimeLeft={false}
                     />
                     <PricingCard
-                        plan={monthlyPlan}
-                        isCurrent={isMonthlyCurrent}
+                        plan={activeProPlan}
+                        isCurrent={isPremium}
                         isFreelancer={isFreelancer}
                         onSelect={handleSelectPlan}
                         extending={extending}
                         onViewAllBenefits={scrollToChart}
-                        hasTimeLeft={monthlyHasTime}
-                    />
-                    <PricingCard
-                        plan={yearlyPlan}
-                        isCurrent={isYearlyCurrent}
-                        isFreelancer={isFreelancer}
-                        onSelect={handleSelectPlan}
-                        extending={extending}
-                        onViewAllBenefits={scrollToChart}
-                        hasTimeLeft={yearlyHasTime}
+                        hasTimeLeft={proHasTime}
+                        monthlyPlan={monthlyPlan}
+                        yearlyPlan={yearlyPlan}
+                        selectedInterval={selectedInterval}
+                        onIntervalChange={setSelectedInterval}
                     />
                 </div>
             )}
@@ -603,7 +594,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     isOpen={showGiftModal}
                     onClose={() => {
                         setShowGiftModal(false);
-                        fetchData(); /* Refresh to pick up gift pending payment */
+                        fetchPendingPayments(); /* Refresh to pick up gift pending payment */
                     }}
                     plans={plans}
                     addNotification={addNotification}

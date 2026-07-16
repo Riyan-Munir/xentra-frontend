@@ -5268,7 +5268,7 @@ input[type="radio"]:focus {
 /* ── Pricing Cards Grid ─────────────────────────────────────────── */
 .premium-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   min-width: 0;
 }
@@ -5600,13 +5600,39 @@ input[type="radio"]:focus {
   gap: 12px;
 }
 
-/* ── Switch Button ──────────────────────────────────────────────── */
-.premium-switch-btn {
+/* ── Interval Toggle (inside Pro card) ──────────────────────────── */
+.premium-card-interval-toggle {
+  display: flex;
+  flex-direction: row;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.premium-interval-btn {
+  flex: 1;
   padding: 8px 12px;
-  gap: 6px;
-  white-space: nowrap;
-  flex-shrink: 0;
   font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-align: center;
+}
+
+.premium-interval-btn:hover {
+  color: var(--text);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.premium-interval-active {
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.12);
+  font-weight: 600;
 }
 
 /* ── Gift Button ────────────────────────────────────────────────── */
@@ -5817,16 +5843,6 @@ input[type="radio"]:focus {
 
 /* ── Premium Responsive ─────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .premium-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .premium-cards-grid .premium-card:last-child {
-    grid-column: 1 / -1;
-    max-width: 50%;
-    justify-self: center;
-  }
-
   .premium-card {
     min-height: 360px;
   }
@@ -5851,10 +5867,6 @@ input[type="radio"]:focus {
 @media (max-width: 768px) {
   .premium-cards-grid {
     grid-template-columns: 1fr;
-  }
-
-  .premium-cards-grid .premium-card:last-child {
-    max-width: 100%;
   }
 
   .premium-card {
@@ -5899,14 +5911,6 @@ input[type="radio"]:focus {
 
   .premium-gift-btn {
     flex-shrink: 0;
-  }
-
-  .premium-switch-btn span {
-    display: none;
-  }
-
-  .premium-switch-btn {
-    padding: 8px;
   }
 
   .premium-card {
