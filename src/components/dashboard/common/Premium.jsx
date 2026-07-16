@@ -148,8 +148,8 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
                 </h3>
             </div>
 
-            {/* Price */}
-            <div className="premium-card-price-block">
+            {/* Price — keyed on plan.id so interval toggle triggers fade-in animation */}
+            <div key={plan?.id || 'free'} className="premium-card-price-block">
                 {isFree ? (
                     <span className="premium-card-price">$0</span>
                 ) : hasDiscount ? (

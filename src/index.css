@@ -5394,6 +5394,19 @@ input[type="radio"]:focus {
   gap: 2px;
   min-height: 72px;
   justify-content: center;
+  animation: premiumPriceFade 0.35s ease;
+}
+
+@keyframes premiumPriceFade {
+  0% {
+    opacity: 0.4;
+    transform: translateY(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .premium-card-price-row {
