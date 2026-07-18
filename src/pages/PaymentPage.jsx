@@ -185,9 +185,9 @@ const SecurityBadges = memo(function SecurityBadges() {
             <div className={styles.securityBadge}>
                 <Clock className={styles.securityBadgeIcon} size={20} />
                 <div className={styles.securityBadgeContent}>
-                    <span className={styles.securityBadgeTitle}>Instant Activation</span>
+                    <span className={styles.securityBadgeTitle}>Fast Confirmation</span>
                     <span className={styles.securityBadgeDesc}>
-                        Your plan will be activated immediately after payment.
+                        Your payment is confirmed instantly on the blockchain.
                     </span>
                 </div>
             </div>
