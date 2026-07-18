@@ -427,17 +427,19 @@ const PaymentSkeleton = memo(function PaymentSkeleton() {
                         <div className={styles.skeletonBar} style={sk(170, 12, 4)} />
                     </p>
 
-                    <div className={styles.walletDropdown}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div className={styles.skeletonCircle} style={sk(20, 20, 10)} />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                                <div className={styles.skeletonBar} style={sk(130, 12, 4)} />
-                                <div className={styles.skeletonBar} style={sk(88, 9, 4)} />
+                    <div className={styles.walletDropdownWrapper}>
+                        <div className={styles.walletDropdown}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div className={styles.skeletonCircle} style={sk(20, 20, 10)} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                    <div className={styles.skeletonBar} style={sk(130, 12, 4)} />
+                                    <div className={styles.skeletonBar} style={sk(88, 9, 4)} />
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div className={styles.skeletonBar} style={sk(72, 12, 4)} />
-                            <div className={styles.skeletonBar} style={sk(16, 16, 8)} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div className={styles.skeletonBar} style={sk(72, 12, 4)} />
+                                <div className={styles.skeletonBar} style={sk(16, 16, 8)} />
+                            </div>
                         </div>
                     </div>
 
