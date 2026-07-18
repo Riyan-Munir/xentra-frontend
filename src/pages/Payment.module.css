@@ -188,6 +188,19 @@
     cursor: default;
 }
 
+.topbarUserInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.topbarUserRole {
+    font-size: 11px;
+    color: var(--pp-text-muted);
+    font-weight: 400;
+    text-transform: capitalize;
+}
+
 .topbarAvatar {
     width: 32px;
     height: 32px;
@@ -216,10 +229,7 @@
     color: var(--pp-text);
 }
 
-.topbarChevron {
-    color: var(--pp-text-dim);
-    flex-shrink: 0;
-}
+/* topbarChevron removed — no longer used */
 
 /* ── Main Layout ─────────────────────────────────────────────────────────── */
 
@@ -234,6 +244,7 @@
     min-height: calc(100vh - 64px);
     box-sizing: border-box;
     align-items: flex-start;
+    justify-content: center;
 }
 
 /* ── Left Panel: Payment Summary ─────────────────────────────────────────── */

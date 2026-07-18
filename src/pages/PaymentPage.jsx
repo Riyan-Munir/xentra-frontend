@@ -5,7 +5,6 @@ import {
     Clock,
     Lock,
     ChevronDown,
-    ChevronRight,
     ArrowRight,
     Sun,
     Moon,
@@ -68,7 +67,8 @@ function formatBalance(balance, currency) {
    Sub-Component: PaymentTopBar
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const PaymentTopBar = memo(function PaymentTopBar({ theme, onToggleTheme, username, avatarUrl }) {
+const PaymentTopBar = memo(function PaymentTopBar({ theme, onToggleTheme, username, avatarUrl, role }) {
+    const roleLabel = role === 'freelancer' ? 'Freelancer' : role === 'client' ? 'Client' : 'Member';
     return (
         <div className={styles.topbar}>
             {/* Logo */}
@@ -113,8 +113,10 @@ const PaymentTopBar = memo(function PaymentTopBar({ theme, onToggleTheme, userna
                 >
                     {username ? username.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <span className={styles.topbarUsername}>{username || 'User'}</span>
-                <ChevronRight className={styles.topbarChevron} size={16} />
+                <div className={styles.topbarUserInfo}>
+                    <span className={styles.topbarUsername}>{username || 'User'}</span>
+                    <span className={styles.topbarUserRole}>{roleLabel}</span>
+                </div>
             </div>
         </div>
     );
@@ -495,6 +497,14 @@ function PaymentPage() {
         return null;
     }, []);
 
+    const userRole = useMemo(() => {
+        const stored = localStorage.getItem('active_role')
+            || localStorage.getItem('selected_role')
+            || localStorage.getItem('user_role');
+        if (!stored || stored === 'undefined' || stored === 'null') return 'freelancer';
+        return stored;
+    }, []);
+
     /* ── Handle Proceed (UI-only placeholder) ─────────────────────────── */
     const handleProceed = useCallback(() => {
         // UI-only — no backend logic
@@ -519,6 +529,7 @@ function PaymentPage() {
                 onToggleTheme={toggleTheme}
                 username={username}
                 avatarUrl={avatarUrl}
+                role={userRole}
             />
 
             {/* Main Content */}
