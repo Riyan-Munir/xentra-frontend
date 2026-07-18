@@ -351,110 +351,121 @@ const PaymentDetailsBox = memo(function PaymentDetailsBox({ amount, currency, ne
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const PaymentSkeleton = memo(function PaymentSkeleton() {
+    /* Reuse actual UI layout classes so skeleton = exact layout match */
+    const sk = (w, h, r = 4) => ({ width: w, height: h, borderRadius: r });
+
     return (
-        <div className={`${styles.page} ${styles.skeleton}`}>
-            {/* Topbar Skeleton */}
-            <div className={styles.skeletonTopbar}>
-                <div className={styles.skeletonTopbarLeft}>
-                    <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 32, height: 32 }} />
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 72, height: 18, borderRadius: 6 }} />
+        <div className={styles.page}>
+            {/* ── Topbar: same class as real topbar ──────────────────────── */}
+            <div className={styles.topbar}>
+                <div className={styles.topbarLogo}>
+                    <div className={styles.skeletonCircle} style={sk(32, 32, 8)} />
+                    <div className={styles.skeletonBar} style={sk(72, 18, 6)} />
                 </div>
-                <div className={styles.skeletonTopbarCenter}>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 48, height: 14, borderRadius: 4 }} />
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 44, height: 24, borderRadius: 12 }} />
+                <div className={styles.topbarCenter}>
+                    <div className={styles.skeletonBar} style={sk(44, 14, 4)} />
+                    <div className={styles.skeletonBar} style={sk(44, 24, 12)} />
                 </div>
-                <div className={styles.skeletonTopbarRight}>
-                    <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 32, height: 32 }} />
-                    <div className={styles.skeletonUserInfo}>
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 90, height: 13, borderRadius: 4 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 64, height: 9, borderRadius: 3 }} />
+                <div className={styles.topbarUser}>
+                    <div className={styles.skeletonCircle} style={sk(32, 32, 16)} />
+                    <div className={styles.topbarUserInfo}>
+                        <div className={styles.skeletonBar} style={sk(80, 13, 4)} />
+                        <div className={styles.skeletonBar} style={sk(56, 10, 3)} />
                     </div>
                 </div>
             </div>
 
-            {/* Main Layout Skeleton */}
-            <div className={styles.skeletonMainLayout}>
-                {/* Left: Summary Skeleton */}
-                <div className={styles.skeletonLeftPanel}>
-                    <div className={styles.skeletonSummaryCard}>
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 130, height: 17, borderRadius: 6, marginBottom: 12 }} />
+            {/* ── Main Layout: same class as real layout ─────────────────── */}
+            <div className={styles.mainLayout}>
+                {/* Left Panel — identical structure to real left panel */}
+                <div className={styles.summaryPanel}>
+                    <div className={styles.summaryCard}>
+                        <div className={styles.skeletonBar} style={{ ...sk(130, 18, 6), marginBottom: 24 }} />
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className={styles.skeletonSummaryRow}>
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 68, height: 12, borderRadius: 4 }} />
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 64, height: 12, borderRadius: 4 }} />
+                            <div key={i} className={styles.summaryRow}>
+                                <div className={styles.skeletonBar} style={sk(70, 12, 4)} />
+                                <div className={styles.skeletonBar} style={sk(64, 12, 4)} />
                             </div>
                         ))}
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: '100%', height: 1, margin: '10px 0' }} />
-                        <div className={styles.skeletonSummaryRow}>
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 82, height: 12, borderRadius: 4 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 96, height: 18, borderRadius: 6 }} />
+                        <div className={styles.summaryDivider} />
+                        <div className={styles.summaryTotalRow}>
+                            <div className={styles.skeletonBar} style={sk(82, 12, 4)} />
+                            <div className={styles.skeletonBar} style={sk(96, 20, 6)} />
                         </div>
                     </div>
 
-                    {/* Security Badges Skeleton */}
-                    <div className={styles.skeletonBadges}>
-                        <div className={styles.skeletonBadge}>
-                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 20, height: 20 }} />
-                            <div className={styles.skeletonBadgeContent}>
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 130, height: 12, borderRadius: 4 }} />
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 220, height: 10, borderRadius: 3 }} />
+                    {/* Security Badges — same structure as real badges */}
+                    <div className={styles.securityBadges}>
+                        <div className={styles.securityBadge}>
+                            <div className={styles.skeletonCircle} style={sk(20, 20, 10)} />
+                            <div className={styles.securityBadgeContent}>
+                                <div className={styles.skeletonBar} style={sk(130, 12, 4)} />
+                                <div className={styles.skeletonBar} style={{ ...sk(200, 10, 3), marginTop: 4 }} />
                             </div>
                         </div>
-                        <div className={styles.skeletonBadge}>
-                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 20, height: 20 }} />
-                            <div className={styles.skeletonBadgeContent}>
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 12, borderRadius: 4 }} />
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 200, height: 10, borderRadius: 3 }} />
+                        <div className={styles.securityBadge}>
+                            <div className={styles.skeletonCircle} style={sk(20, 20, 10)} />
+                            <div className={styles.securityBadgeContent}>
+                                <div className={styles.skeletonBar} style={sk(120, 12, 4)} />
+                                <div className={styles.skeletonBar} style={{ ...sk(180, 10, 3), marginTop: 4 }} />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right: Form Skeleton */}
-                <div className={styles.skeletonFormPanel}>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 260, height: 26, borderRadius: 6 }} />
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 300, height: 13, borderRadius: 4, marginBottom: 12 }} />
+                {/* Right Panel — identical structure to real form panel */}
+                <div className={styles.formPanel}>
+                    <div className={styles.skeletonBar} style={{ ...sk(260, 26, 6), marginBottom: 6 }} />
+                    <div className={styles.skeletonBar} style={{ ...sk(300, 13, 4), marginBottom: 28 }} />
 
                     {/* Step 1 */}
-                    <div className={styles.skeletonStepRow}>
-                        <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 28, height: 28 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 108, height: 15, borderRadius: 4 }} />
+                    <div className={styles.stepHeader}>
+                        <div className={styles.skeletonCircle} style={sk(28, 28, 14)} />
+                        <div className={styles.skeletonBar} style={sk(108, 17, 4)} />
                     </div>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 170, height: 12, borderRadius: 4, marginLeft: 40, marginBottom: 12 }} />
-                    <div className={styles.skeletonWalletBox}>
+                    <p className={styles.stepDescription}>
+                        <div className={styles.skeletonBar} style={sk(170, 12, 4)} />
+                    </p>
+
+                    <div className={styles.walletDropdown}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 20, height: 20 }} />
-                            <div>
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 130, height: 12, borderRadius: 4, marginBottom: 5 }} />
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 88, height: 9, borderRadius: 4 }} />
+                            <div className={styles.skeletonCircle} style={sk(20, 20, 10)} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                <div className={styles.skeletonBar} style={sk(130, 12, 4)} />
+                                <div className={styles.skeletonBar} style={sk(88, 9, 4)} />
                             </div>
                         </div>
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 72, height: 12, borderRadius: 4 }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div className={styles.skeletonBar} style={sk(72, 12, 4)} />
+                            <div className={styles.skeletonBar} style={sk(16, 16, 8)} />
+                        </div>
                     </div>
 
                     {/* Step 2 */}
-                    <div className={styles.skeletonStepRow}>
-                        <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 28, height: 28 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 128, height: 15, borderRadius: 4 }} />
+                    <div className={styles.stepHeader}>
+                        <div className={styles.skeletonCircle} style={sk(28, 28, 14)} />
+                        <div className={styles.skeletonBar} style={sk(128, 17, 4)} />
                     </div>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 110, height: 12, borderRadius: 4, marginLeft: 40, marginBottom: 12 }} />
-                    <div className={styles.skeletonPaymentBox}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 36, height: 36 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 20, borderRadius: 6 }} />
+                    <p className={styles.stepDescription}>
+                        <div className={styles.skeletonBar} style={sk(100, 12, 4)} />
+                    </p>
+
+                    <div className={styles.paymentDetailsBox}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                            <div className={styles.skeletonCircle} style={sk(36, 36, 18)} />
+                            <div className={styles.skeletonBar} style={sk(100, 22, 6)} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 48, height: 9, borderRadius: 4 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 72, height: 20, borderRadius: 6 }} />
+                            <div className={styles.skeletonBar} style={sk(44, 10, 4)} />
+                            <div className={styles.skeletonBar} style={sk(72, 20, 6)} />
                         </div>
                     </div>
 
-                    <div className={`${styles.skeletonButton} ${styles.skeleton}`} />
+                    <div className={styles.skeletonBar} style={{ ...sk('100%', 48, 12), marginBottom: 16 }} />
 
-                    {/* Footer skeleton */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12 }}>
-                        <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 14, height: 14 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 280, height: 10, borderRadius: 4 }} />
+                    <div className={styles.footerText}>
+                        <div className={styles.skeletonCircle} style={sk(14, 14, 7)} />
+                        <div className={styles.skeletonBar} style={sk(260, 10, 4)} />
                     </div>
                 </div>
             </div>

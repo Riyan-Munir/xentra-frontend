@@ -776,32 +776,24 @@
 
 /* ── Skeleton Loading ────────────────────────────────────────────────────── */
 
-.skeleton {
-    animation: ppShimmer 1.8s infinite ease-in-out;
+.skeletonBar,
+.skeletonCircle {
+    background: linear-gradient(90deg,
+            var(--pp-surface) 25%,
+            var(--pp-surface-hover) 50%,
+            var(--pp-surface) 75%);
+    background-size: 200% 100%;
+    animation: ppShimmer 1.6s infinite ease-in-out;
 }
 
 @keyframes ppShimmer {
     0% {
-        opacity: 0.5;
-    }
-
-    50% {
-        opacity: 0.8;
+        background-position: 200% 0;
     }
 
     100% {
-        opacity: 0.5;
+        background-position: -200% 0;
     }
-}
-
-.skeletonBar {
-    background: var(--pp-surface-hover);
-    border-radius: 6px;
-}
-
-.skeletonCircle {
-    background: var(--pp-surface-hover);
-    border-radius: 50%;
 }
 
 .skeletonTopbar {
