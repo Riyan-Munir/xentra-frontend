@@ -1,0 +1,1057 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Payment.module.css — Standalone Payment Page (Light + Dark Theme)
+   Responsive: Desktop (1440px), Tablet (768px), Mobile (375px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Theme Variables ─────────────────────────────────────────────────────── */
+
+/* Dark theme (default) */
+.page {
+    --pp-bg: #0a0a0a;
+    --pp-bg-card: #141414;
+    --pp-bg-card-hover: #1a1a1a;
+    --pp-text: #f5f5f5;
+    --pp-text-dim: #888888;
+    --pp-text-muted: #666666;
+    --pp-border: #222222;
+    --pp-border-light: #1e1e1e;
+    --pp-primary: #ffffff;
+    --pp-primary-bg: #ffffff;
+    --pp-primary-text: #000000;
+    --pp-surface: rgba(255, 255, 255, 0.04);
+    --pp-surface-hover: rgba(255, 255, 255, 0.07);
+    --pp-badge-bg: #1a1a1a;
+    --pp-badge-border: #2a2a2a;
+    --pp-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --pp-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --pp-divider: #222222;
+    --pp-toggle-bg: #333333;
+    --pp-toggle-knob: #ffffff;
+    --pp-link: #e0e0e0;
+    --pp-success: #10b981;
+    --pp-step-circle-bg: #ffffff;
+    --pp-step-circle-text: #000000;
+    --pp-network-badge-bg: #1e1e1e;
+    --pp-network-badge-border: #333333;
+    --pp-network-badge-text: #e0e0e0;
+    --pp-dropdown-bg: #1a1a1a;
+    --pp-dropdown-hover: #222222;
+    --pp-dropdown-border: #2a2a2a;
+}
+
+/* Light theme */
+.page.light {
+    --pp-bg: #f5f5f5;
+    --pp-bg-card: #ffffff;
+    --pp-bg-card-hover: #fafafa;
+    --pp-text: #111111;
+    --pp-text-dim: #666666;
+    --pp-text-muted: #999999;
+    --pp-border: #e5e5e5;
+    --pp-border-light: #f0f0f0;
+    --pp-primary: #000000;
+    --pp-primary-bg: #000000;
+    --pp-primary-text: #ffffff;
+    --pp-surface: rgba(0, 0, 0, 0.02);
+    --pp-surface-hover: rgba(0, 0, 0, 0.04);
+    --pp-badge-bg: #f9f9f9;
+    --pp-badge-border: #e8e8e8;
+    --pp-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --pp-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --pp-divider: #e8e8e8;
+    --pp-toggle-bg: #d1d5db;
+    --pp-toggle-knob: #ffffff;
+    --pp-link: #333333;
+    --pp-success: #059669;
+    --pp-step-circle-bg: #000000;
+    --pp-step-circle-text: #ffffff;
+    --pp-network-badge-bg: #f3f4f6;
+    --pp-network-badge-border: #e5e7eb;
+    --pp-network-badge-text: #374151;
+    --pp-dropdown-bg: #ffffff;
+    --pp-dropdown-hover: #f5f5f5;
+    --pp-dropdown-border: #e5e5e5;
+}
+
+/* ── Page Container ──────────────────────────────────────────────────────── */
+
+.page {
+    min-height: 100vh;
+    background: var(--pp-bg);
+    color: var(--pp-text);
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.page::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Top Bar ─────────────────────────────────────────────────────────────── */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    min-height: 64px;
+    max-height: 64px;
+    border-bottom: 1px solid var(--pp-border);
+    background: var(--pp-bg);
+    flex-shrink: 0;
+}
+
+.topbarLogo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbarLogoIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--pp-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pp-bg);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.topbarLogoText {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--pp-text);
+    letter-spacing: -0.02em;
+}
+
+.topbarCenter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbarThemeLabel {
+    font-size: 13px;
+    color: var(--pp-text-dim);
+    font-weight: 400;
+}
+
+/* Theme Toggle Switch */
+.themeToggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--pp-toggle-bg);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.themeToggleKnob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: var(--pp-toggle-knob);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.themeToggleKnobShifted {
+    transform: translateX(20px);
+}
+
+.themeToggleIcon {
+    width: 12px;
+    height: 12px;
+}
+
+.topbarUser {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: default;
+}
+
+.topbarAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.topbarAvatarFallback {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--pp-surface-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pp-text-dim);
+    flex-shrink: 0;
+}
+
+.topbarUsername {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pp-text);
+}
+
+.topbarChevron {
+    color: var(--pp-text-dim);
+    flex-shrink: 0;
+}
+
+/* ── Main Layout ─────────────────────────────────────────────────────────── */
+
+.mainLayout {
+    display: flex;
+    flex: 1;
+    padding: 40px;
+    gap: 40px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: calc(100vh - 64px);
+    box-sizing: border-box;
+}
+
+/* ── Left Panel: Payment Summary ─────────────────────────────────────────── */
+
+.summaryPanel {
+    width: 100%;
+    min-width: 320px;
+    max-width: 420px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.summaryCard {
+    background: var(--pp-bg-card);
+    border: 1px solid var(--pp-border);
+    border-radius: 16px;
+    padding: 32px;
+    min-height: 340px;
+    max-height: 500px;
+    box-shadow: var(--pp-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.summaryTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--pp-text);
+    margin-bottom: 28px;
+}
+
+.summaryRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.summaryLabel {
+    font-size: 14px;
+    color: var(--pp-text-dim);
+    font-weight: 400;
+}
+
+.summaryValue {
+    font-size: 14px;
+    color: var(--pp-text);
+    font-weight: 500;
+}
+
+.summaryDivider {
+    height: 1px;
+    background: var(--pp-divider);
+    margin: 12px 0;
+    flex-shrink: 0;
+}
+
+.summaryTotalRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 0;
+}
+
+.summaryTotalLabel {
+    font-size: 14px;
+    color: var(--pp-text-dim);
+    font-weight: 400;
+}
+
+.summaryTotalValue {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pp-text);
+    letter-spacing: -0.02em;
+}
+
+/* ── Security Badges ─────────────────────────────────────────────────────── */
+
+.securityBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.securityBadge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.securityBadgeIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--pp-text-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.securityBadgeContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.securityBadgeTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pp-text);
+}
+
+.securityBadgeDesc {
+    font-size: 13px;
+    color: var(--pp-text-dim);
+    line-height: 1.4;
+}
+
+/* ── Right Panel: Payment Form ───────────────────────────────────────────── */
+
+.formPanel {
+    flex: 1;
+    min-width: 0;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+}
+
+.formTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--pp-text);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.formSubtitle {
+    font-size: 15px;
+    color: var(--pp-text-dim);
+    margin-bottom: 36px;
+    font-weight: 400;
+}
+
+/* ── Step Header ─────────────────────────────────────────────────────────── */
+
+.stepHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.stepCircle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--pp-step-circle-bg);
+    color: var(--pp-step-circle-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.stepTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--pp-text);
+}
+
+.stepDescription {
+    font-size: 14px;
+    color: var(--pp-text-dim);
+    margin-bottom: 16px;
+    margin-left: 40px;
+}
+
+/* ── Wallet Dropdown ─────────────────────────────────────────────────────── */
+
+.walletDropdownWrapper {
+    margin-bottom: 32px;
+    position: relative;
+}
+
+.walletDropdown {
+    width: 100%;
+    min-height: 64px;
+    max-height: 80px;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    box-sizing: border-box;
+}
+
+.walletDropdown:hover {
+    border-color: var(--pp-text-muted);
+}
+
+.walletDropdownLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.walletDropdownIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--pp-text-dim);
+    flex-shrink: 0;
+}
+
+.walletDropdownInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.walletDropdownName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pp-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.walletDropdownAddress {
+    font-size: 12px;
+    color: var(--pp-text-dim);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.walletDropdownRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.walletDropdownBalance {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pp-text);
+    white-space: nowrap;
+}
+
+.walletDropdownChevron {
+    color: var(--pp-text-dim);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.walletDropdownChevronOpen {
+    transform: rotate(180deg);
+}
+
+/* Wallet Dropdown Menu */
+.walletDropdownMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 6px;
+    z-index: 50;
+    box-shadow: var(--pp-shadow-lg);
+    max-height: 240px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.walletDropdownMenu::-webkit-scrollbar {
+    display: none;
+}
+
+.walletDropdownOption {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.walletDropdownOption:hover {
+    background: var(--pp-dropdown-hover);
+}
+
+.walletDropdownOptionSelected {
+    background: var(--pp-surface-hover);
+}
+
+.walletDropdownOptionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.walletDropdownOptionName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pp-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.walletDropdownOptionAddress {
+    font-size: 12px;
+    color: var(--pp-text-dim);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.walletDropdownOptionBalance {
+    font-size: 13px;
+    color: var(--pp-text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Wallet States (no wallet / no default) */
+.walletStateMessage {
+    width: 100%;
+    min-height: 64px;
+    max-height: 80px;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.walletStateIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--pp-text-muted);
+    flex-shrink: 0;
+}
+
+.walletStateText {
+    font-size: 14px;
+    color: var(--pp-text-dim);
+    line-height: 1.4;
+}
+
+/* ── Payment Details Box ─────────────────────────────────────────────────── */
+
+.paymentDetailsBox {
+    width: 100%;
+    min-height: 88px;
+    max-height: 100px;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    margin-bottom: 28px;
+}
+
+.paymentDetailsLeft {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.paymentDetailsIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--pp-surface-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.paymentDetailsIconInner {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--pp-text);
+}
+
+.paymentDetailsAmount {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.paymentDetailsValue {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--pp-text);
+    letter-spacing: -0.02em;
+}
+
+.paymentDetailsCurrency {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--pp-text-dim);
+}
+
+.paymentDetailsRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.paymentDetailsNetworkLabel {
+    font-size: 12px;
+    color: var(--pp-text-dim);
+}
+
+.networkBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: var(--pp-network-badge-bg);
+    border: 1px solid var(--pp-network-badge-border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pp-network-badge-text);
+    letter-spacing: 0.02em;
+}
+
+/* ── Proceed Button ──────────────────────────────────────────────────────── */
+
+.proceedBtn {
+    width: 100%;
+    min-height: 52px;
+    max-height: 56px;
+    background: var(--pp-primary-bg);
+    color: var(--pp-primary-text);
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+    padding: 0 24px;
+    margin-bottom: 20px;
+}
+
+.proceedBtn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.proceedBtn:active {
+    transform: translateY(0);
+}
+
+.proceedBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.proceedBtnArrow {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Footer Text ─────────────────────────────────────────────────────────── */
+
+.footerText {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--pp-text-muted);
+    padding: 8px 0;
+}
+
+.footerLockIcon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.footerLink {
+    color: var(--pp-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.footerLink:hover {
+    color: var(--pp-text);
+}
+
+/* ── Skeleton Loading ────────────────────────────────────────────────────── */
+
+.skeleton {
+    animation: ppShimmer 1.8s infinite ease-in-out;
+}
+
+@keyframes ppShimmer {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+.skeletonBar {
+    background: var(--pp-surface-hover);
+    border-radius: 6px;
+}
+
+.skeletonCircle {
+    background: var(--pp-surface-hover);
+    border-radius: 50%;
+}
+
+.skeletonTopbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    min-height: 64px;
+    border-bottom: 1px solid var(--pp-border);
+    background: var(--pp-bg);
+}
+
+.skeletonTopbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skeletonTopbarCenter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skeletonTopbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skeletonMainLayout {
+    display: flex;
+    flex: 1;
+    padding: 40px;
+    gap: 40px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.skeletonSummaryCard {
+    width: 100%;
+    min-width: 320px;
+    max-width: 420px;
+    background: var(--pp-bg-card);
+    border: 1px solid var(--pp-border);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.skeletonSummaryRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skeletonFormPanel {
+    flex: 1;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.skeletonStepRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.skeletonWalletBox {
+    width: 100%;
+    min-height: 64px;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.skeletonPaymentBox {
+    width: 100%;
+    min-height: 88px;
+    background: var(--pp-dropdown-bg);
+    border: 1px solid var(--pp-dropdown-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.skeletonButton {
+    width: 100%;
+    min-height: 52px;
+    background: var(--pp-surface-hover);
+    border-radius: 12px;
+}
+
+/* ── Mobile Menu Button ──────────────────────────────────────────────────── */
+
+.mobileMenuBtn {
+    display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE: Tablet (max-width: 1024px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .topbar {
+        padding: 14px 24px;
+    }
+
+    .mainLayout {
+        flex-direction: column;
+        padding: 24px;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .summaryPanel {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .summaryCard {
+        min-height: auto;
+        max-height: none;
+    }
+
+    .formPanel {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .formTitle {
+        font-size: 24px;
+    }
+
+    .skeletonMainLayout {
+        flex-direction: column;
+        padding: 24px;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .skeletonSummaryCard {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .skeletonFormPanel {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE: Mobile (max-width: 640px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    .topbar {
+        padding: 12px 16px;
+        min-height: 56px;
+        max-height: 56px;
+    }
+
+    .topbarLogoText {
+        font-size: 16px;
+    }
+
+    .topbarUsername {
+        display: none;
+    }
+
+    .topbarCenter {
+        gap: 8px;
+    }
+
+    .mainLayout {
+        flex-direction: column;
+        padding: 16px;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .summaryPanel {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .summaryCard {
+        padding: 24px;
+        min-height: auto;
+        max-height: none;
+    }
+
+    .summaryTitle {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    .summaryTotalValue {
+        font-size: 18px;
+    }
+
+    .formPanel {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .formTitle {
+        font-size: 22px;
+    }
+
+    .formSubtitle {
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .formTitle,
+    .formSubtitle {
+        padding: 0 4px;
+    }
+
+    .paymentDetailsBox {
+        padding: 16px 18px;
+    }
+
+    .paymentDetailsValue {
+        font-size: 20px;
+    }
+
+    .skeletonMainLayout {
+        flex-direction: column;
+        padding: 16px;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .skeletonSummaryCard {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        padding: 24px;
+    }
+
+    .skeletonFormPanel {
+        max-width: 100%;
+        width: 100%;
+    }
+}

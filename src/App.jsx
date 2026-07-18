@@ -7,6 +7,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const BannedPage = lazy(() => import('./pages/BannedPage'));
+const PaymentPage = lazy(() => import('./pages/PaymentPage'));
 
 // Minimal loading state, zero layout shift, pure skeleton placeholder
 const RouteFallback = memo(() => (
@@ -32,18 +33,27 @@ function App() {
           <Route path="/banned" element={<BannedPage />} />
 
           {/* Protected Routes */}
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            } 
+            }
+          />
+
+          <Route
+            path="/payment/:callback_token"
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            }
           />
 
           {/* Root Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           {/* 404 Redirect */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
