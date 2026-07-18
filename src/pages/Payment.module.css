@@ -844,18 +844,48 @@
     align-items: flex-start;
 }
 
-.skeletonSummaryCard {
-    width: 100%;
+.skeletonLeftPanel {
     min-width: 300px;
     max-width: 420px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.skeletonSummaryCard {
+    width: 100%;
     background: var(--pp-bg-card);
     border: 1px solid var(--pp-border);
     border-radius: 16px;
     padding: 28px;
     display: flex;
     flex-direction: column;
+    gap: 0;
+}
+
+.skeletonUserInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.skeletonBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.skeletonBadge {
+    display: flex;
+    align-items: flex-start;
     gap: 12px;
-    flex-shrink: 0;
+}
+
+.skeletonBadgeContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .skeletonSummaryRow {
@@ -869,7 +899,7 @@
     max-width: 620px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     margin-top: 8px;
 }
 
@@ -961,9 +991,14 @@
         align-items: center;
     }
 
-    .skeletonSummaryCard {
+    .skeletonLeftPanel {
         max-width: 100%;
         min-width: 0;
+        width: 100%;
+    }
+
+    .skeletonSummaryCard {
+        max-width: 100%;
         width: 100%;
     }
 
@@ -989,6 +1024,10 @@
     }
 
     .topbarUsername {
+        display: none;
+    }
+
+    .topbarUserRole {
         display: none;
     }
 
@@ -1058,9 +1097,14 @@
         align-items: stretch;
     }
 
-    .skeletonSummaryCard {
+    .skeletonLeftPanel {
         max-width: 100%;
         min-width: 0;
+        width: 100%;
+    }
+
+    .skeletonSummaryCard {
+        max-width: 100%;
         width: 100%;
         padding: 24px;
     }
