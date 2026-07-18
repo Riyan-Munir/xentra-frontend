@@ -37,6 +37,9 @@ function processPendingRequests(newToken) {
  * if the refresh fails.
  */
 async function refreshAccessToken() {
+  // If the session was expired by inactivity, don't attempt refresh
+  if (sessionStorage.getItem('session_expired') === 'true') return null;
+
   const refreshToken = localStorage.getItem('refresh_token');
   if (!refreshToken) return null;
 
@@ -99,6 +102,11 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // If session was expired by inactivity, reject immediately — no refresh attempt
+    if (sessionStorage.getItem('session_expired') === 'true') {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 429) {
       const message = error.response.data?.message || 'Rate limit exceeded. Please wait.';
@@ -215,6 +223,18 @@ api.invalidateCache = (urlPrefix) => {
  */
 api.clearCache = () => {
   responseCache.clear();
+};
+
+/**
+ * Force-clear all auth state and redirect to login.
+ * Used by session expiry and logout flows.
+ */
+api.clearAuthAndRedirect = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  sessionStorage.setItem('session_expired', 'true');
+  responseCache.clear();
+  window.location.href = '/login';
 };
 
 /**

@@ -9,13 +9,30 @@ const AuthCallback = () => {
   const [error, setError] = useState(null);
   const [needUsername, setNeedUsername] = useState(false);
   const [botUsername, setBotUsername] = useState('');
-  const [registrationId, setRegistrationId] = useState(null); 
+  const [registrationId, setRegistrationId] = useState(null);
   const hasCalled = React.useRef(false);
 
   const code = searchParams.get('code');
   const guildId = searchParams.get('guild_id');
-  const stateRole = searchParams.get('state'); 
-  const role = stateRole || searchParams.get('role') || localStorage.getItem('selected_role') || 'client';
+  const stateRole = searchParams.get('state');
+
+  // Check if this is a payment callback flow
+  const paymentCallbackToken = localStorage.getItem('payment_callback_token');
+  const isPaymentFlow = !!paymentCallbackToken;
+
+  // Parse role from state — may be "payment:TOKEN:ROLE" format from payment mode
+  let role;
+  let parsedPaymentToken = null;
+  if (stateRole && stateRole.startsWith('payment:')) {
+    const parts = stateRole.split(':');
+    parsedPaymentToken = parts[1];
+    role = parts[2] || 'freelancer';
+  } else {
+    role = stateRole || searchParams.get('role') || localStorage.getItem('selected_role') || 'client';
+  }
+
+  // Use parsed payment token if available
+  const effectivePaymentToken = parsedPaymentToken || paymentCallbackToken;
 
   console.log('--- AuthCallback Logic ---', { code, guildId, role });
 
@@ -23,11 +40,22 @@ const AuthCallback = () => {
     console.log('Registering guild in backend:', gId);
     try {
       await api.post(`guilds/register/`, { guild_id: gId });
-      navigate('/dashboard');
+      // Payment flow: navigate to payment page instead of dashboard
+      if (isPaymentFlow && effectivePaymentToken) {
+        localStorage.removeItem('payment_callback_token');
+        localStorage.removeItem('payment_return_role');
+        navigate(`/payment/${effectivePaymentToken}`);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('Guild registration failed:', err);
       alert('Guild registration failed. Please ensure you are logged in correctly and try again.');
-      navigate('/dashboard');
+      if (isPaymentFlow && effectivePaymentToken) {
+        navigate(`/payment/${effectivePaymentToken}?auth_error=1`);
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
@@ -55,6 +83,8 @@ const AuthCallback = () => {
       }
 
       const savedRole = res.data.user.role || role || 'freelancer';
+      // Clear session expired flag now that we have fresh tokens
+      sessionStorage.removeItem('session_expired');
       localStorage.setItem('access_token', res.data.access);
       localStorage.setItem('refresh_token', res.data.refresh);
       localStorage.setItem('user_role', savedRole);
@@ -65,8 +95,17 @@ const AuthCallback = () => {
       localStorage.setItem('selected_role', savedRole);
       localStorage.setItem('active_role', res.data.user.active_role);
       localStorage.setItem('is_banned', res.data.user.is_banned);
-      
-      if (guildId) {
+
+      // Payment flow: navigate to payment page after successful auth
+      if (isPaymentFlow && effectivePaymentToken) {
+        localStorage.removeItem('payment_callback_token');
+        localStorage.removeItem('payment_return_role');
+        if (guildId) {
+          await registerGuild(guildId);
+        } else {
+          navigate(`/payment/${effectivePaymentToken}`);
+        }
+      } else if (guildId) {
         await registerGuild(guildId);
       } else if (shouldNavigate) {
         navigate('/dashboard');
@@ -89,6 +128,13 @@ const AuthCallback = () => {
 
     if (oauthError) {
       setLoading(false);
+      // Payment flow: redirect back to payment page with error
+      if (isPaymentFlow && effectivePaymentToken) {
+        localStorage.removeItem('payment_callback_token');
+        localStorage.removeItem('payment_return_role');
+        navigate(`/payment/${effectivePaymentToken}?auth_error=1`, { replace: true });
+        return;
+      }
       if (oauthError === 'access_denied') {
         setError('Login cancelled: You denied the connection request to Discord.');
       } else {
@@ -105,7 +151,10 @@ const AuthCallback = () => {
           if (guildId && result.status !== 'need_username' && (result.status === 'success' || localStorage.getItem('access_token'))) {
             await registerGuild(guildId);
           } else if (!guildId && result.status === 'success') {
-            navigate('/dashboard');
+            // Payment flow: already handled in exchangeCode
+            if (!isPaymentFlow) {
+              navigate('/dashboard');
+            }
           }
         };
         handleFlow();
@@ -114,6 +163,13 @@ const AuthCallback = () => {
         registerGuild(guildId);
       } else {
         setLoading(false);
+        // Payment flow: redirect back to payment page with error
+        if (isPaymentFlow && effectivePaymentToken) {
+          localStorage.removeItem('payment_callback_token');
+          localStorage.removeItem('payment_return_role');
+          navigate(`/payment/${effectivePaymentToken}?auth_error=1`, { replace: true });
+          return;
+        }
         setError('Missing authentication code. Please try logging in again.');
       }
     }
@@ -122,7 +178,7 @@ const AuthCallback = () => {
   if (loading) return (
     <div className="auth-callback-container loading-bg">
       <div className="auth-callback-grid-lines"></div>
-      
+
       <div className="fade-in text-center z-2">
         <div className="auth-callback-loader-wrapper">
           <div className="auth-callback-loader-outer"></div>
@@ -138,7 +194,7 @@ const AuthCallback = () => {
   if (error) return (
     <div className="auth-callback-container error-bg">
       <div className="auth-callback-grid-lines"></div>
-      
+
       <div className="auth-callback-card error fade-in">
         <div className="auth-callback-error-icon-wrapper">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -150,12 +206,18 @@ const AuthCallback = () => {
 
         <h3 className="auth-error-heading">Authentication Blocked</h3>
         <p className="auth-error-description">{error}</p>
-        
-        <button 
-          onClick={() => navigate('/login')} 
+
+        <button
+          onClick={() => {
+            if (isPaymentFlow && effectivePaymentToken) {
+              navigate(`/payment/${effectivePaymentToken}?auth_error=1`);
+            } else {
+              navigate('/login');
+            }
+          }}
           className="btn btn-primary auth-callback-btn-error"
         >
-          Return to Login
+          {isPaymentFlow ? 'Return to Payment' : 'Return to Login'}
         </button>
       </div>
     </div>
@@ -165,7 +227,7 @@ const AuthCallback = () => {
     return (
       <div className="auth-callback-container client-bg">
         <div className="auth-callback-grid-lines"></div>
-        
+
         <div className="auth-callback-card username-client fade-in">
           <div className="auth-username-section">
             <h2 className="auth-username-heading">One Last Step!</h2>
@@ -177,7 +239,7 @@ const AuthCallback = () => {
               role.
             </p>
           </div>
-          
+
           <div className="auth-username-group">
             <label className="form-label auth-username-label">Display Name</label>
             <input
@@ -192,7 +254,7 @@ const AuthCallback = () => {
               Max 16 characters. Allowed: letters, numbers, spaces, underscores, and hyphens. No dots.
             </p>
           </div>
-          
+
           <button
             onClick={() => exchangeCode(botUsername)}
             className="btn btn-primary auth-callback-btn-username-client"

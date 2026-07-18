@@ -1,10 +1,19 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Disc as Discord, Shield, Briefcase, Globe, Clock, LogOut, ShieldCheck } from 'lucide-react';
 import CaptchaChallenge from '../components/dashboard/common/CaptchaChallenge';
 import { fetchCaptchaChallenge, captchaVerify } from '../services/api';
 
 const LoginPage = () => {
-  const [role, setRole] = useState('freelancer');
+  const [searchParams] = useSearchParams();
+
+  /* ── Payment Mode ──────────────────────────────────────────────────── */
+  const paymentCallbackToken = searchParams.get('payment_callback_token');
+  const paymentRole = searchParams.get('role');
+  const isPaymentMode = !!paymentCallbackToken;
+  const autoClickedRef = useRef(false);
+
+  const [role, setRole] = useState(paymentRole || 'freelancer');
   const [isExpired] = useState(() => {
     const expired = sessionStorage.getItem('session_expired') === 'true';
     sessionStorage.removeItem('session_expired');
@@ -21,13 +30,22 @@ const LoginPage = () => {
 
   const redirectToDiscord = useCallback(() => {
     localStorage.setItem('selected_role', role);
+    // Store payment callback info for AuthCallback to pick up
+    if (isPaymentMode) {
+      localStorage.setItem('payment_callback_token', paymentCallbackToken);
+      localStorage.setItem('payment_return_role', paymentRole || role);
+    }
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
     const redirectUri = encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI);
     const scope = encodeURIComponent('identify email guilds');
-    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${role}`;
-  }, [role]);
+    // Encode payment callback token in state so AuthCallback can retrieve it
+    const statePayload = isPaymentMode
+      ? `payment:${paymentCallbackToken}:${paymentRole || role}`
+      : role;
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${encodeURIComponent(statePayload)}`;
+  }, [role, isPaymentMode, paymentCallbackToken, paymentRole]);
 
-  const handleDiscordLogin = async () => {
+  const handleDiscordLogin = useCallback(async () => {
     // Fetch the public captcha site key, then show the widget.
     setCaptcha((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
@@ -43,7 +61,7 @@ const LoginPage = () => {
       // Backend unreachable or error, graceful degradation: skip captcha.
       redirectToDiscord();
     }
-  };
+  }, [redirectToDiscord]);
 
   const handleCaptchaVerified = useCallback(async (token) => {
     try {
@@ -60,6 +78,18 @@ const LoginPage = () => {
   const handleCaptchaDismiss = useCallback(() => {
     setCaptcha({ required: false, siteKey: '', error: null, isLoading: false });
   }, []);
+
+  /* ── Payment Mode: Auto-click login button ─────────────────────────── */
+  useEffect(() => {
+    if (isPaymentMode && !autoClickedRef.current) {
+      autoClickedRef.current = true;
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        handleDiscordLogin();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isPaymentMode, handleDiscordLogin]);
 
   if (isExpired) {
     return (
@@ -93,40 +123,59 @@ const LoginPage = () => {
           <p className="login-subtitle">The future of decentralized freelancing.</p>
         </div>
 
-        <div className="login-page-select-wrapper">
-          <label className="form-label">Select Your Identity</label>
-          <div className="login-page-grid">
-            <div
-              onClick={() => setRole('client')}
-              className={`nav-item login-role-item ${role === 'client' ? 'active' : ''}`}
-            >
-              <Briefcase size={20} />
-              <span>Client</span>
-            </div>
-            <div
-              onClick={() => setRole('freelancer')}
-              className={`nav-item login-role-item ${role === 'freelancer' ? 'active' : ''}`}
-            >
-              <Globe size={20} />
-              <span>Freelancer</span>
-            </div>
-            <div
-              onClick={() => setRole('server_admin')}
-              className={`nav-item login-role-item ${role === 'server_admin' ? 'active' : ''}`}
-            >
-              <Shield size={20} />
-              <span>Server Admin</span>
+        {!isPaymentMode && (
+          <div className="login-page-select-wrapper">
+            <label className="form-label">Select Your Identity</label>
+            <div className="login-page-grid">
+              <div
+                onClick={() => setRole('client')}
+                className={`nav-item login-role-item ${role === 'client' ? 'active' : ''}`}
+              >
+                <Briefcase size={20} />
+                <span>Client</span>
+              </div>
+              <div
+                onClick={() => setRole('freelancer')}
+                className={`nav-item login-role-item ${role === 'freelancer' ? 'active' : ''}`}
+              >
+                <Globe size={20} />
+                <span>Freelancer</span>
+              </div>
+              <div
+                onClick={() => setRole('server_admin')}
+                className={`nav-item login-role-item ${role === 'server_admin' ? 'active' : ''}`}
+              >
+                <Shield size={20} />
+                <span>Server Admin</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {isPaymentMode && (
+          <div className="login-page-select-wrapper">
+            <label className="form-label">Payment Login</label>
+            <div className="login-page-grid" style={{ pointerEvents: 'none', opacity: 0.7 }}>
+              <div
+                className={`nav-item login-role-item ${role === 'freelancer' ? 'active' : ''}`}
+              >
+                {role === 'client' ? <Briefcase size={20} /> : <Globe size={20} />}
+                <span>{role === 'client' ? 'Client' : 'Freelancer'}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <button
           onClick={handleDiscordLogin}
           className="btn btn-primary login-page-btn-discord"
-          disabled={captcha.isLoading}
+          disabled={captcha.isLoading || isPaymentMode}
         >
           <Discord size={24} />
-          {captcha.isLoading ? 'Verifying...' : 'Continue with Discord'}
+          {isPaymentMode
+            ? (captcha.isLoading ? 'Verifying...' : 'Authenticating...')
+            : (captcha.isLoading ? 'Verifying...' : 'Continue with Discord')
+          }
         </button>
 
         <p className="text-075rem text-dim mt-24">

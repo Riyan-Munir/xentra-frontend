@@ -44,11 +44,7 @@ function App() {
 
           <Route
             path="/payment/:callback_token"
-            element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            }
+            element={<PaymentPage />}
           />
 
           {/* Root Redirect */}

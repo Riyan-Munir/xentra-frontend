@@ -917,6 +917,11 @@ const Dashboard = () => {
       clearTimeout(inactivityTimerRef.current);
     }
     inactivityTimerRef.current = setTimeout(() => {
+      // Clear all auth state so tokens can't be reused on reload
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      // Persist expired flag across navigation/reload for LoginPage
+      sessionStorage.setItem('session_expired', 'true');
       setSessionExpired(true);
     }, SESSION_EXPIRY_MS);
   }, [sessionExpired]);
@@ -1150,7 +1155,12 @@ const Dashboard = () => {
         </p>
         <button
           className="hacking-modal-btn"
-          onClick={() => { window.location.href = '/login'; }}
+          onClick={() => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            sessionStorage.setItem('session_expired', 'true');
+            window.location.href = '/login';
+          }}
         >
           <LogOut size={20} />
           Go to Login

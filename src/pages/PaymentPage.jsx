@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
     ShieldCheck,
     Clock,
@@ -11,44 +11,12 @@ import {
     Menu,
     Wallet,
     AlertCircle,
+    LogOut,
+    RefreshCw,
+    AlertTriangle,
 } from 'lucide-react';
 import styles from './Payment.module.css';
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Mock Data — UI-only, no backend logic
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-const MOCK_PAYMENT_DATA = {
-    plan: 'Pro Plan',
-    duration: '1 Month',
-    amount: 50.0,
-    amountCurrency: 'USDT',
-    networkFee: 0.29,
-    networkFeeCurrency: 'USDT',
-    network: 'BSC (BEP20)',
-    totalPayable: 50.29,
-};
-
-const MOCK_WALLETS = [
-    {
-        id: '1',
-        name: 'Main Wallet',
-        address: '0x3f4a9c2e1b7d8f5a3c6e9b2d4f7a1c8e5b3d6f9a',
-        balance: 125.5,
-        currency: 'USDT',
-        isDefault: true,
-        isVerified: true,
-    },
-    {
-        id: '2',
-        name: 'Trading Wallet',
-        address: '0x7e2b5d8a1c4f9e3b6a2d8c5f1e4b7a3d9c6f2e8b',
-        balance: 342.0,
-        currency: 'USDT',
-        isDefault: false,
-        isVerified: true,
-    },
-];
+import callbackService from '../services/callbackService';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Utility: Format address for display
@@ -479,8 +447,46 @@ const PaymentSkeleton = memo(function PaymentSkeleton() {
    Main Component: PaymentPage
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Page States — error / expired / tampered / reauth / session-expired
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function PaymentErrorOverlay({ theme, icon: Icon, title, message, actionLabel, onAction, secondaryLabel, onSecondary }) {
+    return (
+        <div className={`${styles.page} ${theme === 'light' ? styles.light : ''}`}>
+            <div className={styles.errorOverlay}>
+                <div className={styles.errorCard}>
+                    <div className={styles.errorIconWrapper}>
+                        <Icon size={48} />
+                    </div>
+                    <h2 className={styles.errorTitle}>{title}</h2>
+                    <p className={styles.errorMessage}>{message}</p>
+                    <div className={styles.errorActions}>
+                        {onAction && (
+                            <button className={styles.proceedBtn} onClick={onAction}>
+                                {actionLabel}
+                            </button>
+                        )}
+                        {onSecondary && (
+                            <button className={styles.errorSecondaryBtn} onClick={onSecondary}>
+                                {secondaryLabel}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Main Component: PaymentPage
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 function PaymentPage() {
     const { callback_token } = useParams();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     /* ── Theme State ──────────────────────────────────────────────────── */
     const [theme, setTheme] = useState(() => {
@@ -495,23 +501,21 @@ function PaymentPage() {
         });
     }, []);
 
-    /* ── Loading State (simulated) ────────────────────────────────────── */
-    const [isLoading, setIsLoading] = useState(true);
+    /* ── Page State ───────────────────────────────────────────────────── */
+    const [pageState, setPageState] = useState('loading');
+    // loading | ready | error | expired | tampered | reauth | session-expired
+    const [paymentData, setPaymentData] = useState(null);
+    const [wallets, setWallets] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [requiredRole, setRequiredRole] = useState(null);
+    const hasValidated = useRef(false);
 
-    useEffect(() => {
-        // Simulate initial data fetch
-        const timer = setTimeout(() => setIsLoading(false), 1500);
-        return () => clearTimeout(timer);
-    }, []);
-
-    /* ── Payment Data ─────────────────────────────────────────────────── */
-    const paymentData = MOCK_PAYMENT_DATA;
+    /* ── Auth Error from redirect ─────────────────────────────────────── */
+    const authError = searchParams.get('auth_error');
+    const reauthNeeded = searchParams.get('reauth');
 
     /* ── Wallet State ─────────────────────────────────────────────────── */
-    const [wallets] = useState(MOCK_WALLETS);
-    const [selectedWallet, setSelectedWallet] = useState(() => {
-        return MOCK_WALLETS.find((w) => w.isDefault) || null;
-    });
+    const [selectedWallet, setSelectedWallet] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleSelectWallet = useCallback((wallet) => {
@@ -547,100 +551,272 @@ function PaymentPage() {
         return stored;
     }, []);
 
+    /* ── Validate Callback Token ──────────────────────────────────────── */
+    const validateToken = useCallback(async () => {
+        const jwt = localStorage.getItem('access_token');
+        if (!jwt) {
+            // No JWT — need to login. Fetch required role first, then redirect.
+            try {
+                const infoRes = await callbackService.getPublicInfo(callback_token);
+                setRequiredRole(infoRes.data.required_role);
+            } catch {
+                setRequiredRole('freelancer');
+            }
+            setPageState('error');
+            setErrorMessage('Please log in to access this payment page.');
+            return;
+        }
+
+        try {
+            const res = await callbackService.validate(callback_token);
+            const data = res.data;
+            setPaymentData(data.payment);
+            setWallets(data.wallets || []);
+            setSelectedWallet((data.wallets || []).find((w) => w.isDefault) || null);
+            setPageState('ready');
+        } catch (err) {
+            const status = err.response?.status;
+            const code = err.response?.data?.error_code;
+            const msg = err.response?.data?.error || err.response?.data?.detail || 'An error occurred.';
+
+            if (status === 401) {
+                // Session expired
+                setPageState('session-expired');
+                setErrorMessage('Your session has expired. Please log in again.');
+            } else if (status === 409) {
+                // Wrong profile — need re-auth
+                setPageState('reauth');
+                setErrorMessage(msg);
+                setRequiredRole(err.response?.data?.required_role || null);
+            } else if (status === 403 || code === 'tampered') {
+                // Wrong user or tampered token
+                setPageState('tampered');
+                setErrorMessage(msg);
+            } else if (code === 'expired') {
+                setPageState('expired');
+                setErrorMessage(msg);
+            } else if (code === 'not_found' || code === 'consumed') {
+                setPageState('expired');
+                setErrorMessage(msg);
+            } else {
+                setPageState('error');
+                setErrorMessage(msg);
+            }
+        }
+    }, [callback_token]);
+
+    /* ── Initial Validation ───────────────────────────────────────────── */
+    useEffect(() => {
+        if (hasValidated.current) return;
+        hasValidated.current = true;
+        validateToken();
+    }, [validateToken]);
+
+    /* ── Handle Auth Error Redirect ───────────────────────────────────── */
+    useEffect(() => {
+        if (authError === '1') {
+            setPageState('error');
+            setErrorMessage('Authentication failed. Please try logging in again.');
+        }
+        if (reauthNeeded === '1') {
+            setPageState('reauth');
+            setErrorMessage('Please log in with the correct profile to continue.');
+        }
+    }, [authError, reauthNeeded]);
+
+    /* ── Session Timeout (15 min) ─────────────────────────────────────── */
+    useEffect(() => {
+        if (pageState !== 'ready') return;
+        const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+        const timer = setTimeout(() => {
+            setPageState('session-expired');
+            setErrorMessage('Your session has expired. Please log in again.');
+        }, SESSION_TIMEOUT);
+        return () => clearTimeout(timer);
+    }, [pageState]);
+
+    /* ── Navigate to Login ────────────────────────────────────────────── */
+    const goToLogin = useCallback(() => {
+        const role = requiredRole || 'freelancer';
+        navigate(`/login?payment_callback_token=${callback_token}&role=${role}`, { replace: true });
+    }, [navigate, callback_token, requiredRole]);
+
+    /* ── Retry Validation ─────────────────────────────────────────────── */
+    const handleRetry = useCallback(() => {
+        setPageState('loading');
+        hasValidated.current = false;
+        validateToken();
+    }, [validateToken]);
+
     /* ── Handle Proceed (UI-only placeholder) ─────────────────────────── */
     const handleProceed = useCallback(() => {
-        // UI-only — no backend logic
+        // TODO: implement actual payment submission
     }, []);
 
-    /* ── Render Skeleton ──────────────────────────────────────────────── */
-    if (isLoading) {
+    /* ── Render Loading ───────────────────────────────────────────────── */
+    if (pageState === 'loading') {
         return <PaymentSkeleton />;
     }
 
-    /* ── Determine wallet state for step 2 button disabled ────────────── */
-    const hasWallets = wallets.length > 0;
-    const hasVerified = wallets.some((w) => w.isVerified);
-    const hasDefault = wallets.some((w) => w.isDefault && w.isVerified);
-    const canProceed = hasWallets && hasVerified && hasDefault;
-
-    return (
-        <div className={`${styles.page} ${theme === 'light' ? styles.light : ''}`}>
-            {/* Top Bar */}
-            <PaymentTopBar
+    /* ── Render Session Expired ───────────────────────────────────────── */
+    if (pageState === 'session-expired') {
+        return (
+            <PaymentErrorOverlay
                 theme={theme}
-                onToggleTheme={toggleTheme}
-                username={username}
-                avatarUrl={avatarUrl}
-                role={userRole}
+                icon={Clock}
+                title="Session Expired"
+                message={errorMessage || 'Your session has timed out. Please log in again to continue.'}
+                actionLabel="Log In Again"
+                onAction={goToLogin}
             />
+        );
+    }
 
-            {/* Main Content */}
-            <div className={styles.mainLayout}>
-                {/* Left Panel: Payment Summary */}
-                <div className={styles.summaryPanel}>
-                    <PaymentSummaryCard data={paymentData} />
-                    <SecurityBadges />
-                </div>
+    /* ── Render Error (no JWT / auth failed) ──────────────────────────── */
+    if (pageState === 'error') {
+        return (
+            <PaymentErrorOverlay
+                theme={theme}
+                icon={AlertCircle}
+                title="Authentication Required"
+                message={errorMessage}
+                actionLabel="Log In"
+                onAction={goToLogin}
+            />
+        );
+    }
 
-                {/* Right Panel: Payment Form */}
-                <div className={styles.formPanel}>
-                    <h1 className={styles.formTitle}>Complete Your Payment</h1>
-                    <p className={styles.formSubtitle}>
-                        Review your order and make a secure crypto payment
-                    </p>
+    /* ── Render Tampered ──────────────────────────────────────────────── */
+    if (pageState === 'tampered') {
+        return (
+            <PaymentErrorOverlay
+                theme={theme}
+                icon={AlertTriangle}
+                title="Access Denied"
+                message={errorMessage || 'This payment link was accessed by an unauthorized account.'}
+                actionLabel="Log In with Correct Account"
+                onAction={goToLogin}
+            />
+        );
+    }
 
-                    {/* Step 1: Select Wallet */}
-                    <div className={styles.stepHeader}>
-                        <div className={styles.stepCircle}>1</div>
-                        <span className={styles.stepTitle}>Select Wallet</span>
+    /* ── Render Expired ───────────────────────────────────────────────── */
+    if (pageState === 'expired') {
+        return (
+            <PaymentErrorOverlay
+                theme={theme}
+                icon={Clock}
+                title="Payment Expired"
+                message={errorMessage || 'This payment link has expired. Please create a new payment from your dashboard.'}
+                actionLabel="Go to Dashboard"
+                onAction={() => navigate('/dashboard')}
+            />
+        );
+    }
+
+    /* ── Render Re-auth Needed ────────────────────────────────────────── */
+    if (pageState === 'reauth') {
+        return (
+            <PaymentErrorOverlay
+                theme={theme}
+                icon={LogOut}
+                title="Wrong Profile"
+                message={errorMessage || 'Please log in with the correct profile to continue.'}
+                actionLabel="Log In with Correct Profile"
+                onAction={goToLogin}
+            />
+        );
+    }
+
+    /* ── Render Ready (payment page) ──────────────────────────────────── */
+    if (pageState === 'ready' && paymentData) {
+        const hasWallets = wallets.length > 0;
+        const hasVerified = wallets.some((w) => w.isVerified);
+        const hasDefault = wallets.some((w) => w.isDefault && w.isVerified);
+        const canProceed = hasWallets && hasVerified && hasDefault;
+
+        return (
+            <div className={`${styles.page} ${theme === 'light' ? styles.light : ''}`}>
+                {/* Top Bar */}
+                <PaymentTopBar
+                    theme={theme}
+                    onToggleTheme={toggleTheme}
+                    username={username}
+                    avatarUrl={avatarUrl}
+                    role={userRole}
+                />
+
+                {/* Main Content */}
+                <div className={styles.mainLayout}>
+                    {/* Left Panel: Payment Summary */}
+                    <div className={styles.summaryPanel}>
+                        <PaymentSummaryCard data={paymentData} />
+                        <SecurityBadges />
                     </div>
-                    <p className={styles.stepDescription}>Choose a wallet to pay with</p>
 
-                    <WalletDropdown
-                        wallets={wallets}
-                        selectedWallet={selectedWallet}
-                        onSelect={handleSelectWallet}
-                        isOpen={isDropdownOpen}
-                        onToggle={handleToggleDropdown}
-                    />
+                    {/* Right Panel: Payment Form */}
+                    <div className={styles.formPanel}>
+                        <h1 className={styles.formTitle}>Complete Your Payment</h1>
+                        <p className={styles.formSubtitle}>
+                            Review your order and make a secure crypto payment
+                        </p>
 
-                    {/* Step 2: Payment Details */}
-                    <div className={styles.stepHeader}>
-                        <div className={styles.stepCircle}>2</div>
-                        <span className={styles.stepTitle}>Payment Details</span>
-                    </div>
-                    <p className={styles.stepDescription}>You are paying</p>
+                        {/* Step 1: Select Wallet */}
+                        <div className={styles.stepHeader}>
+                            <div className={styles.stepCircle}>1</div>
+                            <span className={styles.stepTitle}>Select Wallet</span>
+                        </div>
+                        <p className={styles.stepDescription}>Choose a wallet to pay with</p>
 
-                    <PaymentDetailsBox
-                        amount={paymentData.totalPayable}
-                        currency={paymentData.amountCurrency}
-                        network={paymentData.network}
-                    />
+                        <WalletDropdown
+                            wallets={wallets}
+                            selectedWallet={selectedWallet}
+                            onSelect={handleSelectWallet}
+                            isOpen={isDropdownOpen}
+                            onToggle={handleToggleDropdown}
+                        />
 
-                    {/* Proceed to Pay */}
-                    <button
-                        className={styles.proceedBtn}
-                        onClick={handleProceed}
-                        disabled={!canProceed}
-                    >
-                        Proceed to Pay
-                        <span className={styles.proceedBtnArrow}>
-                            <ArrowRight size={18} />
-                        </span>
-                    </button>
+                        {/* Step 2: Payment Details */}
+                        <div className={styles.stepHeader}>
+                            <div className={styles.stepCircle}>2</div>
+                            <span className={styles.stepTitle}>Payment Details</span>
+                        </div>
+                        <p className={styles.stepDescription}>You are paying</p>
 
-                    {/* Footer */}
-                    <div className={styles.footerText}>
-                        <Lock className={styles.footerLockIcon} size={14} />
-                        <span>By proceeding, you agree to our </span>
-                        <span className={styles.footerLink}>Terms of Service</span>
-                        <span> and </span>
-                        <span className={styles.footerLink}>Privacy Policy</span>
+                        <PaymentDetailsBox
+                            amount={paymentData.totalPayable || paymentData.amount}
+                            currency={paymentData.amountCurrency || 'USDT'}
+                            network={paymentData.network || 'BSC (BEP20)'}
+                        />
+
+                        {/* Proceed to Pay */}
+                        <button
+                            className={styles.proceedBtn}
+                            onClick={handleProceed}
+                            disabled={!canProceed}
+                        >
+                            Proceed to Pay
+                            <span className={styles.proceedBtnArrow}>
+                                <ArrowRight size={18} />
+                            </span>
+                        </button>
+
+                        {/* Footer */}
+                        <div className={styles.footerText}>
+                            <Lock className={styles.footerLockIcon} size={14} />
+                            <span>By proceeding, you agree to our </span>
+                            <span className={styles.footerLink}>Terms of Service</span>
+                            <span> and </span>
+                            <span className={styles.footerLink}>Privacy Policy</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+    /* ── Fallback: should not reach here ──────────────────────────────── */
+    return <PaymentSkeleton />;
 }
 
 export default memo(PaymentPage);

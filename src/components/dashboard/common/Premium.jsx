@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Crown,
     Gift,
@@ -294,6 +295,7 @@ PendingPaymentBanner.displayName = 'PendingPaymentBanner';
 
 /* ── Main Premium Component ──────────────────────────────────────── */
 const Premium = ({ profile, currentRole, addNotification }) => {
+    const navigate = useNavigate();
     const [plans, setPlans] = useState([]);
     const [activeSub, setActiveSub] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -390,14 +392,19 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 plan_id: plan.id,
                 payment_type: 'subscription',
             });
-            addNotification?.(
-                isExtend
-                    ? 'Subscription extension created. Complete payment to activate.'
-                    : 'Payment initiated. Complete payment to activate premium.',
-                'success'
-            );
-            /* Refresh pending payments to show the newly created payment */
-            fetchPendingPayments();
+            const callbackToken = res.data?.callback_token;
+            if (callbackToken) {
+                /* Navigate to payment page with callback token */
+                navigate(`/payment/${callbackToken}`);
+            } else {
+                addNotification?.(
+                    isExtend
+                        ? 'Subscription extension created. Complete payment to activate.'
+                        : 'Payment initiated. Complete payment to activate premium.',
+                    'success'
+                );
+                fetchPendingPayments();
+            }
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create payment.';
             addNotification?.(msg, 'error');
@@ -666,13 +673,18 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
         setSelectedPlan(plan);
         setCreating(true);
         try {
-            await premiumService.createPayment({
+            const res = await premiumService.createPayment({
                 plan_id: plan.id,
                 payment_type: 'gift',
                 giftee_system_id: selectedUser.discord_id,
             });
-            setStep('success');
-            addNotification?.(`Gift subscription created for ${selectedUser.discord_username}. Complete payment to send.`, 'success');
+            const callbackToken = res.data?.callback_token;
+            if (callbackToken) {
+                navigate(`/payment/${callbackToken}`);
+            } else {
+                setStep('success');
+                addNotification?.(`Gift subscription created for ${selectedUser.discord_username}. Complete payment to send.`, 'success');
+            }
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create gift.';
             addNotification?.(msg, 'error');
