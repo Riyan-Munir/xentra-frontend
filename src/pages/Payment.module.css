@@ -226,51 +226,52 @@
 .mainLayout {
     display: flex;
     flex: 1;
-    padding: 40px;
-    gap: 40px;
-    max-width: 1400px;
+    padding: 32px 40px;
+    gap: 32px;
+    max-width: 1200px;
     width: 100%;
     margin: 0 auto;
     min-height: calc(100vh - 64px);
     box-sizing: border-box;
+    align-items: flex-start;
 }
 
 /* ── Left Panel: Payment Summary ─────────────────────────────────────────── */
 
 .summaryPanel {
     width: 100%;
-    min-width: 320px;
-    max-width: 420px;
+    min-width: 280px;
+    max-width: 360px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
 }
 
 .summaryCard {
     background: var(--pp-bg-card);
     border: 1px solid var(--pp-border);
     border-radius: 16px;
-    padding: 32px;
-    min-height: 340px;
-    max-height: 500px;
+    padding: 28px;
+    min-height: 0;
+    max-height: none;
     box-shadow: var(--pp-shadow);
     display: flex;
     flex-direction: column;
 }
 
 .summaryTitle {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--pp-text);
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .summaryRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0;
+    padding: 8px 0;
 }
 
 .summaryLabel {
@@ -288,7 +289,7 @@
 .summaryDivider {
     height: 1px;
     background: var(--pp-divider);
-    margin: 12px 0;
+    margin: 8px 0;
     flex-shrink: 0;
 }
 
@@ -296,7 +297,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0 0;
+    padding: 8px 0 0;
 }
 
 .summaryTotalLabel {
@@ -306,7 +307,7 @@
 }
 
 .summaryTotalValue {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--pp-text);
     letter-spacing: -0.02em;
@@ -317,7 +318,7 @@
 .securityBadges {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .securityBadge {
@@ -357,23 +358,24 @@
 .formPanel {
     flex: 1;
     min-width: 0;
-    max-width: 680px;
+    max-width: 520px;
     display: flex;
     flex-direction: column;
+    margin-top: 8px;
 }
 
 .formTitle {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--pp-text);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     letter-spacing: -0.02em;
 }
 
 .formSubtitle {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--pp-text-dim);
-    margin-bottom: 36px;
+    margin-bottom: 28px;
     font-weight: 400;
 }
 
@@ -407,27 +409,27 @@
 }
 
 .stepDescription {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--pp-text-dim);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     margin-left: 40px;
 }
 
 /* ── Wallet Dropdown ─────────────────────────────────────────────────────── */
 
 .walletDropdownWrapper {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     position: relative;
 }
 
 .walletDropdown {
     width: 100%;
-    min-height: 64px;
-    max-height: 80px;
+    min-height: 56px;
+    max-height: 64px;
     background: var(--pp-dropdown-bg);
     border: 1px solid var(--pp-dropdown-border);
     border-radius: 12px;
-    padding: 14px 20px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -578,12 +580,12 @@
 /* Wallet States (no wallet / no default) */
 .walletStateMessage {
     width: 100%;
-    min-height: 64px;
-    max-height: 80px;
+    min-height: 56px;
+    max-height: 64px;
     background: var(--pp-dropdown-bg);
     border: 1px solid var(--pp-dropdown-border);
     border-radius: 12px;
-    padding: 14px 20px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -607,17 +609,17 @@
 
 .paymentDetailsBox {
     width: 100%;
-    min-height: 88px;
-    max-height: 100px;
+    min-height: 72px;
+    max-height: 80px;
     background: var(--pp-dropdown-bg);
     border: 1px solid var(--pp-dropdown-border);
     border-radius: 12px;
-    padding: 20px 24px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .paymentDetailsLeft {
@@ -627,8 +629,8 @@
 }
 
 .paymentDetailsIcon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--pp-surface-hover);
     display: flex;
@@ -638,7 +640,7 @@
 }
 
 .paymentDetailsIconInner {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--pp-text);
 }
@@ -650,14 +652,14 @@
 }
 
 .paymentDetailsValue {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--pp-text);
     letter-spacing: -0.02em;
 }
 
 .paymentDetailsCurrency {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--pp-text-dim);
 }
@@ -692,13 +694,13 @@
 
 .proceedBtn {
     width: 100%;
-    min-height: 52px;
-    max-height: 56px;
+    min-height: 48px;
+    max-height: 52px;
     background: var(--pp-primary-bg);
     color: var(--pp-primary-text);
     border: none;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -708,7 +710,7 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
     font-family: 'Outfit', sans-serif;
     padding: 0 24px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .proceedBtn:hover {
@@ -738,9 +740,9 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--pp-text-muted);
-    padding: 8px 0;
+    padding: 4px 0;
 }
 
 .footerLockIcon {
@@ -822,25 +824,26 @@
 .skeletonMainLayout {
     display: flex;
     flex: 1;
-    padding: 40px;
-    gap: 40px;
-    max-width: 1400px;
+    padding: 32px 40px;
+    gap: 32px;
+    max-width: 1200px;
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    align-items: flex-start;
 }
 
 .skeletonSummaryCard {
     width: 100%;
-    min-width: 320px;
-    max-width: 420px;
+    min-width: 280px;
+    max-width: 360px;
     background: var(--pp-bg-card);
     border: 1px solid var(--pp-border);
     border-radius: 16px;
-    padding: 32px;
+    padding: 28px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     flex-shrink: 0;
 }
 
@@ -852,10 +855,11 @@
 
 .skeletonFormPanel {
     flex: 1;
-    max-width: 680px;
+    max-width: 520px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
+    margin-top: 8px;
 }
 
 .skeletonStepRow {
@@ -866,11 +870,11 @@
 
 .skeletonWalletBox {
     width: 100%;
-    min-height: 64px;
+    min-height: 56px;
     background: var(--pp-dropdown-bg);
     border: 1px solid var(--pp-dropdown-border);
     border-radius: 12px;
-    padding: 14px 20px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -879,11 +883,11 @@
 
 .skeletonPaymentBox {
     width: 100%;
-    min-height: 88px;
+    min-height: 72px;
     background: var(--pp-dropdown-bg);
     border: 1px solid var(--pp-dropdown-border);
     border-radius: 12px;
-    padding: 20px 24px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -892,7 +896,7 @@
 
 .skeletonButton {
     width: 100%;
-    min-height: 52px;
+    min-height: 48px;
     background: var(--pp-surface-hover);
     border-radius: 12px;
 }

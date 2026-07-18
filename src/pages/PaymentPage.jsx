@@ -371,56 +371,56 @@ const PaymentSkeleton = memo(function PaymentSkeleton() {
             <div className={styles.skeletonMainLayout}>
                 {/* Left: Summary Skeleton */}
                 <div className={styles.skeletonSummaryCard}>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 140, height: 22, borderRadius: 6 }} />
+                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 18, borderRadius: 6 }} />
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i} className={styles.skeletonSummaryRow}>
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 80, height: 14, borderRadius: 4 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 70, height: 14, borderRadius: 4 }} />
+                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 70, height: 12, borderRadius: 4 }} />
+                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 60, height: 12, borderRadius: 4 }} />
                         </div>
                     ))}
                     <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: '100%', height: 1 }} />
                     <div className={styles.skeletonSummaryRow}>
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 90, height: 14, borderRadius: 4 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 24, borderRadius: 6 }} />
+                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 80, height: 12, borderRadius: 4 }} />
+                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 90, height: 20, borderRadius: 6 }} />
                     </div>
                 </div>
 
                 {/* Right: Form Skeleton */}
                 <div className={styles.skeletonFormPanel}>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 280, height: 32, borderRadius: 6 }} />
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 320, height: 16, borderRadius: 4 }} />
+                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 240, height: 28, borderRadius: 6 }} />
+                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 280, height: 14, borderRadius: 4 }} />
 
                     {/* Step 1 */}
                     <div className={styles.skeletonStepRow}>
                         <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 28, height: 28 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 18, borderRadius: 4 }} />
+                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 16, borderRadius: 4 }} />
                     </div>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 200, height: 14, borderRadius: 4, marginLeft: 40 }} />
+                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 160, height: 12, borderRadius: 4, marginLeft: 40 }} />
                     <div className={styles.skeletonWalletBox}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 20, height: 20 }} />
                             <div>
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 140, height: 14, borderRadius: 4, marginBottom: 4 }} />
-                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 10, borderRadius: 4 }} />
+                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 12, borderRadius: 4, marginBottom: 4 }} />
+                                <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 80, height: 9, borderRadius: 4 }} />
                             </div>
                         </div>
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 80, height: 14, borderRadius: 4 }} />
+                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 70, height: 12, borderRadius: 4 }} />
                     </div>
 
                     {/* Step 2 */}
                     <div className={styles.skeletonStepRow}>
                         <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 28, height: 28 }} />
-                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 140, height: 18, borderRadius: 4 }} />
+                        <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 16, borderRadius: 4 }} />
                     </div>
-                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 14, borderRadius: 4, marginLeft: 40 }} />
+                    <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 12, borderRadius: 4, marginLeft: 40 }} />
                     <div className={styles.skeletonPaymentBox}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 40, height: 40 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 120, height: 24, borderRadius: 6 }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div className={`${styles.skeletonCircle} ${styles.skeleton}`} style={{ width: 36, height: 36 }} />
+                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 100, height: 20, borderRadius: 6 }} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 48, height: 10, borderRadius: 4 }} />
-                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 80, height: 24, borderRadius: 6 }} />
+                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 44, height: 9, borderRadius: 4 }} />
+                            <div className={`${styles.skeletonBar} ${styles.skeleton}`} style={{ width: 72, height: 20, borderRadius: 6 }} />
                         </div>
                     </div>
 
@@ -480,13 +480,16 @@ function PaymentPage() {
 
     /* ── User Profile from localStorage ───────────────────────────────── */
     const username = useMemo(() => {
-        return localStorage.getItem('username') || 'User';
+        const stored = localStorage.getItem('username');
+        if (!stored || stored === 'undefined' || stored === 'null') return 'User';
+        return stored;
     }, []);
 
     const avatarUrl = useMemo(() => {
         const discordId = localStorage.getItem('discord_id');
         const discordAvatar = localStorage.getItem('discord_avatar');
-        if (discordId && discordAvatar) {
+        if (discordId && discordId !== 'undefined'
+            && discordAvatar && discordAvatar !== 'undefined') {
             return `https://cdn.discordapp.com/avatars/${discordId}/${discordAvatar}.png`;
         }
         return null;
