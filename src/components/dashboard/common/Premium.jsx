@@ -28,6 +28,7 @@ import {
     ChevronDown,
     Trash2,
     DollarSign,
+    Timer,
 } from 'lucide-react';
 import premiumService from '../../../services/premiumService';
 
@@ -245,8 +246,38 @@ const PricingCard = memo(({ plan, isCurrent, isFreelancer, onSelect, extending, 
 });
 PricingCard.displayName = 'PricingCard';
 
+/* ── Format seconds into MM:SS or HH:MM:SS ─────────────────────── */
+function formatCountdown(totalSeconds) {
+    if (totalSeconds <= 0) return 'Expired';
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    if (h > 0) {
+        return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+    }
+    return `${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+}
+
 /* ── Pending Payment Banner ──────────────────────────────────────── */
 const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => {
+    const [remaining, setRemaining] = useState(
+        () => payment?.callback_token_remaining_seconds ?? 0
+    );
+
+    useEffect(() => {
+        if (remaining <= 0) return;
+        const interval = setInterval(() => {
+            setRemaining((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [remaining > 0]);
+
     if (!payment) return null;
 
     const isGift = payment.payment_type === 'gift';
@@ -255,38 +286,53 @@ const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => 
             year: 'numeric', month: 'short', day: 'numeric',
         })
         : '';
+    const isExpired = remaining <= 0;
+    const isUrgent = remaining > 0 && remaining <= 300; // last 5 minutes
 
     return (
-        <div className="glass flex-row items-center gap-12 p-12 bg-warning-5 border-warning-light premium-pending-banner">
-            <AlertCircle size={16} className="warning-text flex-shrink-0" />
-            <div className="flex-col gap-2 flex-1 min-w-0">
-                <p className="text-sm text-white font-medium">
-                    {isGift ? 'Gift payment initiated' : 'Payment initiated'} —{' '}
-                    <span className="text-dim">{payment.payment_id}</span>
-                </p>
-                <p className="text-xs text-dim">
-                    {formatPrice(payment.amount)} USDT{createdAt ? ` · ${createdAt}` : ''}
-                    {isGift && payment.payment_id && ' · Gift'}
-                </p>
+        <div className={`glass flex-col gap-8 p-12 premium-pending-banner ${isExpired ? 'bg-error-5 border-error-light' : 'bg-warning-5 border-warning-light'}`}>
+            {/* Top row: info + buttons */}
+            <div className="flex-row items-center gap-12">
+                <AlertCircle size={16} className={`flex-shrink-0 ${isExpired ? 'error-text' : 'warning-text'}`} />
+                <div className="flex-col gap-2 flex-1 min-w-0">
+                    <p className="text-sm text-white font-medium">
+                        {isGift ? 'Gift payment initiated' : 'Payment initiated'} —{' '}
+                        <span className="text-dim">{payment.payment_id}</span>
+                    </p>
+                    <p className="text-xs text-dim">
+                        {formatPrice(payment.amount)} USDT{createdAt ? ` · ${createdAt}` : ''}
+                        {isGift && payment.payment_id && ' · Gift'}
+                    </p>
+                </div>
+                <div className="flex-row items-center gap-8 flex-shrink-0">
+                    <button
+                        className="btn btn-primary text-xs"
+                        onClick={() => onPay(payment)}
+                        disabled={cancelling || isExpired}
+                        title={isExpired ? 'Payment link expired' : 'Pay now'}
+                    >
+                        <DollarSign size={14} />
+                        Pay
+                    </button>
+                    <button
+                        className="btn btn-secondary text-xs"
+                        onClick={() => onCancel(payment)}
+                        disabled={cancelling}
+                    >
+                        {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        Cancel
+                    </button>
+                </div>
             </div>
-            <div className="flex-row items-center gap-8 flex-shrink-0">
-                <button
-                    className="btn btn-secondary text-xs"
-                    onClick={() => onPay(payment)}
-                    disabled={cancelling}
-                    title="Pay now (dummy — no payment page yet)"
-                >
-                    <DollarSign size={14} />
-                    Pay
-                </button>
-                <button
-                    className="btn btn-secondary text-xs"
-                    onClick={() => onCancel(payment)}
-                    disabled={cancelling}
-                >
-                    {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                    Cancel
-                </button>
+            {/* Countdown row */}
+            <div className="flex-row items-center gap-6">
+                <Timer size={12} className={`flex-shrink-0 ${isExpired ? 'error-text' : isUrgent ? 'error-text' : 'warning-text'}`} />
+                <p className={`text-xs font-medium ${isExpired ? 'error-text' : isUrgent ? 'error-text' : 'warning-text'}`}>
+                    {isExpired
+                        ? 'Payment link expired — cancel and create a new payment'
+                        : `Expires in ${formatCountdown(remaining)}`
+                    }
+                </p>
             </div>
         </div>
     );
@@ -303,10 +349,12 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const [extending, setExtending] = useState(false);
     const chartRef = useRef(null);
 
-    /* ── Pending payment state (Fix 3) ───────────────────────────── */
+    /* ── Pending payment state ──────────────────────────────────── */
     const [pendingPayment, setPendingPayment] = useState(null);
     const [pendingGiftPayment, setPendingGiftPayment] = useState(null);
     const [cancellingId, setCancellingId] = useState(null);
+    /* Store callback tokens keyed by payment_id (only available on creation) */
+    const callbackTokensRef = useRef({});
 
     /* ── Interval selector state — single Pro card with toggle ────── */
     const [selectedInterval, setSelectedInterval] = useState('monthly');
@@ -340,14 +388,23 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         try {
             const paymentsRes = await premiumService.getPayments({ page_size: 20 });
             const allPayments = paymentsRes.data?.results || [];
+            const tokens = callbackTokensRef.current;
+            /* Merge stored callback tokens into payment objects */
+            const enrich = (p) => {
+                if (!p) return null;
+                if (!p.callback_token && tokens[p.payment_id]) {
+                    return { ...p, callback_token: tokens[p.payment_id] };
+                }
+                return p;
+            };
             const pending = allPayments.find(
                 (p) => p.status === 'pending' && p.payment_type === 'subscription'
             );
             const pendingGift = allPayments.find(
                 (p) => p.status === 'pending' && p.payment_type === 'gift'
             );
-            setPendingPayment(pending || null);
-            setPendingGiftPayment(pendingGift || null);
+            setPendingPayment(enrich(pending));
+            setPendingGiftPayment(enrich(pendingGift));
         } catch (err) {
             if (err?.response?.status === 429) {
                 addNotification?.('Too many requests. Please wait a moment and try again.', 'error');
@@ -380,7 +437,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const availableIntervals = activeSub?.available_intervals || [];
     const proHasTime = availableIntervals.length > 0;
 
-    /* Handle subscribe / extend */
+    /* Handle subscribe / extend — creates payment, shows pending card (no navigation) */
     const handleSelectPlan = useCallback(async (plan, isExtend) => {
         if (!plan?.id) {
             addNotification?.('Plan not available.', 'error');
@@ -392,19 +449,20 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 plan_id: plan.id,
                 payment_type: 'subscription',
             });
-            const callbackToken = res.data?.callback_token;
-            if (callbackToken) {
-                /* Navigate to payment page with callback token */
-                navigate(`/payment/${callbackToken}`);
-            } else {
-                addNotification?.(
-                    isExtend
-                        ? 'Subscription extension created. Complete payment to activate.'
-                        : 'Payment initiated. Complete payment to activate premium.',
-                    'success'
-                );
-                fetchPendingPayments();
+            /* Store the callback token for later use by the Pay button */
+            const token = res.data?.callback_token;
+            const paymentId = res.data?.payment_id;
+            if (token && paymentId) {
+                callbackTokensRef.current[paymentId] = token;
             }
+            addNotification?.(
+                isExtend
+                    ? 'Subscription extension created. Complete payment to activate.'
+                    : 'Payment initiated. Complete payment to activate premium.',
+                'success'
+            );
+            /* Refresh pending payments to show the banner with countdown */
+            fetchPendingPayments();
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create payment.';
             addNotification?.(msg, 'error');
@@ -429,10 +487,15 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         }
     }, [addNotification, fetchPendingPayments]);
 
-    /* ── Pay pending payment (dummy for now) (Fix 3) ──────────────── */
-    const handlePayPayment = useCallback(async (payment) => {
-        addNotification?.('Payment page coming soon. (Dummy action)', 'info');
-    }, [addNotification]);
+    /* ── Pay pending payment — navigate to payment page with callback token ── */
+    const handlePayPayment = useCallback((payment) => {
+        const token = payment?.callback_token;
+        if (token) {
+            navigate(`/payment/${token}`);
+        } else {
+            addNotification?.('Payment link not available. Please cancel and create a new payment.', 'error');
+        }
+    }, [navigate, addNotification]);
 
     /* Expiry info */
     const expiryDate = activeSub?.expires_at;
@@ -606,6 +669,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     plans={plans}
                     addNotification={addNotification}
                     isFreelancer={isFreelancer}
+                    callbackTokensRef={callbackTokensRef}
                 />
             )}
         </div>
@@ -615,7 +679,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
 /* ══════════════════════════════════════════════════════════════════
    Gift Modal
    ══════════════════════════════════════════════════════════════════ */
-const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFreelancer }) => {
+const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFreelancer, callbackTokensRef }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -678,20 +742,21 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
                 payment_type: 'gift',
                 giftee_system_id: selectedUser.discord_id,
             });
-            const callbackToken = res.data?.callback_token;
-            if (callbackToken) {
-                navigate(`/payment/${callbackToken}`);
-            } else {
-                setStep('success');
-                addNotification?.(`Gift subscription created for ${selectedUser.discord_username}. Complete payment to send.`, 'success');
+            /* Store the callback token for later use by the Pay button */
+            const token = res.data?.callback_token;
+            const paymentId = res.data?.payment_id;
+            if (token && paymentId && callbackTokensRef?.current) {
+                callbackTokensRef.current[paymentId] = token;
             }
+            setStep('success');
+            addNotification?.(`Gift subscription created for ${selectedUser.discord_username}. Complete payment from the pending banner to send.`, 'success');
         } catch (err) {
             const msg = err?.response?.data?.error || 'Failed to create gift.';
             addNotification?.(msg, 'error');
         } finally {
             setCreating(false);
         }
-    }, [selectedUser, selectedProfile, addNotification]);
+    }, [selectedUser, selectedProfile, addNotification, callbackTokensRef]);
 
     const handleBackToSearch = useCallback(() => {
         setStep('search');

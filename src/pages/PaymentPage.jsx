@@ -451,13 +451,21 @@ const PaymentSkeleton = memo(function PaymentSkeleton() {
    Page States — error / expired / tampered / reauth / session-expired
    ═══════════════════════════════════════════════════════════════════════════ */
 
-function PaymentErrorOverlay({ theme, icon: Icon, title, message, actionLabel, onAction, secondaryLabel, onSecondary }) {
+function PaymentErrorOverlay({ theme, onToggleTheme, username, avatarUrl, role, icon: Icon, title, message, actionLabel, onAction, secondaryLabel, onSecondary, hint }) {
     return (
         <div className={`${styles.page} ${theme === 'light' ? styles.light : ''}`}>
+            {/* Top Bar with theme toggle */}
+            <PaymentTopBar
+                theme={theme}
+                onToggleTheme={onToggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={role}
+            />
             <div className={styles.errorOverlay}>
                 <div className={styles.errorCard}>
                     <div className={styles.errorIconWrapper}>
-                        <Icon size={48} />
+                        <Icon size={40} />
                     </div>
                     <h2 className={styles.errorTitle}>{title}</h2>
                     <p className={styles.errorMessage}>{message}</p>
@@ -473,6 +481,9 @@ function PaymentErrorOverlay({ theme, icon: Icon, title, message, actionLabel, o
                             </button>
                         )}
                     </div>
+                    {hint && (
+                        <p className={styles.errorHint}>{hint}</p>
+                    )}
                 </div>
             </div>
         </div>
@@ -555,15 +566,16 @@ function PaymentPage() {
     const validateToken = useCallback(async () => {
         const jwt = localStorage.getItem('access_token');
         if (!jwt) {
-            // No JWT — need to login. Fetch required role first, then redirect.
+            // No JWT — fetch required role for login redirect, then go to login.
             try {
                 const infoRes = await callbackService.getPublicInfo(callback_token);
                 setRequiredRole(infoRes.data.required_role);
             } catch {
                 setRequiredRole('freelancer');
             }
-            setPageState('error');
-            setErrorMessage('Please log in to access this payment page.');
+            // Redirect to login page immediately (no error overlay)
+            const role = 'freelancer'; // default; setRequiredRole is async
+            navigate(`/login?payment_callback_token=${callback_token}&role=${role}`, { replace: true });
             return;
         }
 
@@ -663,11 +675,18 @@ function PaymentPage() {
         return (
             <PaymentErrorOverlay
                 theme={theme}
+                onToggleTheme={toggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={userRole}
                 icon={Clock}
                 title="Session Expired"
-                message={errorMessage || 'Your session has timed out. Please log in again to continue.'}
+                message={errorMessage || 'Your session has timed out. Please log in again to continue with your payment.'}
                 actionLabel="Log In Again"
                 onAction={goToLogin}
+                secondaryLabel="Go to Dashboard"
+                onSecondary={() => navigate('/dashboard')}
+                hint="Your session tokens are stored securely. Logging in again will restore your session."
             />
         );
     }
@@ -677,11 +696,18 @@ function PaymentPage() {
         return (
             <PaymentErrorOverlay
                 theme={theme}
+                onToggleTheme={toggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={userRole}
                 icon={AlertCircle}
                 title="Authentication Required"
-                message={errorMessage}
+                message={errorMessage || 'You need to be logged in to access this payment page. Your existing session will be used — no separate login is required.'}
                 actionLabel="Log In"
                 onAction={goToLogin}
+                secondaryLabel="Go to Dashboard"
+                onSecondary={() => navigate('/dashboard')}
+                hint="Use the same account you logged in with on the dashboard."
             />
         );
     }
@@ -691,11 +717,18 @@ function PaymentPage() {
         return (
             <PaymentErrorOverlay
                 theme={theme}
+                onToggleTheme={toggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={userRole}
                 icon={AlertTriangle}
                 title="Access Denied"
-                message={errorMessage || 'This payment link was accessed by an unauthorized account.'}
+                message={errorMessage || 'This payment link was accessed by an unauthorized account. Each payment link is tied to the account that created it.'}
                 actionLabel="Log In with Correct Account"
                 onAction={goToLogin}
+                secondaryLabel="Go to Dashboard"
+                onSecondary={() => navigate('/dashboard')}
+                hint="Switch to the account that initiated this payment to proceed."
             />
         );
     }
@@ -705,11 +738,16 @@ function PaymentPage() {
         return (
             <PaymentErrorOverlay
                 theme={theme}
+                onToggleTheme={toggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={userRole}
                 icon={Clock}
                 title="Payment Expired"
-                message={errorMessage || 'This payment link has expired. Please create a new payment from your dashboard.'}
+                message={errorMessage || 'This payment link has expired. Payment links are valid for 30 minutes. Please create a new payment from your dashboard.'}
                 actionLabel="Go to Dashboard"
                 onAction={() => navigate('/dashboard')}
+                hint="You can create a new payment from the Subscription section in your dashboard."
             />
         );
     }
@@ -719,11 +757,18 @@ function PaymentPage() {
         return (
             <PaymentErrorOverlay
                 theme={theme}
+                onToggleTheme={toggleTheme}
+                username={username}
+                avatarUrl={avatarUrl}
+                role={userRole}
                 icon={LogOut}
                 title="Wrong Profile"
-                message={errorMessage || 'Please log in with the correct profile to continue.'}
+                message={errorMessage || 'This payment requires a different profile. Please log in with the correct profile to continue.'}
                 actionLabel="Log In with Correct Profile"
                 onAction={goToLogin}
+                secondaryLabel="Go to Dashboard"
+                onSecondary={() => navigate('/dashboard')}
+                hint="Each payment is linked to the profile type (freelancer or client) that created it."
             />
         );
     }
