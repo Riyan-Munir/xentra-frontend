@@ -28,7 +28,8 @@ function formatAddress(addr) {
 }
 
 function formatBalance(balance, currency) {
-    return `${balance.toFixed(2)} ${currency}`;
+    const val = typeof balance === 'number' && !isNaN(balance) ? balance : 0;
+    return `${val.toFixed(2)} ${currency || 'USDT'}`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -95,31 +96,36 @@ const PaymentTopBar = memo(function PaymentTopBar({ theme, onToggleTheme, userna
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const PaymentSummaryCard = memo(function PaymentSummaryCard({ data }) {
+    const amount = typeof data.amount === 'number' ? data.amount : 0;
+    const networkFee = typeof data.networkFee === 'number' ? data.networkFee : 0;
+    const totalPayable = typeof data.totalPayable === 'number' ? data.totalPayable : amount + networkFee;
+    const currency = data.amountCurrency || 'USDT';
+
     return (
         <div className={styles.summaryCard}>
             <h2 className={styles.summaryTitle}>Payment Summary</h2>
 
             <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Plan</span>
-                <span className={styles.summaryValue}>{data.plan}</span>
+                <span className={styles.summaryValue}>{data.plan || 'Premium'}</span>
             </div>
 
             <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Duration</span>
-                <span className={styles.summaryValue}>{data.duration}</span>
+                <span className={styles.summaryValue}>{data.duration || 'N/A'}</span>
             </div>
 
             <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Amount</span>
                 <span className={styles.summaryValue}>
-                    {data.amount.toFixed(2)} {data.amountCurrency}
+                    {amount.toFixed(2)} {currency}
                 </span>
             </div>
 
             <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Network Fee</span>
                 <span className={styles.summaryValue}>
-                    {data.networkFee.toFixed(2)} {data.networkFeeCurrency}
+                    {networkFee.toFixed(2)} {currency}
                 </span>
             </div>
 
@@ -128,7 +134,7 @@ const PaymentSummaryCard = memo(function PaymentSummaryCard({ data }) {
             <div className={styles.summaryTotalRow}>
                 <span className={styles.summaryTotalLabel}>Total Payable</span>
                 <span className={styles.summaryTotalValue}>
-                    {data.totalPayable.toFixed(2)} {data.amountCurrency}
+                    {totalPayable.toFixed(2)} {currency}
                 </span>
             </div>
         </div>
@@ -295,6 +301,7 @@ function WalletDropdown({ wallets, selectedWallet, onSelect, isOpen, onToggle })
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const PaymentDetailsBox = memo(function PaymentDetailsBox({ amount, currency, network }) {
+    const val = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
     return (
         <div className={styles.paymentDetailsBox}>
             <div className={styles.paymentDetailsLeft}>
@@ -302,13 +309,13 @@ const PaymentDetailsBox = memo(function PaymentDetailsBox({ amount, currency, ne
                     <span className={styles.paymentDetailsIconInner}>T</span>
                 </div>
                 <div className={styles.paymentDetailsAmount}>
-                    <span className={styles.paymentDetailsValue}>{amount.toFixed(2)}</span>
-                    <span className={styles.paymentDetailsCurrency}>{currency}</span>
+                    <span className={styles.paymentDetailsValue}>{val.toFixed(2)}</span>
+                    <span className={styles.paymentDetailsCurrency}>{currency || 'USDT'}</span>
                 </div>
             </div>
             <div className={styles.paymentDetailsRight}>
                 <span className={styles.paymentDetailsNetworkLabel}>Network</span>
-                <span className={styles.networkBadge}>{network}</span>
+                <span className={styles.networkBadge}>{network || 'BSC (BEP20)'}</span>
             </div>
         </div>
     );
@@ -588,7 +595,7 @@ function PaymentPage() {
             setPageState('ready');
         } catch (err) {
             const status = err.response?.status;
-            const code = err.response?.data?.error_code;
+            const code = err.response?.data?.code || err.response?.data?.error_code;
             const msg = err.response?.data?.error || err.response?.data?.detail || 'An error occurred.';
 
             if (status === 401) {
