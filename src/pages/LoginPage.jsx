@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Disc as Discord, Shield, Briefcase, Globe, Clock, LogOut, ShieldCheck } from 'lucide-react';
+import { Disc as Discord, Shield, Briefcase, Globe, ShieldCheck } from 'lucide-react';
 import CaptchaChallenge from '../components/dashboard/common/CaptchaChallenge';
 import { fetchCaptchaChallenge, captchaVerify } from '../services/api';
 
@@ -14,11 +14,10 @@ const LoginPage = () => {
   const autoClickedRef = useRef(false);
 
   const [role, setRole] = useState(paymentRole || 'freelancer');
-  const [isExpired] = useState(() => {
-    const expired = sessionStorage.getItem('session_expired') === 'true';
+  // Clear the session_expired flag on mount (Dashboard already showed the expired modal)
+  useEffect(() => {
     sessionStorage.removeItem('session_expired');
-    return expired;
-  });
+  }, []);
 
   // ── Captcha state ────────────────────────────────────────────────
   const [captcha, setCaptcha] = useState({
@@ -90,25 +89,6 @@ const LoginPage = () => {
       return () => clearTimeout(timer);
     }
   }, [isPaymentMode, handleDiscordLogin]);
-
-  if (isExpired) {
-    return (
-      <div className="login-page-container">
-        <div className="auth-callback-grid-lines"></div>
-        <div className="hacking-modal">
-          <div className="hacking-modal-icon">
-            <Clock size={48} />
-          </div>
-          <h2 className="hacking-modal-title">Session Expired</h2>
-          <p className="hacking-modal-text">Your session has expired. Please log in again to continue.</p>
-          <button onClick={() => window.location.reload()} className="hacking-modal-btn">
-            <LogOut size={20} />
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="login-page-container">
