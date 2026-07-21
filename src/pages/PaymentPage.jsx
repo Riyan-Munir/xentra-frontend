@@ -544,12 +544,15 @@ function PaymentPage() {
         setIsDropdownOpen(open);
     }, []);
 
-    /* ── User Profile from localStorage ───────────────────────────────── */
-    const username = useMemo(() => {
+    /* ── User Profile from localStorage (overridden by API response) ── */
+    const [displayName, setDisplayName] = useState(() => {
         const stored = localStorage.getItem('username');
         if (!stored || stored === 'undefined' || stored === 'null') return 'User';
         return stored;
-    }, []);
+    });
+
+    /* Keep a stable reference for error overlays (before API response) */
+    const username = useMemo(() => displayName, [displayName]);
 
     const avatarUrl = useMemo(() => {
         const discordId = localStorage.getItem('discord_id');
@@ -592,6 +595,10 @@ function PaymentPage() {
             setPaymentData(data.payment);
             setWallets(data.wallets || []);
             setSelectedWallet((data.wallets || []).find((w) => w.isDefault) || null);
+            /* Use profile display name from API instead of localStorage */
+            if (data.profile?.username) {
+                setDisplayName(data.profile.username);
+            }
             setPageState('ready');
         } catch (err) {
             const status = err.response?.status;
@@ -685,6 +692,10 @@ function PaymentPage() {
                 const data = res.data;
                 /* Refresh payment data in case it changed */
                 setPaymentData(data.payment);
+                /* Keep display name in sync */
+                if (data.profile?.username) {
+                    setDisplayName(data.profile.username);
+                }
             } catch (err) {
                 const status = err.response?.status;
                 const code = err.response?.data?.code || err.response?.data?.error_code;

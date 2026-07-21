@@ -8,12 +8,15 @@ const premiumService = {
 
     /**
      * Fetch the current user's active subscription state.
+     * @param {string} [role] - 'freelancer' or 'client' to isolate profile data
      */
-    getActive: () => api.get('/premium/active/'),
+    getActive: (role) => api.get('/premium/active/', {
+        params: role ? { role } : {},
+    }),
 
     /**
      * List the current user's premium payments.
-     * @param {Object} [params] - { page, page_size }
+     * @param {Object} [params] - { page, page_size, role }
      */
     getPayments: (params = {}) => api.get('/premium/payments/', { params }),
 

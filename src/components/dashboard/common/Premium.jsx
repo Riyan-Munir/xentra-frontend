@@ -382,13 +382,14 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const isFreelancer = currentRole === 'freelancer';
     const benefits = isFreelancer ? FREELANCER_BENEFITS : CLIENT_BENEFITS;
 
-    /* Fetch plans + active subscription */
+    /* Fetch plans + active subscription — scoped to current role for profile isolation */
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            const activeRole = isFreelancer ? 'freelancer' : 'client';
             const [plansRes, activeRes] = await Promise.all([
                 premiumService.getPlans(),
-                premiumService.getActive(),
+                premiumService.getActive(activeRole),
             ]);
             setPlans(plansRes.data?.plans || []);
             setActiveSub(activeRes.data || {});
@@ -401,12 +402,13 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         } finally {
             setLoading(false);
         }
-    }, [addNotification]);
+    }, [addNotification, isFreelancer]);
 
-    /* Fetch pending payments separately (called only when needed to avoid rate limits) */
+    /* Fetch pending payments separately — scoped to current role */
     const fetchPendingPayments = useCallback(async () => {
         try {
-            const paymentsRes = await premiumService.getPayments({ page_size: 20 });
+            const activeRole = isFreelancer ? 'freelancer' : 'client';
+            const paymentsRes = await premiumService.getPayments({ page_size: 20, role: activeRole });
             const allPayments = paymentsRes.data?.results || [];
             const tokens = callbackTokensRef.current;
             /* Merge stored callback tokens into payment objects */
@@ -431,7 +433,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
             }
             /* Silently ignore other errors for pending payment fetch */
         }
-    }, [addNotification]);
+    }, [addNotification, isFreelancer]);
 
     useEffect(() => {
         fetchData();
