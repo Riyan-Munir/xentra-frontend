@@ -643,16 +643,76 @@ function PaymentPage() {
         }
     }, [authError, reauthNeeded]);
 
-    /* ── Session Timeout (15 min) ─────────────────────────────────────── */
+    /* ── 15-Minute Inactivity Timeout ───────────────────────────────── */
+    /* If the user is idle on the payment page for 15 minutes we treat
+       the login session as expired and ask them to re-authenticate.
+       The timer resets on any mouse / keyboard / touch interaction. */
     useEffect(() => {
         if (pageState !== 'ready') return;
-        const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-        const timer = setTimeout(() => {
-            setPageState('session-expired');
-            setErrorMessage('Your session has expired. Please log in again.');
-        }, SESSION_TIMEOUT);
-        return () => clearTimeout(timer);
+        const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+        let timer = null;
+
+        const startTimer = () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                setPageState('session-expired');
+                setErrorMessage(
+                    'Your login session has expired due to inactivity. Please log in again to continue with your payment.'
+                );
+            }, INACTIVITY_TIMEOUT);
+        };
+
+        const resetEvents = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
+        resetEvents.forEach((evt) => window.addEventListener(evt, startTimer, { passive: true }));
+        startTimer();
+
+        return () => {
+            clearTimeout(timer);
+            resetEvents.forEach((evt) => window.removeEventListener(evt, startTimer));
+        };
     }, [pageState]);
+
+    /* ── Periodic Token Re-validation (every 5 min) ──────────────────── */
+    /* The backend token lifetime is 30 minutes. We periodically
+       re-validate with the backend to keep payment data fresh and
+       detect expired / consumed / tampered tokens promptly. */
+    useEffect(() => {
+        if (pageState !== 'ready') return;
+        const REVALIDATE_INTERVAL = 5 * 60 * 1000; // every 5 minutes
+        const interval = setInterval(async () => {
+            try {
+                const res = await callbackService.validate(callback_token);
+                const data = res.data;
+                /* Refresh payment data in case it changed */
+                setPaymentData(data.payment);
+            } catch (err) {
+                const status = err.response?.status;
+                const code = err.response?.data?.code || err.response?.data?.error_code;
+                const msg = err.response?.data?.error || err.response?.data?.detail || 'An error occurred.';
+
+                if (status === 401) {
+                    setPageState('session-expired');
+                    setErrorMessage('Your login session has expired. Please log in again.');
+                } else if (status === 409) {
+                    setPageState('reauth');
+                    setErrorMessage(msg);
+                    setRequiredRole(err.response?.data?.required_role || null);
+                } else if (status === 403 || code === 'tampered') {
+                    setPageState('tampered');
+                    setErrorMessage(msg);
+                } else if (code === 'expired') {
+                    setPageState('expired');
+                    setErrorMessage(msg);
+                } else if (code === 'not_found' || code === 'consumed') {
+                    setPageState('expired');
+                    setErrorMessage(msg);
+                } else {
+                    /* Network error or 5xx — don't kill the page, just skip this cycle */
+                }
+            }
+        }, REVALIDATE_INTERVAL);
+        return () => clearInterval(interval);
+    }, [pageState, callback_token]);
 
     /* ── Navigate to Login ────────────────────────────────────────────── */
     const goToLogin = useCallback(() => {
@@ -687,8 +747,8 @@ function PaymentPage() {
                 avatarUrl={avatarUrl}
                 role={userRole}
                 icon={Clock}
-                title="Session Expired"
-                message={errorMessage || 'Your session has timed out. Please log in again to continue with your payment.'}
+                title="Login Session Expired"
+                message={errorMessage || 'Your login session has expired. Please log in again to continue with your payment.'}
                 actionLabel="Log In Again"
                 onAction={goToLogin}
                 secondaryLabel="Go to Dashboard"
@@ -730,12 +790,10 @@ function PaymentPage() {
                 role={userRole}
                 icon={AlertTriangle}
                 title="Access Denied"
-                message={errorMessage || 'This payment link was accessed by an unauthorized account. Each payment link is tied to the account that created it.'}
-                actionLabel="Log In with Correct Account"
-                onAction={goToLogin}
-                secondaryLabel="Go to Dashboard"
-                onSecondary={() => navigate('/dashboard')}
-                hint="Switch to the account that initiated this payment to proceed."
+                message={errorMessage || 'This payment link is tied to a different account. You are logged in with the wrong profile, so access has been denied.'}
+                actionLabel="Go to Dashboard"
+                onAction={() => navigate('/dashboard')}
+                hint="This is not a session issue — the payment link belongs to another account. Log in with the correct account from the dashboard, then use the payment link again."
             />
         );
     }

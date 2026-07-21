@@ -32,6 +32,25 @@ import {
 } from 'lucide-react';
 import premiumService from '../../../services/premiumService';
 
+/* ── localStorage helpers for callback token persistence ────────── */
+const CB_TOKENS_KEY = 'xentra_callback_tokens';
+function _loadCallbackTokens() {
+    try {
+        const raw = localStorage.getItem(CB_TOKENS_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+}
+function _saveCallbackTokens(tokens) {
+    try { localStorage.setItem(CB_TOKENS_KEY, JSON.stringify(tokens)); } catch { /* ignore */ }
+}
+function _removeCallbackToken(paymentId) {
+    try {
+        const tokens = _loadCallbackTokens();
+        delete tokens[paymentId];
+        _saveCallbackTokens(tokens);
+    } catch { /* ignore */ }
+}
+
 /* ── Benefit definitions per role (for comparison chart) ─────────── */
 const FREELANCER_BENEFITS = [
     { label: 'Applications / week', free: '3', pro: '6', icon: Briefcase },
@@ -353,8 +372,9 @@ const Premium = ({ profile, currentRole, addNotification }) => {
     const [pendingPayment, setPendingPayment] = useState(null);
     const [pendingGiftPayment, setPendingGiftPayment] = useState(null);
     const [cancellingId, setCancellingId] = useState(null);
-    /* Store callback tokens keyed by payment_id (only available on creation) */
-    const callbackTokensRef = useRef({});
+    /* Store callback tokens keyed by payment_id (only available on creation).
+       Persisted in localStorage so tokens survive page refreshes. */
+    const callbackTokensRef = useRef(_loadCallbackTokens());
 
     /* ── Interval selector state — single Pro card with toggle ────── */
     const [selectedInterval, setSelectedInterval] = useState('monthly');
@@ -454,6 +474,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
             const paymentId = res.data?.payment_id;
             if (token && paymentId) {
                 callbackTokensRef.current[paymentId] = token;
+                _saveCallbackTokens(callbackTokensRef.current);
             }
             addNotification?.(
                 isExtend
@@ -477,6 +498,9 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         setCancellingId(payment.payment_id);
         try {
             await premiumService.cancelPayment(payment.payment_id);
+            /* Remove callback token from persistence on cancel */
+            delete callbackTokensRef.current[payment.payment_id];
+            _removeCallbackToken(payment.payment_id);
             addNotification?.('Payment cancelled.', 'success');
             fetchPendingPayments();
         } catch (err) {
@@ -747,6 +771,7 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
             const paymentId = res.data?.payment_id;
             if (token && paymentId && callbackTokensRef?.current) {
                 callbackTokensRef.current[paymentId] = token;
+                _saveCallbackTokens(callbackTokensRef.current);
             }
             setStep('success');
             addNotification?.(`Gift subscription created for ${selectedUser.discord_username}. Complete payment from the pending banner to send.`, 'success');
