@@ -115,6 +115,22 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // ── Profile temp-ban intercept (403) ──────────────────────────
+    // When ProfileSecurityMiddleware detects the active profile has a
+    // temp-ban, it returns 403 with code "profile_banned".  Fire a
+    // custom DOM event so the UI can display the ban overlay.
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === 'profile_banned'
+    ) {
+      window.dispatchEvent(
+        new CustomEvent('xentra:profile_banned', {
+          detail: error.response.data,
+        })
+      );
+      return Promise.reject(error);
+    }
+
     // ── Captcha challenge intercept ─────────────────────────────
     // When the WAF blocks an anonymous request, it returns 403 with
     // require_captcha: true and a captcha_site_key.  Fire a custom DOM
@@ -140,6 +156,24 @@ api.interceptors.response.use(
     ) {
       window.dispatchEvent(
         new CustomEvent('xentra:hacking_alert', {
+          detail: error.response.data,
+        })
+      );
+      return Promise.reject(error);
+    }
+
+    // ── Profile mismatch intercept (409) ─────────────────────────
+    // When ProfileSecurityMiddleware detects that ?role= does not match
+    // the JWT's current_role claim, it returns 409 with code
+    // "profile_mismatch".  Fire a custom DOM event so the UI can show
+    // an appropriate message and/or redirect to re-login with the
+    // correct role.
+    if (
+      error.response?.status === 409 &&
+      error.response?.data?.code === 'profile_mismatch'
+    ) {
+      window.dispatchEvent(
+        new CustomEvent('xentra:profile_mismatch', {
           detail: error.response.data,
         })
       );

@@ -883,6 +883,42 @@ const Dashboard = () => {
     return () => window.removeEventListener('xentra:captcha_required', handler);
   }, []);
 
+  // ── Listen for profile_mismatch events from api.js interceptor ──
+  // When ProfileSecurityMiddleware detects that ?role= does not match
+  // the JWT's current_role claim, it returns 409 with "profile_mismatch".
+  // This happens when a user tampers with frontend packets to access a
+  // profile they're not logged in as.  The UI shows an error overlay
+  // telling them to log in with the correct profile.
+  useEffect(() => {
+    const handler = (e) => {
+      const detail = e.detail || {};
+      const requiredRole = detail.required_role || 'unknown';
+      const currentRole = detail.current_role || 'unknown';
+      addNotification(
+        'error',
+        `This action requires the ${requiredRole} profile, but you are logged in as ${currentRole}. Please log in with the correct profile and try again.`
+      );
+    };
+    window.addEventListener('xentra:profile_mismatch', handler);
+    return () => window.removeEventListener('xentra:profile_mismatch', handler);
+  }, [addNotification]);
+
+  // ── Listen for profile_banned events from api.js interceptor ────
+  // When ProfileSecurityMiddleware detects the active profile has a
+  // temp-ban, it returns 403 with "profile_banned".  The UI shows an
+  // error notification explaining the profile is temporarily suspended.
+  useEffect(() => {
+    const handler = (e) => {
+      const detail = e.detail || {};
+      addNotification(
+        'error',
+        detail.error || 'Access denied: This profile is temporarily suspended.'
+      );
+    };
+    window.addEventListener('xentra:profile_banned', handler);
+    return () => window.removeEventListener('xentra:profile_banned', handler);
+  }, [addNotification]);
+
   // ── Captcha verify handler ─────────────────────────────────────
   // Called by CaptchaChallenge when the user completes the Turnstile widget.
   // Posts the token to the backend, and if successful, clears the captcha state.
