@@ -584,7 +584,8 @@ function PaymentPage() {
                 setRequiredRole('freelancer');
             }
             // Redirect to login page immediately (no error overlay)
-            const role = 'freelancer'; // default; setRequiredRole is async
+            // Use requiredRole state if available (set above), fallback to freelancer
+            const role = requiredRole || 'freelancer';
             navigate(`/login?payment_callback_token=${callback_token}&role=${role}`, { replace: true });
             return;
         }
