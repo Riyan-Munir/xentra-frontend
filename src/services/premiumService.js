@@ -34,8 +34,6 @@ const premiumService = {
         payment_type: data.payment_type || 'subscription',
         giftee_system_id: data.giftee_system_id || null,
         gift_message: data.gift_message || '',
-        wallet_type: data.wallet_type || null,
-        wallet_id: data.wallet_id || null,
     }),
 
     /**
