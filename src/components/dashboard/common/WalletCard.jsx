@@ -21,11 +21,11 @@ const WalletCard = ({
   onRemove,
   index = 0,
 }) => {
-  const isDefault = wallet.is_default;
+  const isWalletDefault = wallet.is_default;
   const isVerified = wallet.is_verified;
   const isPending = wallet.status === 'pending_verification' || !isVerified;
 
-  const variant = isDefault && isVerified
+  const variant = isWalletDefault && isVerified
     ? 'default'
     : isVerified
       ? 'verified'
@@ -41,7 +41,7 @@ const WalletCard = ({
         {/* Action row: top-right — badge/status + action buttons */}
         <div className="wallet-card-top-actions">
           {/* Default badge only when wallet IS verified AND default */}
-          {isDefault && isVerified && (
+          {isWalletDefault && isVerified && (
             <span className="wallet-badge-default">
               <Star size={10} style={{ marginRight: 4, verticalAlign: 'middle' }} />
               DEFAULT
@@ -60,7 +60,7 @@ const WalletCard = ({
           )}
 
           {/* Set as Default when verified but not default */}
-          {!isDefault && isVerified && (
+          {!isWalletDefault && isVerified && (
             <button
               className="btn btn-secondary text-xs"
               style={{ padding: '4px 8px', fontSize: 10 }}
