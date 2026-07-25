@@ -159,21 +159,6 @@ const PROVIDER_INSTRUCTIONS = {
         linkSecondary: { text: 'Supported Wallets', url: 'https://explorer.walletconnect.com/' },
         altNote: 'WalletConnect is a connection protocol, not a wallet. The signing experience depends on the wallet you choose.',
     },
-    OTHER: {
-        name: 'Other EVM Wallet',
-        steps: [
-            'Click "Connect Wallet" on Xentra.',
-            'Choose your wallet or connect using WalletConnect.',
-            'Approve the connection.',
-            'Click "Verify Wallet".',
-            'Your wallet will display the signing request.',
-            'Review the message.',
-            'Click or tap "Sign".',
-        ],
-        link: { text: 'WalletConnect Supported Wallets', url: 'https://explorer.walletconnect.com/' },
-        linkSecondary: null,
-        altNote: 'Most Ethereum-compatible wallets follow the same message-signing process.',
-    },
 };
 
 const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, addNotification }) => {
@@ -538,8 +523,8 @@ const VerifyWalletModal = ({ isOpen, onClose, wallet, walletType, onSuccess, add
         : '';
 
     // Get provider-specific instructions
-    const providerKey = (wallet.provider || 'OTHER').toUpperCase();
-    const instructions = PROVIDER_INSTRUCTIONS[providerKey] || PROVIDER_INSTRUCTIONS.OTHER;
+    const providerKey = (wallet.provider || 'METAMASK').toUpperCase();
+    const instructions = PROVIDER_INSTRUCTIONS[providerKey] || PROVIDER_INSTRUCTIONS.METAMASK;
     const providerDisplayName = instructions.name || wallet.provider || 'your wallet';
 
     const isConnected = !!connectedAddress;

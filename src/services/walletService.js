@@ -17,7 +17,7 @@ const walletService = {
      * @param {{ address: string, label?: string, provider?: string }} data
      * @returns {Promise} — Created wallet object
      */
-    create: (walletType, { address, label = '', provider = 'OTHER' }) =>
+    create: (walletType, { address, label = '', provider = 'METAMASK' }) =>
         api.post('/wallets/', {
             wallet_type: walletType,
             address: address.trim(),

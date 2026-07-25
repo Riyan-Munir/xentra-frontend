@@ -129,11 +129,11 @@ export function isWalletAvailable() {
 /**
  * Detect which wallet provider the user has installed.
  * @param {object} [targetProvider] - Optional specific provider to detect.
- * @returns {string} Provider key (e.g. 'METAMASK', 'TRUST_WALLET', etc.)
+ * @returns {string|null} Provider key (e.g. 'METAMASK', 'TRUST_WALLET') or null if unknown.
  */
 export function detectProvider(targetProvider) {
   const eth = targetProvider || (typeof window !== 'undefined' && window.ethereum);
-  if (!eth) return 'OTHER';
+  if (!eth) return null;
 
   // If the provider has a providers array (multi-wallet), try each
   const providerCandidates = eth.providers?.length
@@ -161,7 +161,7 @@ export function detectProvider(targetProvider) {
     }
   }
 
-  return 'OTHER';
+  return null;
 }
 
 /**
@@ -492,11 +492,174 @@ export function onDisconnect(callback, customProvider) {
   };
 }
 
+// ── USDT Transfer ───────────────────────────────────────────────────────────
+
 /**
- * Get the BSC explorer URL for an address.
- * @param {string} address
+ * Minimal ERC-20 ABI for encoding a USDT transfer function call.
+ * Only the `transfer(address,uint256)` function signature is needed;
+ * the frontend never decodes return data — that's the backend's job.
+ */
+const USDT_TRANSFER_ABI = [
+  {
+    constant: false,
+    inputs: [
+      { name: '_to', type: 'address' },
+      { name: '_value', type: 'uint256' },
+    ],
+    name: 'transfer',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function',
+  },
+];
+
+/**
+ * Encode a USDT transfer function call so it can be passed to eth_sendTransaction.
+ *
+ * Uses the raw ABI encoding (function selector + 32-byte padded params) so we
+ * don't need ethers.js or web3.js on the frontend.
+ *
+ * @param {string} to - Recipient address (0x...)
+ * @param {number|string} rawAmount - Amount in *human-readable* USDT (e.g., 5.00)
+ * @param {number} decimals - Token decimals (USDT = 18 on BSC)
+ * @returns {string} Encoded data hex string (0x...)
+ */
+function encodeUsdtTransfer(to, rawAmount, decimals = 18) {
+  // 1. Compute function selector = keccak256("transfer(address,uint256)")[0:4]
+  //    Pre-computed: 0xa9059cbb
+  const SELECTOR = '0xa9059cbb';
+
+  // 2. Convert human-readable amount to raw uint256 (multiply by 10^decimals)
+  //    USDT on BSC uses 18 decimals, so 5.00 USDT → 5_000_000_000_000_000_000
+  const amountWei = BigInt(Math.round(Number(rawAmount) * 10 ** decimals));
+
+  // 3. Pad address to 32 bytes (left-pad with zeros)
+  const cleanTo = to.startsWith('0x') ? to.slice(2).toLowerCase() : to.toLowerCase();
+  const paddedTo = cleanTo.padStart(64, '0');
+
+  // 4. Convert amount to 32-byte hex (no leading 0x, pad to 64 chars)
+  const amountHex = amountWei.toString(16).padStart(64, '0');
+
+  // 5. Concatenate
+  return `${SELECTOR}${paddedTo}${amountHex}`;
+}
+
+/**
+ * Send a USDT transfer from the user's connected wallet.
+ *
+ * Opens the wallet extension popup to let the user review and approve
+ * the transaction. Returns only after the wallet has submitted it to
+ * the mempool (NOT after confirmation — the backend handles confirmation).
+ *
+ * @param {Object} opts
+ * @param {string} opts.recipientAddress - The address that will receive USDT (0x...)
+ * @param {number} opts.amount - Human-readable USDT amount (e.g., 5.00 for 5 USDT)
+ * @param {string} [opts.tokenContract] - USDT BEP20 contract address (default BSC USDT)
+ * @param {number} [opts.chainId=56] - BSC Mainnet chain ID
+ * @param {number} [opts.decimals=18] - Token decimals (USDT on BSC = 18)
+ * @param {object} [customProvider] - Optional specific EIP-6963 provider
+ * @returns {Promise<{ txHash: string, from: string }>}
+ * @throws {Error} If wallet not detected, user rejects, chain wrong, or send fails.
+ */
+export async function sendPaymentTransaction(opts, customProvider) {
+  const {
+    recipientAddress,
+    amount,
+    tokenContract = '0x55d398326f99059ff775485246999027b3197955',
+    chainId = 56,
+    decimals = 18,
+  } = opts || {};
+
+  if (!recipientAddress) throw new Error('recipientAddress is required');
+  if (amount == null || isNaN(amount) || Number(amount) <= 0) {
+    throw new Error('A valid positive amount is required');
+  }
+
+  const eth = customProvider || window.ethereum;
+  if (!eth) {
+    throw new Error('No wallet extension detected. Please install MetaMask or another EVM wallet.');
+  }
+
+  // 1. Ensure connected and get the sender address
+  let fromAddress;
+  try {
+    const accounts = await eth.request({ method: 'eth_requestAccounts' });
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No accounts available. Please unlock your wallet.');
+    }
+    fromAddress = accounts[0];
+  } catch (err) {
+    if (err.code === 4001) throw new Error('Connection rejected in wallet.');
+    throw new Error(err.message || 'Failed to connect wallet.');
+  }
+
+  // 2. Validate / switch to correct chain
+  try {
+    const currentChainId = await eth.request({ method: 'eth_chainId' });
+    const targetHex = `0x${chainId.toString(16)}`;
+    if (currentChainId?.toLowerCase() !== targetHex.toLowerCase()) {
+      // Try switching
+      try {
+        await eth.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: targetHex }],
+        });
+        // Wait briefly for chain switch
+        await new Promise((r) => setTimeout(r, 500));
+      } catch (switchErr) {
+        if (switchErr.code === 4902) {
+          throw new Error(
+            `Chain ID ${chainId} is not in your wallet. Please add it manually or switch to BSC (56).`
+          );
+        }
+        if (switchErr.code === 4001) {
+          throw new Error('Chain switch was rejected in your wallet.');
+        }
+        throw new Error(`Failed to switch chain: ${switchErr.message}`);
+      }
+    }
+  } catch (err) {
+    // Re-throw chain errors directly
+    if (err.message.includes('rejected') || err.message.includes('Chain ID')) throw err;
+    // Non-critical — continue, the wallet will reject if chain is wrong
+  }
+
+  // 3. Encode the USDT transfer
+  const data = encodeUsdtTransfer(recipientAddress, amount, decimals);
+
+  // 4. Send the transaction
+  const txParams = {
+    from: fromAddress,
+    to: tokenContract,
+    data,
+    // No value — this is a token transfer, not BNB
+  };
+
+  try {
+    const txHash = await eth.request({
+      method: 'eth_sendTransaction',
+      params: [txParams],
+    });
+
+    if (!txHash || typeof txHash !== 'string') {
+      throw new Error('Wallet did not return a transaction hash.');
+    }
+
+    return { txHash, from: fromAddress };
+  } catch (err) {
+    if (err.code === 4001 || err.code === -32002) {
+      throw new Error('Transaction was rejected in your wallet.');
+    }
+    throw new Error(err.message || 'Failed to send transaction.');
+  }
+}
+
+/**
+ * Get the BSC explorer URL for an address or transaction hash.
+ * @param {string} address - Address or tx hash
+ * @param {boolean} [isTx=false] - If true, link to tx instead of address
  * @returns {string}
  */
-export function getBscScanUrl(address) {
+export function getBscScanUrl(address, isTx = false) {
+  if (isTx) return `https://bscscan.com/tx/${address}`;
   return `https://bscscan.com/address/${address}`;
 }
