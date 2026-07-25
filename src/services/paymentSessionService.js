@@ -27,12 +27,13 @@ const paymentSessionService = {
     createSession: (data) => api.post('/blockchain/session/create/', {
         payment_content_type_id: data.paymentContentTypeId,
         payment_object_id: data.paymentObjectId,
-        session_type: data.sessionType || 'SUBSCRIPTION',
+        session_type: (data.sessionType || 'subscription').toLowerCase(),
         recipient_address: data.recipientAddress,
         amount: data.amount,
         wallet_provider: data.walletProvider,
         chain_id: data.chainId || 56,
         token_contract: data.tokenContract || undefined,
+        selected_wallet_address: data.selectedWalletAddress || '',
     }),
 
     /**
