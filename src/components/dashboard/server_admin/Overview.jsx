@@ -62,87 +62,104 @@ const Overview = ({ profile, avatarUrl, servers, onConfigure, onRefreshServers, 
             )}
           </h3>
 
-          {isServersLoading && servers.length === 0 ? (
-            <div className="server-card-grid">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="card server-card">
-                  <div className="server-card-row">
-                    <Skeleton template="circle" />
-                    <div className="flex-1">
-                      <Skeleton template="text" lines={2} />
+          <div className="admin-server-panel">
+            {isServersLoading && servers.length === 0 ? (
+              <div className="server-card-grid">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="card server-card">
+                    <div className="server-card-row">
+                      <Skeleton template="circle" />
+                      <div className="flex-1">
+                        <Skeleton template="text" lines={2} />
+                      </div>
+                    </div>
+                    <div className="server-card-actions flex-row gap-8">
+                      <Skeleton template="text" lines={1} />
+                      <Skeleton template="circle" />
                     </div>
                   </div>
-                  <div className="server-card-actions flex-row gap-8">
-                    <Skeleton template="text" lines={1} />
-                    <Skeleton template="circle" />
-                  </div>
+                ))}
+              </div>
+            ) : servers.length === 0 ? (
+              /* Empty state — matches wallets/applications placeholder theme */
+              <div className="flex-1 flex-col flex-center gap-16 text-center" style={{ minHeight: 200 }}>
+                <div className="flex-center flex-shrink-0" style={{ width: 64, height: 64, background: 'rgba(99, 102, 241, 0.1)', borderRadius: 16 }}>
+                  <Shield size={28} className="primary-text" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="server-card-grid">
-              {servers.map((server) => (
-                <div key={server.id} className="card server-card">
-                  <div className="server-card-row">
-                    {server.icon ? (
-                      <img
-                        src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
-                        alt={server.name}
-                        className="server-icon"
-                      />
-                    ) : (
-                      <div className="server-icon-placeholder">
-                        {server.name.charAt(0)}
+                <div>
+                  <p className="font-bold text-lg mb-6">No Servers Found</p>
+                  <p className="text-sm text-dim" style={{ maxWidth: 320 }}>
+                    You don't have any Discord servers yet. Once you create or join a server, it will appear here.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="server-scroll-area">
+                <div className="server-card-grid">
+                  {servers.map((server) => (
+                    <div key={server.id} className="card server-card">
+                      <div className="server-card-row">
+                        {server.icon ? (
+                          <img
+                            src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
+                            alt={server.name}
+                            className="server-icon"
+                          />
+                        ) : (
+                          <div className="server-icon-placeholder">
+                            {server.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="server-card-info">
+                          <div className="flex-row items-flex-start flex-between">
+                            <h4 className="server-card-name">{server.name}</h4>
+                            {server.has_bot && (
+                              <button
+                                onClick={() => setSelectedGuild(server)}
+                                className="bg-none border-none cursor-pointer primary-text p-4"
+                                title="Show Stats"
+                              >
+                                <BarChart2 size={16} />
+                              </button>
+                            )}
+                          </div>
+                          <p className="server-card-role">
+                            {server.is_owner ? 'Owner' : 'Moderator'}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    <div className="server-card-info">
-                      <div className="flex-row items-flex-start flex-between">
-                        <h4 className="server-card-name">{server.name}</h4>
-                        {server.has_bot && (
+
+                      <div className="server-card-actions">
+                        {server.has_bot ? (
                           <button
-                            onClick={() => setSelectedGuild(server)}
-                            className="bg-none border-none cursor-pointer primary-text p-4"
-                            title="Show Stats"
+                            className="btn btn-primary server-btn-full"
+                            onClick={() => onConfigure(server.id)}
                           >
-                            <BarChart2 size={16} />
+                            <Settings size={14} />
+                            Configure
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary server-btn-full"
+                            onClick={() => {
+                              window.open(inviteUrl(server.id), '_blank');
+                              if (onRefreshServers) setTimeout(onRefreshServers, 5000);
+                            }}
+                          >
+                            <Plus size={14} />
+                            Invite Bot
                           </button>
                         )}
+                        <button className="btn btn-secondary server-btn-icon" title="Server Logs">
+                          <ExternalLink size={14} />
+                        </button>
                       </div>
-                      <p className="server-card-role">
-                        {server.is_owner ? 'Owner' : 'Moderator'}
-                      </p>
                     </div>
-                  </div>
-
-                  <div className="server-card-actions">
-                    {server.has_bot ? (
-                      <button
-                        className="btn btn-primary server-btn-full"
-                        onClick={() => onConfigure(server.id)}
-                      >
-                        <Settings size={14} />
-                        Configure
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-primary server-btn-full"
-                        onClick={() => {
-                          window.open(inviteUrl(server.id), '_blank');
-                          if (onRefreshServers) setTimeout(onRefreshServers, 5000);
-                        }}
-                      >
-                        <Plus size={14} />
-                        Invite Bot
-                      </button>
-                    )}
-                    <button className="btn btn-secondary server-btn-icon" title="Server Logs">
-                      <ExternalLink size={14} />
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

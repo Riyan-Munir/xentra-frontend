@@ -2970,6 +2970,34 @@ input[type="radio"]:focus {
   gap: 6px;
 }
 
+/* Admin server panel — fixed-height scroll container matching wallets/apps pattern */
+.admin-server-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.admin-server-panel .scrollable-content-card {
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior-y: unset;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-server-panel .server-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-server-panel .server-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
 .stats-icon {
   flex-shrink: 0;
   width: 18px;

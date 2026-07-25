@@ -1208,10 +1208,10 @@ const Dashboard = () => {
   // ── Hacking Notification Modal (tier-based) ───────────────────
   const getTierInfo = (tier) => {
     const tierMap = {
-      1: { icon: '🔍', title: 'Security Notice', severity: 'info', msg: 'Please review your recent activity.' },
-      2: { icon: '⚠️', title: 'Security Warning', severity: 'warning', msg: 'Continued suspicious activity may result in feature restrictions.' },
-      3: { icon: '🚨', title: 'Security Alert, Action Required', severity: 'danger', msg: 'Some dashboard features may be restricted until this is resolved.' },
-      4: { icon: '⛔', title: 'Critical Security Alert', severity: 'critical', msg: 'Your account is at risk of automatic suspension. Contact an administrator immediately.' },
+      1: { icon: Info, title: 'Security Notice', severity: 'info', msg: 'Please review your recent activity.' },
+      2: { icon: AlertCircle, title: 'Security Warning', severity: 'warning', msg: 'Continued suspicious activity may result in feature restrictions.' },
+      3: { icon: ShieldAlert, title: 'Security Alert, Action Required', severity: 'danger', msg: 'Some dashboard features may be restricted until this is resolved.' },
+      4: { icon: ShieldAlert, title: 'Critical Security Alert', severity: 'critical', msg: 'Your account is at risk of automatic suspension. Contact an administrator immediately.' },
     };
     return tierMap[tier] || tierMap[1];
   };
@@ -1227,7 +1227,10 @@ const Dashboard = () => {
           const tierInfo = getTierInfo(tier);
           return (
             <>
-              <h2 className="hacking-modal-title">{tierInfo.icon} {tierInfo.title}</h2>
+              <h2 className="hacking-modal-title">
+                <tierInfo.icon size={24} className="hacking-tier-icon" />
+                {tierInfo.title}
+              </h2>
               <p className="hacking-modal-text">
                 Our system has detected {hackingState.pending_count > 1
                   ? `${hackingState.pending_count} security attempt(s)`
