@@ -21,14 +21,15 @@ const WalletCard = ({
   onRemove,
   index = 0,
 }) => {
-  // Determine card variant
-  const variant = isDefault
+  const isDefault = wallet.is_default;
+  const isVerified = wallet.is_verified;
+  const isPending = wallet.status === 'pending_verification' || !isVerified;
+
+  const variant = isDefault && isVerified
     ? 'default'
-    : wallet.is_verified
+    : isVerified
       ? 'verified'
       : 'pending';
-
-  const isPending = wallet.status === 'pending_verification' || !wallet.is_verified;
 
   return (
     <div className="wallet-card-group" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -39,12 +40,16 @@ const WalletCard = ({
       >
         {/* Action row: top-right — badge/status + action buttons */}
         <div className="wallet-card-top-actions">
-          {isDefault ? (
+          {/* Default badge only when wallet IS verified AND default */}
+          {isDefault && isVerified && (
             <span className="wallet-badge-default">
               <Star size={10} style={{ marginRight: 4, verticalAlign: 'middle' }} />
               DEFAULT
             </span>
-          ) : isPending ? (
+          )}
+
+          {/* Verify button when not yet verified (even if it's auto-defaulted) */}
+          {isPending && (
             <button
               className="btn btn-primary text-xs"
               style={{ padding: '4px 8px', fontSize: 10 }}
@@ -52,7 +57,10 @@ const WalletCard = ({
             >
               <Shield size={12} /> Verify
             </button>
-          ) : (
+          )}
+
+          {/* Set as Default when verified but not default */}
+          {!isDefault && isVerified && (
             <button
               className="btn btn-secondary text-xs"
               style={{ padding: '4px 8px', fontSize: 10 }}
