@@ -5,11 +5,10 @@ const jobService = {
     return api.get('/jobs/', { params });
   },
 
-  getMyJobs: (status = 'open') => {
+  getMyJobs: () => {
     return api.get('/jobs/', {
       params: {
-        my_jobs: 'true',
-        status: status
+        my_jobs: 'true'
       }
     });
   },
@@ -24,6 +23,10 @@ const jobService = {
 
   deleteJob: (jobId) => {
     return api.delete(`/jobs/${jobId}/`);
+  },
+
+  reactivateJob: (jobId) => {
+    return api.post(`/jobs/${jobId}/reactivate/`);
   },
 
   getMyApplications: (jobId) => {

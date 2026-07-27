@@ -19,10 +19,12 @@ import {
   Star,
   Trash2,
   Info,
-  MessageSquare
+  MessageSquare,
+  RotateCcw
 } from 'lucide-react';
 import CustomSelect from '../common/CustomSelect';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { SkeletonCard } from '../../common/Skeleton';
 
 const JobModal = ({ job, isOpen, onClose, onSave, onDelete, isPremium, addNotification }) => {
   const [formData, setFormData] = useState({
@@ -509,6 +511,7 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [interviewApp, setInterviewApp] = useState(null);
   const [popupState, setPopupState] = useState(null);
+  const [reactivatingJobId, setReactivatingJobId] = useState(null);
 
   const closePopup = useCallback(() => {
     setPopupState(null);
@@ -537,7 +540,7 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
   const fetchJobs = async () => {
     try {
       setIsLoading(true);
-      const response = await jobService.getMyJobs('open');
+      const response = await jobService.getMyJobs();
       setJobs(response.data);
     } catch (err) {
       addNotification(err.response?.data?.error || 'Failed to fetch jobs', 'error');
@@ -627,13 +630,29 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
     if (!jobToDelete) return;
     try {
       await jobService.deleteJob(jobToDelete);
-      addNotification('Job deleted successfully!', 'success');
+      addNotification('Job cancelled successfully!', 'success');
       setIsJobModalOpen(false);
       fetchJobs();
     } catch (err) {
-      addNotification('Failed to delete job', 'error');
+      addNotification('Failed to cancel job', 'error');
     }
   };
+
+  const handleReactivateJob = async (jobId) => {
+    setReactivatingJobId(jobId);
+    try {
+      await jobService.reactivateJob(jobId);
+      addNotification('Job reactivated successfully!', 'success');
+      fetchJobs();
+    } catch (err) {
+      addNotification(err.response?.data?.error || 'Failed to reactivate job', 'error');
+    } finally {
+      setReactivatingJobId(null);
+    }
+  };
+
+  const activeJobs = jobs.filter(j => j.is_active && j.status === 'open');
+  const inactiveJobs = jobs.filter(j => !j.is_active || j.status === 'cancelled');
 
   const selectedJob = jobs.find(j => j.id === selectedJobId);
 
@@ -684,16 +703,16 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
 
       <div className="grid gap-20" style={{ gridTemplateColumns: '1fr' }}>
 
-        {/* Container 1: Posted Jobs */}
+        {/* Container 1: Active Jobs */}
         <div className="jobs-fixed-panel">
           <div className="scrollable-content-card">
             <h3 className="text-lg text-dim mb-16 flex-row items-center gap-8 flex-shrink-0">
               <Briefcase size={18} /> Active Listings
             </h3>
-            {jobs.length > 0 ? (
+            {activeJobs.length > 0 ? (
               <div className="scroll-area">
                 <div className="flex-col gap-12">
-                  {jobs.map(job => (
+                  {activeJobs.map(job => (
                     <div
                       key={job.id}
                       className={'glass flex-row items-center flex-between gap-16 p-12 px-20' + (job.is_featured ? ' premium-card premium-glow' : '')}
@@ -738,13 +757,72 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
             ) : (
               <div className="flex-1 flex-center flex-col text-center opacity-40">
                 <Briefcase size={48} className="mx-auto mb-12" />
-                <p>No jobs posted yet.</p>
+                <p>No active jobs.</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Container 2: Applications */}
+        {/* Container 2: Inactive / Cancelled Jobs (available for reactivation) */}
+        <div className="jobs-fixed-panel">
+          <div className="scrollable-content-card">
+            <h3 className="text-lg text-dim mb-16 flex-row items-center gap-8 flex-shrink-0">
+              <AlertCircle size={18} /> Inactive Listings <span className="text-xs text-dim font-normal">(consumes 1 job post each)</span>
+            </h3>
+            {isLoading ? (
+              <div className="scroll-area">
+                <div className="flex-col gap-12">
+                  <SkeletonCard count={2} />
+                </div>
+              </div>
+            ) : inactiveJobs.length > 0 ? (
+              <div className="scroll-area">
+                <div className="flex-col gap-12">
+                  {inactiveJobs.map(job => (
+                    <div
+                      key={job.id}
+                      className="glass flex-row items-center flex-between gap-16 p-12 px-20 overflow-hidden"
+                      style={{ opacity: 0.7 }}
+                    >
+                      <div className="flex-row items-center gap-16 flex-1 min-w-0 overflow-hidden">
+                        <div className="flex-center flex-shrink-0" style={{ width: '40px', height: '40px', background: 'var(--glass)', borderRadius: '8px', color: 'var(--text-dim)' }}>
+                          <Briefcase size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex-row items-center gap-8">
+                            <span className="text-sm font-bold text-ellipsis">{job.title}</span>
+                            <span className="status-tag status-tag--pending text-xs">Cancelled</span>
+                          </div>
+                          <div className="flex-row gap-8 text-sm text-dim mt-2 flex-wrap">
+                            <span className="flex-row items-center gap-4"><Tag size={12} /> <span className="text-ellipsis" style={{ maxWidth: '120px' }}>{job.category}</span></span>
+                            <span className="flex-row items-center gap-4"><Clock size={12} /> Cancelled: {job.updated_at ? new Date(job.updated_at).toLocaleDateString() : 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-row gap-8 flex-shrink-0 items-center">
+                        <button
+                          className="btn btn-primary px-12 py-6 text-xs radius-6"
+                          onClick={() => handleReactivateJob(job.id)}
+                          disabled={reactivatingJobId === job.id}
+                          style={reactivatingJobId === job.id ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                        >
+                          <RotateCcw size={14} /> {reactivatingJobId === job.id ? 'Reactivating...' : 'Reactivate'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 flex-center flex-col text-center opacity-40">
+                <AlertCircle size={48} className="mx-auto mb-12" />
+                <p>No inactive jobs.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Container 3: Applications */}
         <div className="jobs-fixed-panel">
           <div className="scrollable-content-card">
             <div className="flex-between mb-16 flex-shrink-0">
@@ -875,9 +953,9 @@ const Jobs = ({ profile, addNotification, fetchProfile }) => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDeleteJob}
-        title="Delete Job Listing"
-        message="Are you sure you want to delete this job listing? This action cannot be undone."
-        confirmText="Delete Listing"
+        title="Cancel Job Listing"
+        message="Are you sure you want to cancel this job listing? It will be deactivated and can be reactivated later from the inactive listings section."
+        confirmText="Cancel Listing"
         type="danger"
       />
 
