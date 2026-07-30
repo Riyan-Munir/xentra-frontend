@@ -1530,6 +1530,15 @@ input[type="radio"]:focus {
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.05);
 }
 
+.login-page-logo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .login-page-title {
   font-size: 2.5rem;
   font-weight: 800;
@@ -3277,6 +3286,14 @@ input[type="radio"]:focus {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.sidebar-logo-img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .sidebar-nav {

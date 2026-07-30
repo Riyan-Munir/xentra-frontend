@@ -96,7 +96,14 @@ const LoginPage = () => {
       <div className="auth-callback-grid-lines"></div>
 
       <div className="card glass fade-in login-page-card">
-        <div className="mb-40">
+        <div className="mb-40" style={{ textAlign: 'center' }}>
+          <img
+            className="login-page-logo"
+            src={(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/resources/xentra_logo/image/'}
+            alt="Xentra"
+            width="64"
+            height="64"
+          />
           <h1 className="login-page-title">
             Xentra
           </h1>

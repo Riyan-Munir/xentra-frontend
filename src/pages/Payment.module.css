@@ -111,17 +111,11 @@
     gap: 10px;
 }
 
-.topbarLogoIcon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--pp-text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--pp-bg);
-    font-weight: 700;
-    font-size: 16px;
+.topbarLogoImg {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
     flex-shrink: 0;
 }
 

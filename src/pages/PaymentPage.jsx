@@ -53,7 +53,13 @@ const PaymentTopBar = memo(function PaymentTopBar({ theme, onToggleTheme, userna
         <div className={styles.topbar}>
             {/* Logo */}
             <div className={styles.topbarLogo}>
-                <div className={styles.topbarLogoIcon}>X</div>
+                <img
+                    className={styles.topbarLogoImg}
+                    src={(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/resources/xentra_logo/image/'}
+                    alt="Xentra"
+                    width="28"
+                    height="28"
+                />
                 <span className={styles.topbarLogoText}>Xentra</span>
             </div>
 
