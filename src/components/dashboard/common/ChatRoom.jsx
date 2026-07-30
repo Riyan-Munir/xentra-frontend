@@ -6,6 +6,9 @@ import {
 import { roomService } from '../../../services/roomService';
 import styles from './ChatRoom.module.css';
 
+// Xentra logo resource URL served by the backend
+const XENTRA_LOGO_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/resources/xentra_logo/image/';
+
 /* ═══════════════════════════════════════════════════════════════════════════
    ChatRoom, Premium-only live chat room page for Client & Freelancer
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -58,6 +61,9 @@ function GoldDust() {
 // ── Avatar Component ──────────────────────────────────────────────────────
 function Avatar({ url, name, sender, size = 32 }) {
     const [imgError, setImgError] = useState(false);
+
+    // Default to Xentra logo URL for bot/system senders when no url is provided
+    const effectiveUrl = url || ((sender === 'bot' || sender === 'system') ? XENTRA_LOGO_URL : null);
     const initial = (name || sender || '?')[0].toUpperCase();
 
     const fallbackClass = sender === 'client'
@@ -68,10 +74,10 @@ function Avatar({ url, name, sender, size = 32 }) {
 
     return (
         <div className={styles.avatar} style={{ width: size, height: size }}>
-            {url && !imgError ? (
+            {effectiveUrl && !imgError ? (
                 <img
                     className={styles.avatarImg}
-                    src={url}
+                    src={effectiveUrl}
                     alt={name || sender}
                     onError={() => setImgError(true)}
                     loading="lazy"
