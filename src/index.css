@@ -5301,7 +5301,7 @@ input[type="radio"]:focus {
   min-width: 0;
 }
 
-.premium-card {
+.premium-cards-grid .premium-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -5888,7 +5888,7 @@ input[type="radio"]:focus {
 
 /* ── Premium Responsive ─────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .premium-card {
+  .premium-cards-grid .premium-card {
     min-height: 400px;
     max-height: 500px;
   }
@@ -5916,7 +5916,7 @@ input[type="radio"]:focus {
     gap: 16px;
   }
 
-  .premium-card {
+  .premium-cards-grid .premium-card {
     padding: 20px;
     min-height: 360px;
     max-height: 480px;
@@ -5961,7 +5961,7 @@ input[type="radio"]:focus {
     flex-shrink: 0;
   }
 
-  .premium-card {
+  .premium-cards-grid .premium-card {
     min-height: 340px;
     max-height: 460px;
     padding: 16px;
