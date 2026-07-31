@@ -278,7 +278,7 @@ function formatCountdown(totalSeconds) {
 }
 
 /* ── Pending Payment Banner ──────────────────────────────────────── */
-const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => {
+const PendingPaymentBanner = memo(({ payment, onCancel, onPay, onExpired, cancelling }) => {
     const [remaining, setRemaining] = useState(
         () => payment?.callback_token_remaining_seconds ?? 0
     );
@@ -296,6 +296,16 @@ const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => 
         }, 1000);
         return () => clearInterval(interval);
     }, [remaining > 0]);
+
+    /* When the countdown reaches 0, notify parent so it can refresh
+       the pending payments list (expired tokens get filtered out). */
+    const expiredFiredRef = useRef(false);
+    useEffect(() => {
+        if (remaining <= 0 && !expiredFiredRef.current) {
+            expiredFiredRef.current = true;
+            onExpired?.();
+        }
+    }, [remaining, onExpired]);
 
     if (!payment) return null;
 
@@ -324,23 +334,27 @@ const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => 
                     </p>
                 </div>
                 <div className="flex-row items-center gap-8 flex-shrink-0">
-                    <button
-                        className="btn btn-primary text-xs"
-                        onClick={() => onPay(payment)}
-                        disabled={cancelling || isExpired}
-                        title={isExpired ? 'Payment link expired' : 'Pay now'}
-                    >
-                        <DollarSign size={14} />
-                        Pay
-                    </button>
-                    <button
-                        className="btn btn-secondary text-xs"
-                        onClick={() => onCancel(payment)}
-                        disabled={cancelling}
-                    >
-                        {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                        Cancel
-                    </button>
+                    {!isExpired && (
+                        <button
+                            className="btn btn-primary text-xs"
+                            onClick={() => onPay(payment)}
+                            disabled={cancelling}
+                            title="Pay now"
+                        >
+                            <DollarSign size={14} />
+                            Pay
+                        </button>
+                    )}
+                    {!isExpired && (
+                        <button
+                            className="btn btn-secondary text-xs"
+                            onClick={() => onCancel(payment)}
+                            disabled={cancelling}
+                        >
+                            {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                            Cancel
+                        </button>
+                    )}
                 </div>
             </div>
             {/* Countdown row */}
@@ -348,7 +362,7 @@ const PendingPaymentBanner = memo(({ payment, onCancel, onPay, cancelling }) => 
                 <Timer size={12} className={`flex-shrink-0 ${isExpired ? 'error-text' : isUrgent ? 'error-text' : 'warning-text'}`} />
                 <p className={`text-xs font-medium ${isExpired ? 'error-text' : isUrgent ? 'error-text' : 'warning-text'}`}>
                     {isExpired
-                        ? 'Payment link expired — cancel and create a new payment'
+                        ? 'Payment link expired — create a new payment to continue'
                         : `Expires in ${formatCountdown(remaining)}`
                     }
                 </p>
@@ -404,7 +418,10 @@ const Premium = ({ profile, currentRole, addNotification }) => {
         }
     }, [addNotification, isFreelancer]);
 
-    /* Fetch pending payments separately — scoped to current role */
+    /* Fetch pending payments separately — scoped to current role.
+       Only show payments whose callback token is still valid.
+       Expired-token payments are filtered out so the user can
+       create a new payment without cancelling the stale one. */
     const fetchPendingPayments = useCallback(async () => {
         try {
             const activeRole = isFreelancer ? 'freelancer' : 'client';
@@ -419,11 +436,18 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                 }
                 return p;
             };
+            /* Only show pending payments whose callback token is still active.
+               If callback_token_remaining_seconds <= 0 the token has expired —
+               the backend will auto-expire the payment on the next creation attempt. */
             const pending = allPayments.find(
-                (p) => p.status === 'pending' && p.payment_type === 'subscription'
+                (p) => p.status === 'pending'
+                    && p.payment_type === 'subscription'
+                    && (p.callback_token_remaining_seconds ?? 0) > 0
             );
             const pendingGift = allPayments.find(
-                (p) => p.status === 'pending' && p.payment_type === 'gift'
+                (p) => p.status === 'pending'
+                    && p.payment_type === 'gift'
+                    && (p.callback_token_remaining_seconds ?? 0) > 0
             );
             setPendingPayment(enrich(pending));
             setPendingGiftPayment(enrich(pendingGift));
@@ -583,6 +607,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     payment={pendingPayment}
                     onCancel={handleCancelPayment}
                     onPay={handlePayPayment}
+                    onExpired={fetchPendingPayments}
                     cancelling={cancellingId === pendingPayment.payment_id}
                 />
             )}
@@ -591,6 +616,7 @@ const Premium = ({ profile, currentRole, addNotification }) => {
                     payment={pendingGiftPayment}
                     onCancel={handleCancelPayment}
                     onPay={handlePayPayment}
+                    onExpired={fetchPendingPayments}
                     cancelling={cancellingId === pendingGiftPayment.payment_id}
                 />
             )}
