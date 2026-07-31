@@ -611,16 +611,17 @@ input[type="radio"]:focus {
 }
 
 .layout-middle {
-  flex: 0 0 auto;
+  flex: 3;
   display: flex;
   gap: 20px;
   align-items: stretch;
-  min-height: 120px;
+  min-height: 140px;
+  max-height: 220px;
 }
 
 .layout-bottom {
-  flex: 1;
-  min-height: 0;
+  flex: 8;
+  min-height: 350px;
   overflow: hidden;
 }
 
@@ -654,8 +655,8 @@ input[type="radio"]:focus {
   border: 1px solid var(--border);
   border-radius: 16px;
   min-height: 120px;
+  max-height: 160px;
   min-width: 280px;
-  overflow: hidden;
 }
 
 .profile-avatar-horizontal {
@@ -783,6 +784,7 @@ input[type="radio"]:focus {
   grid-template-rows: repeat(2, 1fr);
   gap: 12px;
   min-height: 148px;
+  max-height: 192px;
 }
 
 .compact-stat-card {
@@ -1234,6 +1236,9 @@ input[type="radio"]:focus {
 @media (max-width: 1100px) {
   .layout-middle {
     flex-direction: column;
+    flex: none;
+    height: auto;
+    max-height: none;
   }
 
   .dashboard-view-container {
@@ -4470,6 +4475,7 @@ input[type="radio"]:focus {
   .stats-grid-right {
     grid-template-columns: repeat(2, 1fr);
     min-height: 124px;
+    max-height: none;
   }
 
   /* Settings grid single column */
@@ -4482,6 +4488,7 @@ input[type="radio"]:focus {
   .layout-middle {
     flex-direction: column;
     min-height: auto;
+    max-height: none;
   }
 
   .layout-bottom {
@@ -4723,6 +4730,7 @@ input[type="radio"]:focus {
   .stats-grid-right {
     grid-template-columns: repeat(2, 1fr);
     min-height: 132px;
+    max-height: 172px;
   }
 
   .jobs-fixed-panel {
@@ -4744,14 +4752,17 @@ input[type="radio"]:focus {
     gap: 20px;
     padding: 20px 24px;
     min-height: 100px;
+    max-height: 140px;
   }
 
   .compact-stat-card {
     min-height: 60px;
+    max-height: 80px;
   }
 
   .layout-middle {
     min-height: 120px;
+    max-height: none;
   }
 
   .layout-bottom {
