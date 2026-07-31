@@ -116,9 +116,9 @@ const ProfileSettings = ({ profile, onUpdate, setHasUnsavedChanges, triggerTremb
           <label className="form-label">Set Your Status</label>
           <CustomSelect
             options={[
-              { label: 'Available (Accepting Jobs)', value: 'available' },
-              { label: 'Busy (Currently Working)', value: 'busy' },
-              { label: 'Offline (Away)', value: 'offline' }
+              { label: 'Available', value: 'available' },
+              { label: 'Busy', value: 'busy' },
+              { label: 'Offline', value: 'offline' }
             ]}
             value={fields.availability}
             onChange={(val) => setField('availability', val)}

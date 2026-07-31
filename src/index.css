@@ -3279,14 +3279,6 @@ input[type="radio"]:focus {
   letter-spacing: -0.02em;
 }
 
-.sidebar-logo-img {
-  display: block;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .sidebar-nav {
   flex: 1;
 }

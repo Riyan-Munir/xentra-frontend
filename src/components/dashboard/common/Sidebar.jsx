@@ -34,13 +34,7 @@ const Sidebar = ({ activeSection, onSectionChange, onLogout, currentRole, isMobi
       {isMobileOpen && <div className="sidebar-mobile-overlay" onClick={onMobileClose} />}
       <aside className={`sidebar glass${isMobileOpen ? ' mobile-open' : ''}`}>
         <div className="sidebar-logo-wrapper">
-          <img
-            className="sidebar-logo-img"
-            src={(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/resources/xentra_logo/image/'}
-            alt="Xentra"
-            width="32"
-            height="32"
-          />
+          <h2 className="sidebar-logo gradient-text-primary">Xentra</h2>
         </div>
 
         <nav className="sidebar-nav">
