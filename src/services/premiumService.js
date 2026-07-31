@@ -47,6 +47,60 @@ const premiumService = {
     searchGiftUser: (username) => api.get('/premium/gifts/search/', {
         params: { username },
     }),
+
+    // ── Blockchain session endpoints (consolidated model) ────────────────
+
+    /**
+     * Start a blockchain payment session for a premium payment.
+     * Sets session_status to 'awaiting_signature' and starts the 15-min timer.
+     */
+    startSession: (paymentId, data = {}) => api.post(
+        `/premium/payments/${paymentId}/start-session/`,
+        {
+            recipient_address: data.recipientAddress || '',
+            amount: data.amount || 0,
+            wallet_provider: data.walletProvider || '',
+            selected_wallet_address: data.selectedWalletAddress || '',
+            chain_id: data.chainId || 56,
+            token_contract: data.tokenContract || '',
+            idempotency_key: data.idempotencyKey || '',
+            reference_token: data.referenceToken || '',
+        },
+    ),
+
+    /**
+     * Submit a transaction hash after the user signs and broadcasts.
+     */
+    submitTx: (paymentId, data = {}) => api.post(
+        `/premium/payments/${paymentId}/submit-tx/`,
+        {
+            tx_hash: data.txHash || '',
+            from_address: data.fromAddress || '',
+        },
+    ),
+
+    /**
+     * Poll the current session status for a payment.
+     */
+    getSessionStatus: (paymentId) => api.get(
+        `/premium/payments/${paymentId}/session-status/`,
+    ),
+
+    /**
+     * Cancel an active blockchain session (only allowed before tx submission).
+     */
+    cancelSession: (paymentId) => api.post(
+        `/premium/payments/${paymentId}/cancel-session/`,
+    ),
+
+    /**
+     * Get the SSE stream URL for real-time session status updates.
+     * Returns the URL string — caller creates an EventSource from it.
+     */
+    getStreamUrl: (paymentId) => {
+        const baseURL = api.defaults?.baseURL || '';
+        return `${baseURL}/premium/payments/${paymentId}/stream/`;
+    },
 };
 
 export default premiumService;

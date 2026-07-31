@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import styles from './Payment.module.css';
 import callbackService from '../services/callbackService';
-import paymentSessionService from '../services/paymentSessionService';
+import premiumService from '../services/premiumService';
 import {
     detectProvider,
     ensureCorrectChain,
@@ -765,15 +765,6 @@ function PaymentPage() {
         return stored;
     }, []);
 
-    /* ── Payment content type from paymentData ────────────────────────── */
-    const paymentContentTypeId = useMemo(() => {
-        return paymentData?.paymentContentTypeId || null;
-    }, [paymentData]);
-
-    const paymentObjectId = useMemo(() => {
-        return paymentData?.paymentObjectId || null;
-    }, [paymentData]);
-
     /* ── Validate Callback Token ──────────────────────────────────────── */
     const validateToken = useCallback(async () => {
         const jwt = localStorage.getItem('access_token');
@@ -797,9 +788,7 @@ function PaymentPage() {
             const data = res.data;
             const payment = data.payment || {};
 
-            // Attach content type info to payment data for later session creation
-            payment.paymentContentTypeId = data.payment_content_type_id;
-            payment.paymentObjectId = data.payment_object_id;
+            // Session info is now on the payment model directly — no content type needed
 
             setPaymentData(payment);
             setWallets(data.wallets || []);
@@ -901,8 +890,6 @@ function PaymentPage() {
                 const data = res.data;
                 /* Refresh payment data in case it changed */
                 const payment = data.payment || {};
-                payment.paymentContentTypeId = data.payment_content_type_id;
-                payment.paymentObjectId = data.payment_object_id;
                 setPaymentData(payment);
                 /* Keep display name in sync */
                 if (data.profile?.username) {
@@ -1037,19 +1024,19 @@ function PaymentPage() {
                 throw new Error('No recipient wallet configured for this payment.');
             }
 
-            const createRes = await paymentSessionService.createSession({
-                paymentContentTypeId: paymentData.paymentContentTypeId,
-                paymentObjectId: paymentData.paymentObjectId,
-                sessionType: 'SUBSCRIPTION',
+            const startRes = await premiumService.startSession(paymentData.paymentId, {
                 recipientAddress,
                 amount: paymentData.totalPayable || paymentData.amount,
                 walletProvider: selectedWallet.provider || 'METAMASK',
                 chainId: 56,
-                selectedWalletAddress: selectedWallet?.address || '',     // ← wallet re-verification
+                tokenContract: paymentData.tokenContract || '',
+                idempotencyKey: `idem_${paymentData.paymentId}_${Date.now()}`,
+                referenceToken: `ref_${paymentData.paymentId}_${Date.now()}`,
+                selectedWalletAddress: selectedWallet?.address || '',
             });
 
-            const session = createRes.data;
-            setSessionId(session.session_id);
+            const session = startRes.data;
+            setSessionId(paymentData.paymentId);
             setSessionData(session);
 
             // Read required_confirmations from backend so progress bar matches scanner
@@ -1059,7 +1046,7 @@ function PaymentPage() {
 
             // ── Step 2: Detect wallet extension by provider ───────────────
             setPaymentFlowState('detecting-wallet');
-            const providerKey = selectedWallet.provider || session.wallet_provider || 'METAMASK';
+            const providerKey = selectedWallet.provider || session.wallet_provider || paymentData.wallet_provider || 'METAMASK';
             const detectedProvider = detectProvider();
 
             if (!detectedProvider) {
@@ -1090,11 +1077,10 @@ function PaymentPage() {
             // from_address helps the scanner skip log parsing to discover
             // the sender — the frontend already knows it.
             setPaymentFlowState('submitting-tx-hash');
-            await paymentSessionService.submitTransaction(
-                session.session_id,
-                txResult.txHash,
-                txResult.from,  // connected wallet address from the popup
-            );
+            await premiumService.submitTx(paymentData.paymentId, {
+                txHash: txResult.txHash,
+                fromAddress: txResult.from || '',
+            });
 
             // ── Step 6: Start polling for confirmation ──────────────────────
             setPaymentFlowState('polling');
@@ -1105,7 +1091,7 @@ function PaymentPage() {
             pollingRef.current = setInterval(async () => {
                 pollCount++;
                 try {
-                    const statusRes = await paymentSessionService.getStatus(session.session_id);
+                    const statusRes = await premiumService.getSessionStatus(paymentData.paymentId);
                     const statusData = statusRes.data;
 
                     // Track confirmations during polling for the progress bar
@@ -1116,24 +1102,24 @@ function PaymentPage() {
                         setRemainingSeconds(statusData.remaining_seconds);
                     }
 
-                    if (statusData.is_terminal) {
+                    if (statusData.is_session_terminal) {
                         clearInterval(pollingRef.current);
                         pollingRef.current = null;
                         isFlowActive.current = false;
 
-                        if (statusData.status === 'SUCCESS') {
+                        if (statusData.session_status === 'SUCCESS') {
                             setPaymentFlowState('success');
-                        } else if (statusData.status === 'FAILED') {
+                        } else if (statusData.session_status === 'FAILED') {
                             setPaymentFlowState('failed');
-                            setPaymentFlowError(statusData.error_log || statusData.status_display || 'Payment verification failed.');
-                        } else if (statusData.status === 'EXPIRED') {
+                            setPaymentFlowError(statusData.error_log || statusData.session_status_display || 'Payment verification failed.');
+                        } else if (statusData.session_status === 'EXPIRED') {
                             setPaymentFlowState('expired-session');
                             setPaymentFlowError('Payment session expired. Please try again.');
                         } else {
                             setPaymentFlowState('failed');
-                            setPaymentFlowError(`Payment ended with status: ${statusData.status_display}`);
+                            setPaymentFlowError(`Payment ended with status: ${statusData.session_status_display}`);
                         }
-                    } else if (statusData.is_expired) {
+                    } else if (statusData.is_session_expired) {
                         // Session expired but we haven't been notified by terminal check
                         clearInterval(pollingRef.current);
                         pollingRef.current = null;
@@ -1188,7 +1174,7 @@ function PaymentPage() {
             setPaymentFlowState('failed');
             setPaymentFlowError(err.message || 'An unexpected error occurred during payment.');
         }
-    }, [selectedWallet, paymentData, paymentContentTypeId, paymentObjectId]);
+    }, [selectedWallet, paymentData]);
 
     /* ── Reset payment flow (go back to form) ─────────────────────────── */
     const handleResetFlow = useCallback(() => {
