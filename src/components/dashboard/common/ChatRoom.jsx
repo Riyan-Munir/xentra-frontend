@@ -156,18 +156,29 @@ function MessageBubble({ msg, viewerRole, isPremium }) {
     );
 }
 
-// ── Leave Notice ──────────────────────────────────────────────────────────
-function LeaveNotice({ msg }) {
-    const name = msg.sender === 'client' ? 'Client' : 'Freelancer';
+// ── Closure Notice ───────────────────────────────────────────────────────
+function ClosureNotice({ msg }) {
+    const name = msg.sender === 'client' ? 'Client' : msg.sender === 'freelancer' ? 'Freelancer' : 'System';
+    const closureType = msg.closure_type || 'leave';
+
+    let titleText;
+    if (closureType === 'agreement') {
+        titleText = 'Room concluded — agreement reached';
+    } else if (closureType === 'system') {
+        titleText = 'Room closed by system';
+    } else {
+        titleText = `${name} left the room`;
+    }
+
     return (
-        <div className={styles.messageRowLeave}>
-            <div className={styles.leaveNoticeCard}>
-                <p className={styles.leaveNoticeTitle}>
+        <div className={styles.messageRowClosure}>
+            <div className={styles.closureNoticeCard}>
+                <p className={styles.closureNoticeTitle}>
                     <LogOut size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    {name} left the room
+                    {titleText}
                 </p>
-                {msg.data && <p className={styles.leaveNoticeReason}>{msg.data}</p>}
-                <p className={styles.leaveNoticeTime}>{formatTime(msg.timestamp)}</p>
+                {msg.data && <p className={styles.closureNoticeReason}>{msg.data}</p>}
+                <p className={styles.closureNoticeTime}>{formatTime(msg.timestamp)}</p>
             </div>
         </div>
     );
@@ -315,11 +326,11 @@ function RoomInfoPanel({ stats, infoOpen, onClose }) {
 
     const checkLabels = {
         // Freelancer-side confirm flags
-        freelancer_greet_sent: 'Freelancer Greet Sent',
+        freelancer_guide_sent: 'Freelancer Guide Sent',
         freelancer_rules_sent: 'Freelancer Rules Sent',
         freelancer_job_details_sent: 'Freelancer Job Details Sent',
         // Client-side confirm flags
-        client_greet_sent: 'Client Greet Sent',
+        client_guide_sent: 'Client Guide Sent',
         client_rules_sent: 'Client Rules Sent',
         client_job_details_sent: 'Client Job Details Sent',
         // Progress flags
@@ -442,8 +453,8 @@ function RoomInfoPanel({ stats, infoOpen, onClose }) {
                             <span className={styles.infoValue}>{stats.stats.complaint_count}</span>
                         </div>
                         <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>Leaves</span>
-                            <span className={styles.infoValue}>{stats.stats.leave_count}</span>
+                            <span className={styles.infoLabel}>Closures</span>
+                            <span className={styles.infoValue}>{stats.stats.closure_count}</span>
                         </div>
                     </div>
                 )}
@@ -783,8 +794,8 @@ const ChatRoom = ({ profile, currentRole }) => {
                                     return <DateDivider key={item.key} label={item.label} isPremium={isPremium} />;
                                 }
                                 const msg = item.data;
-                                if (msg.type === 'leave') {
-                                    return <LeaveNotice key={item.key} msg={msg} />;
+                                if (msg.type === 'closure') {
+                                    return <ClosureNotice key={item.key} msg={msg} />;
                                 }
                                 return (
                                     <MessageBubble

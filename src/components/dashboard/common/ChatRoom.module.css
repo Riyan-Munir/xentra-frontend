@@ -690,7 +690,7 @@
     margin-right: auto;
 }
 
-.messageRowLeave {
+.messageRowClosure {
     justify-content: center;
     max-width: 100%;
 }
@@ -933,14 +933,14 @@
     color: rgba(255, 215, 0, 0.7);
 }
 
-/* ── Leave Notice (centered) ──────────────────────────────────────────── */
-.leaveNotice {
+/* ── Closure Notice (centered) ────────────────────────────────────────── */
+.closureNotice {
     display: flex;
     justify-content: center;
     padding: 8px 0;
 }
 
-.leaveNoticeCard {
+.closureNoticeCard {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 8px;
@@ -949,20 +949,20 @@
     max-width: 320px;
 }
 
-.leaveNoticeTitle {
+.closureNoticeTitle {
     font-size: 0.75rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
-.leaveNoticeReason {
+.closureNoticeReason {
     font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.3);
     margin: 4px 0 0;
 }
 
-.leaveNoticeTime {
+.closureNoticeTime {
     font-size: 0.6rem;
     color: rgba(255, 255, 255, 0.25);
     margin-top: 4px;
