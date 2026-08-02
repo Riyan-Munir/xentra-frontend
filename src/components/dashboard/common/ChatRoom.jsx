@@ -495,7 +495,6 @@ const ChatRoom = ({ profile, currentRole }) => {
 
     // ── Fetch rooms ──────────────────────────────────────────────────────
     const fetchRooms = useCallback(async () => {
-        if (!isPremium) return;
         setRoomsLoading(true);
         try {
             const data = await roomService.getMyRooms(currentRole, 'all', activeTab);
@@ -505,7 +504,7 @@ const ChatRoom = ({ profile, currentRole }) => {
         } finally {
             setRoomsLoading(false);
         }
-    }, [currentRole, activeTab, isPremium]);
+    }, [currentRole, activeTab]);
 
     useEffect(() => {
         fetchRooms();
@@ -618,35 +617,14 @@ const ChatRoom = ({ profile, currentRole }) => {
         : null;
 
     // ════════════════════════════════════════════════════════════════════
-    // RENDER, Locked (free tier)
-    // ════════════════════════════════════════════════════════════════════
-    if (!isPremium) {
-        return (
-            <div className={`${styles.chatContainer} ${styles.chatContainerLocked}`}>
-                <div className={styles.lockedOverlay}>
-                    <div className={styles.lockedIconBlue}>
-                        <Lock size={28} />
-                    </div>
-                    <h3 className={styles.lockedTitle}>Premium Feature</h3>
-                    <p className={styles.lockedText}>
-                        Chat Rooms is an exclusive feature for premium members.
-                        Upgrade your plan to access live interview transcripts,
-                        room management, and more.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // ════════════════════════════════════════════════════════════════════
-    // RENDER, Premium (unlocked)
+    // RENDER
     // ════════════════════════════════════════════════════════════════════
     return (
-        <div className={`${styles.chatContainer} ${styles.chatContainerPremium}`}>
-            <GoldDust />
+        <div className={`${styles.chatContainer} ${isPremium ? styles.chatContainerPremium : ''}`}>
+            {isPremium && <GoldDust />}
 
             {/* ── Header ──────────────────────────────────────────────────── */}
-            <div className={`${styles.chatHeader} ${styles.chatHeaderPremium}`}>
+            <div className={`${styles.chatHeader} ${isPremium ? styles.chatHeaderPremium : ''}`}>
                 <button
                     className={styles.toggleBtn}
                     onClick={() => { setMenuOpen(!menuOpen); setInfoOpen(false); }}
@@ -654,7 +632,7 @@ const ChatRoom = ({ profile, currentRole }) => {
                 >
                     {menuOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
-                <div className={`${styles.headerTitle} ${styles.headerTitlePremium}`}>
+                <div className={`${styles.headerTitle} ${isPremium ? styles.headerTitlePremium : ''}`}>
                     <h3>{headerTitle}</h3>
                     {headerSubtitle && <p className={styles.headerSubtitle}>{headerSubtitle}</p>}
                 </div>
@@ -792,6 +770,16 @@ const ChatRoom = ({ profile, currentRole }) => {
                             <p className={styles.emptyStateText}>
                                 This room has no messages yet. Messages will appear here
                                 as they are sent via the Discord bot.
+                            </p>
+                        </div>
+                    ) : !isPremium ? (
+                        <div className={styles.chatFreePlaceholder}>
+                            <Lock size={32} className={styles.chatFreePlaceholderIcon} />
+                            <h3 className={styles.chatFreePlaceholderTitle}>Premium Feature</h3>
+                            <p className={styles.chatFreePlaceholderText}>
+                                Chat messaging is exclusive to premium members.
+                                Upgrade your plan to access live interview transcripts
+                                and room chat.
                             </p>
                         </div>
                     ) : (
