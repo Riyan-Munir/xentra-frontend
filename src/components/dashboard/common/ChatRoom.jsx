@@ -142,7 +142,14 @@ function MessageBubble({ msg, viewerRole, isPremium }) {
                     </div>
                 )}
                 <ReplyPreview reply={msg.reply_preview} />
-                <p className={styles.bubbleText}>{msg.data}</p>
+                {isStyledSender(msg.sender) ? (
+                    <div
+                        className={`${styles.bubbleText} ${styles.mdContent}`}
+                        dangerouslySetInnerHTML={{ __html: discordMdToHtml(msg.data) }}
+                    />
+                ) : (
+                    <p className={styles.bubbleText}>{msg.data}</p>
+                )}
                 <div className={styles.bubbleTimestamp}>{formatTime(msg.timestamp)}</div>
             </div>
             {isSelf && (

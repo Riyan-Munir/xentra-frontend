@@ -1684,3 +1684,55 @@
         padding: 8px 12px;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Markdown-rendered content (system / bot messages via dangerouslySetInnerHTML)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mdContent {
+    composes: bubbleText;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.mdContent :global(.md-blockquote) {
+    margin: 4px 0;
+    padding: 2px 0 2px 12px;
+    border-left: 3px solid var(--accent, rgba(255, 255, 255, 0.25));
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+}
+
+.mdContent :global(.md-blockquote-multi) {
+    margin: 4px 0;
+    padding: 2px 0 2px 12px;
+    border-left: 3px solid var(--accent, rgba(255, 255, 255, 0.35));
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.mdContent :global(.md-inline-code) {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    color: #e8b4b8;
+}
+
+.mdContent :global(.md-spoiler) {
+    background: rgba(255, 255, 255, 0.15);
+    color: transparent;
+    border-radius: 3px;
+    padding: 0 3px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+
+.mdContent :global(.md-spoiler):hover,
+.mdContent :global(.md-spoiler):active {
+    color: inherit;
+    background: rgba(255, 255, 255, 0.08);
+}
