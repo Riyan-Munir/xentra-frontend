@@ -91,7 +91,8 @@ const AuthCallback = () => {
       localStorage.setItem('username', res.data.user.username);
       localStorage.setItem('discord_avatar', res.data.user.discord_avatar);
       localStorage.setItem('discord_id', res.data.user.discord_id);
-      localStorage.setItem('is_superuser', res.data.user.is_superuser);
+      // NOTE: is_superuser is deliberately NOT stored in localStorage.
+      // Admin/superuser status is never exposed to the frontend.
       localStorage.setItem('selected_role', savedRole);
       localStorage.setItem('active_role', res.data.user.active_role);
       localStorage.setItem('is_banned', res.data.user.is_banned);
