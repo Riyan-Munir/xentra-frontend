@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
     Menu, X, MessageCircle, Info, Lock, ChevronDown,
-    User, Bot, AlertTriangle, LogOut, Clock, RefreshCw,
+    User, Bot, AlertTriangle, LogOut, Clock, RefreshCw, Paperclip,
 } from 'lucide-react';
 import { roomService } from '../../../services/roomService';
+import { discordMdToHtml, shouldStyleMessage } from './markdownRenderer';
 import styles from './ChatRoom.module.css';
 
 // Xentra logo resource URL served by the backend
 const XENTRA_LOGO_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/resources/xentra_logo/image/';
+
+// Number of transcript entries fetched per lazy-load chunk (older messages)
+const CHUNK_SIZE = 25;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ChatRoom, Premium-only live chat room page for Client & Freelancer
@@ -45,6 +49,37 @@ function formatRelativeTime(ts) {
         if (days < 7) return `${days}d ago`;
         return formatDate(ts);
     } catch { return ''; }
+}
+
+// ── Helper: attachment tag label (parity with PDF generator) ──────────────
+function attachmentTagText(metadata) {
+    const raw = String(metadata == null ? '' : metadata).trim();
+    if (!raw) return '';
+
+    let parsed = null;
+    try { parsed = JSON.parse(raw); } catch { parsed = null; }
+
+    if (parsed === null) {
+        // Plain string: "Shared 1 file(s) (a.pdf)" -> "Shared 1 file(s) [a.pdf]"
+        // Only the LAST (...) group (the file names) becomes square brackets;
+        // "file(s)" keeps its round brackets.
+        const m = /^(.*?)(\([^()]*\))$/.exec(raw);
+        if (m) return `${m[1].replace(/\s+$/, '')} [${m[2].slice(1, -1)}]`;
+        return raw;
+    }
+    if (Array.isArray(parsed)) {
+        const names = [];
+        for (const item of parsed) {
+            if (item && typeof item === 'object' && item.filename) names.push(String(item.filename));
+            else if (typeof item === 'string') names.push(item);
+        }
+        if (!names.length) return raw;
+        return `Shared ${names.length} file(s) [${names.join(', ')}]`;
+    }
+    if (parsed && typeof parsed === 'object' && parsed.filename) {
+        return `Shared 1 file(s) [${String(parsed.filename)}]`;
+    }
+    return raw;
 }
 
 // ── Gold Dust Particles ───────────────────────────────────────────────────
@@ -94,11 +129,25 @@ function Avatar({ url, name, sender, size = 32 }) {
 // ── Reply Preview Strip ───────────────────────────────────────────────────
 function ReplyPreview({ reply }) {
     if (!reply) return null;
+    const senderLabel = String(reply.sender || 'system');
+    const prettySender = senderLabel.charAt(0).toUpperCase() + senderLabel.slice(1);
     return (
         <div className={styles.replyPreview}>
             <div className={styles.replyAccent} />
-            <p className={styles.replySender}>{(reply.sender || '').capitalize?.() || reply.sender}</p>
-            <p className={styles.replyText}>{(reply.data || '').slice(0, 80)}</p>
+            <p className={styles.replySender}>{prettySender}</p>
+            <p className={styles.replyText}>{reply.data || ''}</p>
+        </div>
+    );
+}
+
+// ── Attachment Tag ────────────────────────────────────────────────────────
+function AttachmentTag({ metadata }) {
+    const label = attachmentTagText(metadata);
+    if (!label) return null;
+    return (
+        <div className={styles.attachmentTag}>
+            <Paperclip size={10} className={styles.attachmentTagIcon} />
+            <span>{label}</span>
         </div>
     );
 }
@@ -107,12 +156,16 @@ function ReplyPreview({ reply }) {
 function MessageBubble({ msg, viewerRole, isPremium }) {
     const isSelf = msg.sender === viewerRole;
 
-    // Determine bubble class
+    // Bubble colour precedence — exact replica of the PDF generator's
+    // ``_bubble_colors`` (closure → bot/system → complain →
+    // /interview_leave command → other command → self → other).
     let bubbleClass = styles.bubbleOther;
-    if (isSelf) bubbleClass = styles.bubbleSelf;
+    if (msg.type === 'closure') bubbleClass = styles.bubbleLeave;
+    else if (msg.sender === 'bot' || msg.sender === 'system') bubbleClass = styles.bubbleBot;
     else if (msg.type === 'complain') bubbleClass = styles.bubbleComplain;
+    else if (msg.is_command && String(msg.command_name || '').replace(/^\/+/, '') === 'interview_leave') bubbleClass = styles.bubbleLeave;
     else if (msg.is_command) bubbleClass = styles.bubbleCommand;
-    else if (msg.sender === 'bot') bubbleClass = styles.bubbleBot;
+    else if (isSelf) bubbleClass = styles.bubbleSelf;
 
     const senderName = msg.sender === 'client'
         ? 'Client'
@@ -142,7 +195,8 @@ function MessageBubble({ msg, viewerRole, isPremium }) {
                     </div>
                 )}
                 <ReplyPreview reply={msg.reply_preview} />
-                {isStyledSender(msg.sender) ? (
+                <AttachmentTag metadata={msg.attachment_metadata} />
+                {shouldStyleMessage(msg.sender, msg.data) ? (
                     <div
                         className={`${styles.bubbleText} ${styles.mdContent}`}
                         dangerouslySetInnerHTML={{ __html: discordMdToHtml(msg.data) }}
@@ -482,7 +536,14 @@ const ChatRoom = ({ profile, currentRole }) => {
     const [rooms, setRooms] = useState([]);
     const [roomsLoading, setRoomsLoading] = useState(true);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+    // Meta from transcript-index (names, avatars, viewer_role, ...)
     const [transcript, setTranscript] = useState(null);
+    // Filtered transcript entries (show_to-aware, saved order)
+    const [transcriptEntries, setTranscriptEntries] = useState([]);
+    // Full merged message objects, loaded lazily in chunks (oldest → newest)
+    const [messages, setMessages] = useState([]);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingOlder, setLoadingOlder] = useState(false);
     const [transcriptLoading, setTranscriptLoading] = useState(false);
     const [roomStats, setRoomStats] = useState(null);
     const [infoOpen, setInfoOpen] = useState(false);
@@ -492,6 +553,19 @@ const ChatRoom = ({ profile, currentRole }) => {
 
     const chatBodyRef = useRef(null);
     const bottomRef = useRef(null);
+
+    // Lazy-loading refs (avoid stale closures inside callbacks)
+    const transcriptRef = useRef(null);
+    const transcriptEntriesRef = useRef([]);
+    const loadedEntriesRef = useRef([]);   // loaded transcript entries, oldest → newest
+    const idByRef = useRef({});            // id -> { type, record } for reply resolution
+    const loadedCountRef = useRef(0);      // how many entries are loaded (from the end)
+    const preserveScrollRef = useRef(0);   // scrollHeight to restore after prepending
+    const shouldAutoScrollRef = useRef(false);
+    const loadingOlderRef = useRef(false);
+
+    useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+    useEffect(() => { transcriptEntriesRef.current = transcriptEntries; }, [transcriptEntries]);
 
     // ── Fetch rooms ──────────────────────────────────────────────────────
     const fetchRooms = useCallback(async () => {
@@ -510,9 +584,142 @@ const ChatRoom = ({ profile, currentRole }) => {
         fetchRooms();
     }, [fetchRooms]);
 
-    // ── Fetch transcript when room selected ──────────────────────────────
-    const fetchTranscript = useCallback(async (roomId, force = false) => {
-        if (!roomId) { setTranscript(null); return; }
+    // ── Rebuild the merged message list from loaded entries + records ────
+    const rebuildMessages = useCallback(() => {
+        const t = transcriptRef.current || {};
+        const out = [];
+        for (const e of loadedEntriesRef.current) {
+            if (!e || !e.id) continue;
+            const hit = idByRef.current[e.id];
+            if (!hit) continue;
+            const rec = hit.record;
+            const isMsg = hit.type === 'message';
+            const sender = rec.sender || 'system';
+
+            const msgObj = {
+                type: isMsg ? 'msg' : 'complain',
+                sender,
+                data: isMsg ? (rec.msg_data ?? '') : (rec.complaint_data ?? ''),
+                timestamp: e.timestamp || '',
+                is_command: isMsg ? Boolean(rec.is_room_command) : false,
+                command_name: isMsg ? (rec.command_name || '') : '',
+                attachment_metadata: isMsg ? (rec.attachment_metadata || '') : '',
+                avatar_url: sender === 'client'
+                    ? (t.client_avatar_url || '')
+                    : sender === 'freelancer'
+                        ? (t.freelancer_avatar_url || '')
+                        : '',
+            };
+
+            // Reply preview: first data line of the target + "..." when the
+            // target data continues beyond the first line (PDF parity).
+            const targetId = isMsg
+                ? (rec.target_msg || '')
+                : (rec.target_msg || rec.target_complaint || '');
+            if (targetId && idByRef.current[targetId]) {
+                const tHit = idByRef.current[targetId];
+                const tRec = tHit.record;
+                const tdata = tHit.type === 'message'
+                    ? (tRec.msg_data ?? '')
+                    : (tRec.complaint_data ?? '');
+                const tlines = tdata ? String(tdata).split('\n') : [''];
+                let preview = tlines[0] || '';
+                if (tlines.length > 1) preview += ' ...';
+                const tSender = tRec.sender || 'system';
+                msgObj.reply_preview = {
+                    sender: tSender,
+                    data: preview,
+                    avatar_url: tSender === 'client'
+                        ? (t.client_avatar_url || '')
+                        : tSender === 'freelancer'
+                            ? (t.freelancer_avatar_url || '')
+                            : '',
+                };
+            }
+
+            out.push(msgObj);
+        }
+        setMessages(out);
+    }, []);
+
+    // ── Fetch full records for a contiguous chunk of entries ────────────
+    const fetchRecordsForChunk = useCallback(async (roomId, entries, fromIndex, endIndex) => {
+        // ``endIndex`` caps the chunk at the oldest currently-loaded index so
+        // that chunks never overlap when the total isn't a multiple of
+        // CHUNK_SIZE (e.g. 30 entries → first chunk [5,30), next [0,5)).
+        const toIndex = Math.min(endIndex ?? (fromIndex + CHUNK_SIZE), entries.length);
+        const chunk = entries.slice(fromIndex, toIndex);
+        if (!chunk.length) {
+            setHasMore(false);
+            return;
+        }
+
+        const msgIds = [];
+        const complainIds = [];
+        for (const e of chunk) {
+            if (!e || !e.id) continue;
+            if (e.type === 'message') msgIds.push(e.id);
+            else if (e.type === 'complain') complainIds.push(e.id);
+        }
+
+        let records = [];
+        if (msgIds.length || complainIds.length) {
+            const res = await roomService.getTranscriptRecords(
+                roomId, currentRole, msgIds, complainIds,
+            );
+            records = (res && res.records) || [];
+        }
+
+        for (const r of records) {
+            if (!r) continue;
+            const rid = r.type === 'message' ? r.msg_id : r.complaint_id;
+            if (rid) idByRef.current[rid] = { type: r.type, record: r };
+        }
+
+        // Chunks are always loaded oldest-first from the end, so each new
+        // chunk is older than what is already loaded → prepend.
+        loadedEntriesRef.current = [...chunk, ...loadedEntriesRef.current];
+    }, [currentRole]);
+
+    // ── Load one older chunk (on scroll-to-top) ──────────────────────────
+    const loadOlder = useCallback(async () => {
+        if (!selectedRoomId || loadingOlderRef.current || !hasMore) return;
+        const entries = transcriptEntriesRef.current;
+        const total = entries.length;
+        const fromIndex = Math.max(0, total - loadedCountRef.current - CHUNK_SIZE);
+        if (fromIndex >= total) {
+            setHasMore(false);
+            return;
+        }
+
+        loadingOlderRef.current = true;
+        setLoadingOlder(true);
+        const prevHeight = chatBodyRef.current ? chatBodyRef.current.scrollHeight : 0;
+        try {
+            const endIndex = total - loadedCountRef.current;
+            await fetchRecordsForChunk(selectedRoomId, entries, fromIndex, endIndex);
+            loadedCountRef.current = Math.min(total, loadedCountRef.current + CHUNK_SIZE);
+            setHasMore(loadedCountRef.current < total);
+            if (chatBodyRef.current && prevHeight) {
+                preserveScrollRef.current = prevHeight;
+            }
+            rebuildMessages();
+        } catch {
+            // keep existing messages on chunk failure
+        } finally {
+            loadingOlderRef.current = false;
+            setLoadingOlder(false);
+        }
+    }, [selectedRoomId, hasMore, fetchRecordsForChunk, rebuildMessages]);
+
+    // ── Fetch filtered transcript index when room selected ───────────────
+    const fetchTranscriptIndex = useCallback(async (roomId, force = false) => {
+        if (!roomId) {
+            setTranscript(null);
+            setTranscriptEntries([]);
+            setMessages([]);
+            return;
+        }
 
         // Simple cache: skip if fetched < 10 seconds ago (unless forced)
         const now = Date.now();
@@ -524,298 +731,340 @@ const ChatRoom = ({ profile, currentRole }) => {
 
         setTranscriptLoading(true);
         try {
-            const data = await roomService.getTranscript(roomId, currentRole);
-            setTranscript(data);
+            const data = await roomService.getTranscriptIndex(roomId, currentRole);
             lastFetchRef.current[roomId] = Date.now();
+            const entries = (data && data.transcript_entries) || [];
+
+            // Reset lazy-loading state for this room
+            loadedEntriesRef.current = [];
+            idByRef.current = {};
+            loadedCountRef.current = 0;
+            preserveScrollRef.current = 0;
+            shouldAutoScrollRef.current = true;
+            setTranscript(data);
+            setTranscriptEntries(entries);
+            setMessages([]);
+            setHasMore(entries.length > 0);
+
+            // Load the most recent chunk first (chat opens at the bottom)
+            if (entries.length) {
+                const fromIndex = Math.max(0, entries.length - CHUNK_SIZE);
+                await fetchRecordsForChunk(roomId, entries, fromIndex);
+                loadedCountRef.current = Math.min(CHUNK_SIZE, entries.length);
+                setHasMore(loadedCountRef.current < entries.length);
+                rebuildMessages();
+            } else {
+                setHasMore(false);
+            }
+
             // Also fetch stats
             const statsData = await roomService.getRoomStats(roomId, currentRole);
-            setRoomStats(statsData);
-        } catch {
-            setTranscript(null);
-            setRoomStats(null);
-        } finally {
-            setTranscriptLoading(false);
+        setRoomStats(statsData);
+    } catch {
+        setTranscript(null);
+        setTranscriptEntries([]);
+        setMessages([]);
+        setRoomStats(null);
+    } finally {
+        setTranscriptLoading(false);
+    }
+}, [currentRole, fetchRecordsForChunk, rebuildMessages]);
+
+// ── Manual refresh (bypasses cache, no transcriptLoading skeleton) ──
+const handleRefresh = useCallback(async () => {
+    if (!selectedRoomId || refreshing) return;
+    setRefreshing(true);
+    try {
+        await fetchTranscriptIndex(selectedRoomId, true);
+    } catch {
+        // keep existing data on refresh failure
+    } finally {
+        setRefreshing(false);
+    }
+}, [selectedRoomId, refreshing, fetchTranscriptIndex]);
+
+useEffect(() => {
+    fetchTranscriptIndex(selectedRoomId);
+}, [selectedRoomId, fetchTranscriptIndex]);
+
+// ── Auto-scroll to bottom on room load / refresh ─────────────────────
+useEffect(() => {
+    if (messages.length && bottomRef.current && shouldAutoScrollRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+        shouldAutoScrollRef.current = false;
+    }
+}, [messages]);
+
+// ── Restore scroll position after prepending older messages ─────────
+useEffect(() => {
+    if (preserveScrollRef.current && chatBodyRef.current) {
+        const el = chatBodyRef.current;
+        const delta = el.scrollHeight - preserveScrollRef.current;
+        el.scrollTop = el.scrollTop + delta;
+        preserveScrollRef.current = 0;
+    }
+}, [messages]);
+
+// ── Detect scroll position: lazy-load older + "new messages" btn ─────
+const handleScroll = useCallback(() => {
+    if (!chatBodyRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setShowNewMsg(!isNearBottom);
+    // Lazy-load older messages when the user scrolls near the top
+    if (scrollTop < 80) {
+        loadOlder();
+    }
+}, [loadOlder]);
+
+const scrollToBottom = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setShowNewMsg(false);
+}, []);
+
+// ── Select room ──────────────────────────────────────────────────────
+const handleSelectRoom = useCallback((roomId) => {
+    setSelectedRoomId(roomId);
+    setMenuOpen(false);
+    setInfoOpen(false);
+}, []);
+
+// ── Group messages by date ───────────────────────────────────────────
+const groupedMessages = useMemo(() => {
+    if (!messages.length) return [];
+    const groups = [];
+    let currentDate = '';
+
+    for (const msg of messages) {
+        const date = formatDate(msg.timestamp);
+        if (date !== currentDate) {
+            currentDate = date;
+            groups.push({ type: 'date', label: date, key: `date-${date}` });
         }
-    }, [currentRole]);
+        groups.push({ type: 'message', data: msg, key: msg.timestamp + '-' + msg.sender });
+    }
+    return groups;
+}, [messages]);
 
-    // ── Manual refresh (bypasses cache, no transcriptLoading skeleton) ──
-    const handleRefresh = useCallback(async () => {
-        if (!selectedRoomId || refreshing) return;
-        setRefreshing(true);
-        try {
-            const data = await roomService.getTranscript(selectedRoomId, currentRole);
-            setTranscript(data);
-            lastFetchRef.current[selectedRoomId] = Date.now();
-            const statsData = await roomService.getRoomStats(selectedRoomId, currentRole);
-            setRoomStats(statsData);
-        } catch {
-            // keep existing data on refresh failure
-        } finally {
-            setRefreshing(false);
-        }
-    }, [selectedRoomId, refreshing, currentRole]);
+// ── Selected room info ───────────────────────────────────────────────
+const selectedRoom = useMemo(() => {
+    if (!selectedRoomId) return null;
+    return rooms.find(r => r.room_id === selectedRoomId);
+}, [selectedRoomId, rooms]);
 
-    useEffect(() => {
-        fetchTranscript(selectedRoomId);
-    }, [selectedRoomId, fetchTranscript]);
+const headerTitle = selectedRoom
+    ? selectedRoom.job_title
+    : 'Chat Rooms';
+const headerSubtitle = selectedRoom
+    ? `${selectedRoom.client_name} ↔ ${selectedRoom.freelancer_name}`
+    : null;
 
-    // ── Auto-scroll to bottom ────────────────────────────────────────────
-    useEffect(() => {
-        if (transcript?.messages && bottomRef.current) {
-            bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [transcript?.messages]);
+// ════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════
+return (
+    <div className={`${styles.chatContainer} ${isPremium ? styles.chatContainerPremium : ''}`}>
+        {isPremium && <GoldDust />}
 
-    // ── Detect scroll position for "new messages" button ─────────────────
-    const handleScroll = useCallback(() => {
-        if (!chatBodyRef.current) return;
-        const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
-        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-        setShowNewMsg(!isNearBottom);
-    }, []);
-
-    const scrollToBottom = useCallback(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-        setShowNewMsg(false);
-    }, []);
-
-    // ── Select room ──────────────────────────────────────────────────────
-    const handleSelectRoom = useCallback((roomId) => {
-        setSelectedRoomId(roomId);
-        setMenuOpen(false);
-        setInfoOpen(false);
-    }, []);
-
-    // ── Group messages by date ───────────────────────────────────────────
-    const groupedMessages = useMemo(() => {
-        if (!transcript?.messages) return [];
-        const groups = [];
-        let currentDate = '';
-
-        for (const msg of transcript.messages) {
-            const date = formatDate(msg.timestamp);
-            if (date !== currentDate) {
-                currentDate = date;
-                groups.push({ type: 'date', label: date, key: `date-${date}` });
-            }
-            groups.push({ type: 'message', data: msg, key: msg.timestamp + '-' + msg.sender });
-        }
-        return groups;
-    }, [transcript?.messages]);
-
-    // ── Selected room info ───────────────────────────────────────────────
-    const selectedRoom = useMemo(() => {
-        if (!selectedRoomId) return null;
-        return rooms.find(r => r.room_id === selectedRoomId);
-    }, [selectedRoomId, rooms]);
-
-    const headerTitle = selectedRoom
-        ? selectedRoom.job_title
-        : 'Chat Rooms';
-    const headerSubtitle = selectedRoom
-        ? `${selectedRoom.client_name} ↔ ${selectedRoom.freelancer_name}`
-        : null;
-
-    // ════════════════════════════════════════════════════════════════════
-    // RENDER
-    // ════════════════════════════════════════════════════════════════════
-    return (
-        <div className={`${styles.chatContainer} ${isPremium ? styles.chatContainerPremium : ''}`}>
-            {isPremium && <GoldDust />}
-
-            {/* ── Header ──────────────────────────────────────────────────── */}
-            <div className={`${styles.chatHeader} ${isPremium ? styles.chatHeaderPremium : ''}`}>
-                <button
-                    className={styles.toggleBtn}
-                    onClick={() => { setMenuOpen(!menuOpen); setInfoOpen(false); }}
-                    aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                >
-                    {menuOpen ? <X size={18} /> : <Menu size={18} />}
-                </button>
-                <div className={`${styles.headerTitle} ${isPremium ? styles.headerTitlePremium : ''}`}>
-                    <h3>{headerTitle}</h3>
-                    {headerSubtitle && <p className={styles.headerSubtitle}>{headerSubtitle}</p>}
-                </div>
-                {selectedRoomId && (
-                    <>
-                        <button
-                            className={styles.infoBtn}
-                            onClick={handleRefresh}
-                            disabled={refreshing}
-                            aria-label="Refresh chat"
-                            title="Refresh"
-                        >
-                            <RefreshCw
-                                size={18}
-                                className={refreshing ? 'spin' : ''}
-                                style={refreshing ? { animation: 'spin 0.8s linear infinite' } : {}}
-                            />
-                        </button>
-                        <button
-                            className={styles.infoBtn}
-                            onClick={() => { setInfoOpen(!infoOpen); setMenuOpen(false); }}
-                            aria-label="Room info"
-                        >
-                            <Info size={18} />
-                        </button>
-                    </>
-                )}
-            </div>
-
-            {/* ── Body ────────────────────────────────────────────────────── */}
-            <div
-                className={styles.chatBody}
-                ref={chatBodyRef}
-                onScroll={handleScroll}
+        {/* ── Header ──────────────────────────────────────────────────── */}
+        <div className={`${styles.chatHeader} ${isPremium ? styles.chatHeaderPremium : ''}`}>
+            <button
+                className={styles.toggleBtn}
+                onClick={() => { setMenuOpen(!menuOpen); setInfoOpen(false); }}
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             >
-                {/* Side Menu */}
-                <div className={`${styles.sideMenu} ${menuOpen ? styles.sideMenuOpen : ''}`}>
-                    <div className={styles.sideMenuHeader}>
-                        <span className={styles.sideMenuTitle}>Rooms</span>
-                        <button className={styles.toggleBtn} onClick={() => setMenuOpen(false)}>
-                            <X size={16} />
-                        </button>
-                    </div>
+                {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+            <div className={`${styles.headerTitle} ${isPremium ? styles.headerTitlePremium : ''}`}>
+                <h3>{headerTitle}</h3>
+                {headerSubtitle && <p className={styles.headerSubtitle}>{headerSubtitle}</p>}
+            </div>
+            {selectedRoomId && (
+                <>
+                    <button
+                        className={styles.infoBtn}
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        aria-label="Refresh chat"
+                        title="Refresh"
+                    >
+                        <RefreshCw
+                            size={18}
+                            className={refreshing ? 'spin' : ''}
+                            style={refreshing ? { animation: 'spin 0.8s linear infinite' } : {}}
+                        />
+                    </button>
+                    <button
+                        className={styles.infoBtn}
+                        onClick={() => { setInfoOpen(!infoOpen); setMenuOpen(false); }}
+                        aria-label="Room info"
+                    >
+                        <Info size={18} />
+                    </button>
+                </>
+            )}
+        </div>
 
-                    {/* Tabs */}
-                    <div className={styles.tabs}>
-                        <button
-                            className={`${styles.tab} ${activeTab === 'interview' ? styles.tabActive : ''}`}
-                            onClick={() => setActiveTab('interview')}
-                        >
-                            Interview
-                        </button>
-                        <button
-                            className={`${styles.tab} ${activeTab === 'job' ? styles.tabActive : ''}`}
-                            onClick={() => setActiveTab('job')}
-                        >
-                            Job
-                        </button>
-                    </div>
-
-                    {/* Room List */}
-                    <div className={styles.roomList}>
-                        {activeTab === 'job' ? (
-                            <div className={styles.yetToImplement}>
-                                <MessageCircle size={32} className={styles.yetToImplementIcon} />
-                                <p className={styles.yetToImplementTitle}>Job Rooms</p>
-                                <p className={styles.yetToImplementText}>
-                                    Job rooms are not implemented yet.
-                                    This feature will be available in a future update.
-                                </p>
-                            </div>
-                        ) : roomsLoading ? (
-                            <RoomListSkeleton />
-                        ) : rooms.length === 0 ? (
-                            <div className={styles.emptyRoomList}>
-                                <MessageCircle size={28} className={styles.emptyRoomListIcon} />
-                                <p className={styles.emptyRoomListTitle}>No rooms found</p>
-                                <p className={styles.emptyRoomListText}>
-                                    You don't have any interview rooms yet.
-                                    Rooms are created when you apply to jobs via the Discord bot.
-                                </p>
-                            </div>
-                        ) : (
-                            rooms.map(room => (
-                                <div
-                                    key={room.room_id}
-                                    className={`${styles.roomItem} ${selectedRoomId === room.room_id ? styles.roomItemSelected : ''}`}
-                                    onClick={() => handleSelectRoom(room.room_id)}
-                                >
-                                    <div className={styles.roomItemIcon}>
-                                        <MessageCircle size={16} />
-                                    </div>
-                                    <div className={styles.roomItemInfo}>
-                                        <p className={styles.roomItemTitle}>{room.job_title}</p>
-                                        <p className={styles.roomItemMeta}>
-                                            {currentRole === 'client'
-                                                ? `with ${room.freelancer_name}`
-                                                : `with ${room.client_name}`}
-                                            {' · '}
-                                            {formatRelativeTime(room.last_activity)}
-                                        </p>
-                                    </div>
-                                    <div className={`${styles.statusDot} ${room.status === 'open' ? styles.statusDotOpen : styles.statusDotClosed
-                                        }`} />
-                                </div>
-                            ))
-                        )}
-                    </div>
+        {/* ── Body ────────────────────────────────────────────────────── */}
+        <div
+            className={styles.chatBody}
+            ref={chatBodyRef}
+            onScroll={handleScroll}
+        >
+            {/* Side Menu */}
+            <div className={`${styles.sideMenu} ${menuOpen ? styles.sideMenuOpen : ''}`}>
+                <div className={styles.sideMenuHeader}>
+                    <span className={styles.sideMenuTitle}>Rooms</span>
+                    <button className={styles.toggleBtn} onClick={() => setMenuOpen(false)}>
+                        <X size={16} />
+                    </button>
                 </div>
 
-                {/* ── Chat Content Wrapper (flex child on desktop) ──── */}
-                <div className={styles.chatContent}>
-                    {/* Room Info Panel, always in DOM for slide transition */}
-                    <RoomInfoPanel
-                        stats={roomStats}
-                        infoOpen={infoOpen}
-                        onClose={() => setInfoOpen(false)}
-                    />
+                {/* Tabs */}
+                <div className={styles.tabs}>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'interview' ? styles.tabActive : ''}`}
+                        onClick={() => setActiveTab('interview')}
+                    >
+                        Interview
+                    </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'job' ? styles.tabActive : ''}`}
+                        onClick={() => setActiveTab('job')}
+                    >
+                        Job
+                    </button>
+                </div>
 
-                    {/* Chat Content */}
-                    {!selectedRoomId ? (
-                        <div className={styles.emptyState}>
-                            <MessageCircle size={48} className={styles.emptyStateIcon} />
-                            <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
-                            <p className={styles.emptyStateText}>
-                                Click the menu button to browse your active interview rooms.
+                {/* Room List */}
+                <div className={styles.roomList}>
+                    {activeTab === 'job' ? (
+                        <div className={styles.yetToImplement}>
+                            <MessageCircle size={32} className={styles.yetToImplementIcon} />
+                            <p className={styles.yetToImplementTitle}>Job Rooms</p>
+                            <p className={styles.yetToImplementText}>
+                                Job rooms are not implemented yet.
+                                This feature will be available in a future update.
                             </p>
                         </div>
-                    ) : (transcriptLoading || refreshing) ? (
-                        <RefreshChatSkeleton profile={profile} />
-                    ) : !transcript || transcript.messages?.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <MessageCircle size={48} className={styles.emptyStateIcon} />
-                            <h3 className={styles.emptyStateTitle}>No messages yet</h3>
-                            <p className={styles.emptyStateText}>
-                                This room has no messages yet. Messages will appear here
-                                as they are sent via the Discord bot.
-                            </p>
-                        </div>
-                    ) : !isPremium ? (
-                        <div className={styles.chatFreePlaceholder}>
-                            <Lock size={32} className={styles.chatFreePlaceholderIcon} />
-                            <h3 className={styles.chatFreePlaceholderTitle}>Premium Feature</h3>
-                            <p className={styles.chatFreePlaceholderText}>
-                                Chat messaging is exclusive to premium members.
-                                Upgrade your plan to access live interview transcripts
-                                and room chat.
+                    ) : roomsLoading ? (
+                        <RoomListSkeleton />
+                    ) : rooms.length === 0 ? (
+                        <div className={styles.emptyRoomList}>
+                            <MessageCircle size={28} className={styles.emptyRoomListIcon} />
+                            <p className={styles.emptyRoomListTitle}>No rooms found</p>
+                            <p className={styles.emptyRoomListText}>
+                                You don't have any interview rooms yet.
+                                Rooms are created when you apply to jobs via the Discord bot.
                             </p>
                         </div>
                     ) : (
-                        <div className={styles.messagesContainer}>
-                            {groupedMessages.map(item => {
-                                if (item.type === 'date') {
-                                    return <DateDivider key={item.key} label={item.label} isPremium={isPremium} />;
-                                }
-                                const msg = item.data;
-                                if (msg.type === 'closure') {
-                                    return <ClosureNotice key={item.key} msg={msg} />;
-                                }
-                                return (
-                                    <MessageBubble
-                                        key={item.key}
-                                        msg={msg}
-                                        viewerRole={transcript.viewer_role}
-                                        isPremium={isPremium}
-                                    />
-                                );
-                            })}
-                            <div ref={bottomRef} />
-                        </div>
-                    )}
-
-                    {/* New Messages Button */}
-                    {showNewMsg && selectedRoomId && (
-                        <button className={styles.newMessagesBtn} onClick={scrollToBottom}>
-                            <ChevronDown size={14} />
-                            New messages
-                        </button>
+                        rooms.map(room => (
+                            <div
+                                key={room.room_id}
+                                className={`${styles.roomItem} ${selectedRoomId === room.room_id ? styles.roomItemSelected : ''}`}
+                                onClick={() => handleSelectRoom(room.room_id)}
+                            >
+                                <div className={styles.roomItemIcon}>
+                                    <MessageCircle size={16} />
+                                </div>
+                                <div className={styles.roomItemInfo}>
+                                    <p className={styles.roomItemTitle}>{room.job_title}</p>
+                                    <p className={styles.roomItemMeta}>
+                                        {currentRole === 'client'
+                                            ? `with ${room.freelancer_name}`
+                                            : `with ${room.client_name}`}
+                                        {' · '}
+                                        {formatRelativeTime(room.last_activity)}
+                                    </p>
+                                </div>
+                                <div className={`${styles.statusDot} ${room.status === 'open' ? styles.statusDotOpen : styles.statusDotClosed
+                                    }`} />
+                            </div>
+                        ))
                     )}
                 </div>
             </div>
+
+            {/* ── Chat Content Wrapper (flex child on desktop) ──── */}
+            <div className={styles.chatContent}>
+                {/* Room Info Panel, always in DOM for slide transition */}
+                <RoomInfoPanel
+                    stats={roomStats}
+                    infoOpen={infoOpen}
+                    onClose={() => setInfoOpen(false)}
+                />
+
+                {/* Chat Content */}
+                {!selectedRoomId ? (
+                    <div className={styles.emptyState}>
+                        <MessageCircle size={48} className={styles.emptyStateIcon} />
+                        <h3 className={styles.emptyStateTitle}>Select a room to view</h3>
+                        <p className={styles.emptyStateText}>
+                            Click the menu button to browse your active interview rooms.
+                        </p>
+                    </div>
+                ) : (transcriptLoading || refreshing) ? (
+                    <RefreshChatSkeleton profile={profile} />
+                ) : !transcript || (transcriptEntries || []).length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <MessageCircle size={48} className={styles.emptyStateIcon} />
+                        <h3 className={styles.emptyStateTitle}>No messages yet</h3>
+                        <p className={styles.emptyStateText}>
+                            This room has no messages yet. Messages will appear here
+                            as they are sent via the Discord bot.
+                        </p>
+                    </div>
+                ) : !isPremium ? (
+                    <div className={styles.chatFreePlaceholder}>
+                        <Lock size={32} className={styles.chatFreePlaceholderIcon} />
+                        <h3 className={styles.chatFreePlaceholderTitle}>Premium Feature</h3>
+                        <p className={styles.chatFreePlaceholderText}>
+                            Chat messaging is exclusive to premium members.
+                            Upgrade your plan to access live interview transcripts
+                            and room chat.
+                        </p>
+                    </div>
+                ) : (
+                    <div className={styles.messagesContainer}>
+                        {loadingOlder && (
+                            <div className={styles.loadingOlder}>
+                                <span className={styles.loadingOlderSpinner} />
+                                Loading older messages…
+                            </div>
+                        )}
+                        {groupedMessages.map(item => {
+                            if (item.type === 'date') {
+                                return <DateDivider key={item.key} label={item.label} isPremium={isPremium} />;
+                            }
+                            const msg = item.data;
+                            if (msg.type === 'closure') {
+                                return <ClosureNotice key={item.key} msg={msg} />;
+                            }
+                            return (
+                                <MessageBubble
+                                    key={item.key}
+                                    msg={msg}
+                                    viewerRole={transcript.viewer_role}
+                                    isPremium={isPremium}
+                                />
+                            );
+                        })}
+                        <div ref={bottomRef} />
+                    </div>
+                )}
+
+                {/* New Messages Button */}
+                {showNewMsg && selectedRoomId && (
+                    <button className={styles.newMessagesBtn} onClick={scrollToBottom}>
+                        <ChevronDown size={14} />
+                        New messages
+                    </button>
+                )}
+            </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default ChatRoom;

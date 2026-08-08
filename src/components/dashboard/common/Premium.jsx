@@ -102,12 +102,6 @@ const CLIENT_PRO_CARD_BENEFITS = [
     'Custom premium ID',
 ];
 
-/* ── Tier string mapping for plan filtering ──────────────────────── */
-const TIER_MAP = {
-    freelancer: 'freelancer_premium',
-    client: 'client_premium',
-};
-
 /* ── Helper: format price ────────────────────────────────────────── */
 const formatPrice = (price) => {
     if (price === null || price === undefined) return '—';
@@ -470,12 +464,12 @@ const Premium = ({ profile, currentRole, addNotification }) => {
 
     /* Split plans into free + pro — filter by tier matching current role */
     const freePlan = { tier: 'free', price: 0 };
-    const activeTier = isFreelancer ? TIER_MAP.freelancer : TIER_MAP.client;
+    const activeRole = isFreelancer ? 'freelancer' : 'client';
     const monthlyPlan = plans.find(
-        (p) => p.billing_interval === 'monthly' && p.tier === activeTier && p.is_active
+        (p) => p.billing_interval === 'monthly' && p.role === activeRole && p.is_active
     );
     const yearlyPlan = plans.find(
-        (p) => p.billing_interval === 'yearly' && p.tier === activeTier && p.is_active
+        (p) => p.billing_interval === 'yearly' && p.role === activeRole && p.is_active
     );
 
     /* The currently-displayed plan changes based on the interval toggle */
@@ -830,15 +824,13 @@ const PremiumGiftModal = memo(({ isOpen, onClose, plans, addNotification, isFree
 
     if (!isOpen) return null;
 
-    /* Filter gift plans by the selected profile's role tier */
-    const giftTier = selectedProfile?.role === 'freelancer' ? TIER_MAP.freelancer
-        : selectedProfile?.role === 'client' ? TIER_MAP.client
-            : null;
-    const monthlyPlan = giftTier
-        ? plans.find((p) => p.billing_interval === 'monthly' && p.tier === giftTier && p.is_active)
+    /* Filter gift plans by the selected profile's role */
+    const giftRole = selectedProfile?.role || null;
+    const monthlyPlan = giftRole
+        ? plans.find((p) => p.billing_interval === 'monthly' && p.role === giftRole && p.is_active)
         : plans.find((p) => p.billing_interval === 'monthly' && p.is_active);
-    const yearlyPlan = giftTier
-        ? plans.find((p) => p.billing_interval === 'yearly' && p.tier === giftTier && p.is_active)
+    const yearlyPlan = giftRole
+        ? plans.find((p) => p.billing_interval === 'yearly' && p.role === giftRole && p.is_active)
         : plans.find((p) => p.billing_interval === 'yearly' && p.is_active);
 
     const giftMonthlyEffective = monthlyPlan?.effective_price ?? monthlyPlan?.price ?? 0;

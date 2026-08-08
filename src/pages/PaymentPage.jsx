@@ -1027,6 +1027,7 @@ function PaymentPage() {
             const startRes = await premiumService.startSession(paymentData.paymentId, {
                 recipientAddress,
                 amount: paymentData.totalPayable || paymentData.amount,
+                walletId: selectedWallet?.id || '',
                 walletProvider: selectedWallet.provider || 'METAMASK',
                 chainId: 56,
                 tokenContract: paymentData.tokenContract || '',
@@ -1087,7 +1088,12 @@ function PaymentPage() {
 
             // Poll every 5 seconds
             let pollCount = 0;
-            const MAX_POLLS = 120; // 10 minutes max (120 × 5s)
+            // 15 min max = aligns with the payment session window (15 × 60s).
+            // The backend session expiry (15 min) is authoritative — the loop
+            // also exits early on is_session_terminal/is_session_expired, so
+            // this cap is a pure safety net that must never fire while the
+            // backend is still legitimately confirming within the window.
+            const MAX_POLLS = 180; // 15 minutes max (180 × 5s)
             pollingRef.current = setInterval(async () => {
                 pollCount++;
                 try {

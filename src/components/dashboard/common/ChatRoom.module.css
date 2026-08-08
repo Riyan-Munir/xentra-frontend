@@ -714,6 +714,33 @@
     display: none;
 }
 
+/* ── Loading Older Messages indicator (top of the chat on lazy load) ─── */
+.loadingOlder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.loadingOlderSpinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.6);
+    animation: loadingOlderSpin 0.7s linear infinite;
+}
+
+@keyframes loadingOlderSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .messageRow {
     display: flex;
     gap: 8px;
@@ -825,6 +852,13 @@
     color: rgba(196, 181, 253, 0.9);
 }
 
+/* Leave/closure bubble (coral glass, matching transcript BUBBLE_LEAVE #FDE8E8/#E8A0A0) */
+.bubbleLeave {
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.22);
+    color: rgba(254, 202, 202, 0.95);
+}
+
 /* ── Command Badge ─────────────────────────────────────────────────────── */
 .commandBadge {
     display: inline-block;
@@ -929,6 +963,29 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* ── Attachment Tag (lavender pill, matching transcript #E9E3FF/#6B4FD8) ── */
+.attachmentTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    margin: 2px 0 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #E9E3FF;
+    color: #6B4FD8;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attachmentTagIcon {
+    flex-shrink: 0;
 }
 
 /* ── Bubble Text ───────────────────────────────────────────────────────── */
@@ -1735,19 +1792,77 @@
     overflow-wrap: break-word;
 }
 
-.mdContent :global(.md-blockquote) {
+.mdContent :global(.md-quote),
+.mdContent :global(.md-quote-multi) {
     margin: 4px 0;
     padding: 2px 0 2px 12px;
-    border-left: 3px solid var(--accent, rgba(255, 255, 255, 0.25));
+    border-left: 3px solid var(--accent, rgba(255, 255, 255, 0.3));
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
 }
 
-.mdContent :global(.md-blockquote-multi) {
-    margin: 4px 0;
-    padding: 2px 0 2px 12px;
-    border-left: 3px solid var(--accent, rgba(255, 255, 255, 0.35));
-    color: rgba(255, 255, 255, 0.65);
+.mdContent :global(.md-quote-text) {
+    font-style: italic;
+}
+
+.mdContent :global(.md-h1) {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin: 8px 0 4px;
+}
+
+.mdContent :global(.md-h2) {
+    font-size: 1.15em;
+    font-weight: 700;
+    margin: 7px 0 3px;
+}
+
+.mdContent :global(.md-h3) {
+    font-size: 1em;
+    font-weight: 700;
+    margin: 6px 0 3px;
+}
+
+.mdContent :global(.md-subtext) {
+    font-size: 0.88em;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.mdContent :global(.md-list) {
+    margin: 2px 0;
+    padding-left: 6px;
+    line-height: 1.5;
+}
+
+.mdContent :global(.md-code-block) {
+    margin: 6px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.85em;
+}
+
+.mdContent :global(.md-code-header) {
+    padding: 3px 8px;
+    font-size: 0.7em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.mdContent :global(.md-code-body) {
+    padding: 8px 10px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.mdContent :global(.md-link) {
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.mdContent :global(.md-link):hover {
+    text-decoration: underline;
 }
 
 .mdContent :global(.md-inline-code) {

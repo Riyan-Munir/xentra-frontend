@@ -59,6 +59,7 @@ const premiumService = {
         {
             recipient_address: data.recipientAddress || '',
             amount: data.amount || 0,
+            wallet_id: data.walletId || '',
             wallet_provider: data.walletProvider || '',
             selected_wallet_address: data.selectedWalletAddress || '',
             chain_id: data.chainId || 56,
